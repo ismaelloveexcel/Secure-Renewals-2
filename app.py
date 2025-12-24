@@ -234,7 +234,7 @@ def verify_credentials(df, staff_number, dob_input):
         if ' ' in dob_str:
             dob_str = dob_str.split(' ')[0]
         
-        for fmt in ['%m/%d/%Y', '%d/%m/%Y', '%Y-%m-%d']:
+        for fmt in ['%d/%m/%Y', '%m/%d/%Y', '%Y-%m-%d']:
             try:
                 parsed_date = datetime.strptime(dob_str, fmt)
                 actual_dob = parsed_date.strftime('%d/%m/%Y')
@@ -242,7 +242,7 @@ def verify_credentials(df, staff_number, dob_input):
             except ValueError:
                 continue
         else:
-            return False, "Account verification issue. Please contact HR."
+            actual_dob = dob_str
         
         if dob_input.strip() == actual_dob:
             return True, None

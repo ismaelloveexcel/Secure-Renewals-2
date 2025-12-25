@@ -370,9 +370,16 @@ CUSTOM_CSS = """
     }
     
     .login-container {
-        max-width: 360px;
-        margin: 60px auto;
+        max-width: 340px;
+        margin: 0 auto;
         text-align: center;
+        padding-top: 8vh;
+    }
+    
+    @media (max-height: 700px) {
+        .login-container {
+            padding-top: 3vh;
+        }
     }
     
     .login-form-wrapper {
@@ -387,12 +394,12 @@ CUSTOM_CSS = """
     }
     
     .login-header {
-        margin-bottom: 25px;
+        margin-bottom: 16px;
     }
     
     .login-logo {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
         background: #1E1B5C;
         border-radius: 12px;
         margin: 0 auto 16px;
@@ -403,36 +410,48 @@ CUSTOM_CSS = """
     }
     
     .login-logo-img {
-        width: 80px;
-        height: 80px;
-        border-radius: 12px;
-        margin: 0 auto 16px;
+        width: 64px;
+        height: 64px;
+        border-radius: 10px;
+        margin: 0 auto 12px;
         display: block;
         object-fit: contain;
     }
     
     .login-title {
         color: #1E1B5C;
-        font-size: 18px;
+        font-size: 22px;
         font-weight: 600;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
+        line-height: 1.2;
+    }
+    
+    @media (max-width: 480px) {
+        .login-logo-img {
+            width: 56px;
+            height: 56px;
+        }
+        .login-title {
+            font-size: 20px;
+        }
     }
     
     .login-subtitle {
         color: #888;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 400;
+        margin-top: 2px;
     }
     
     .login-badge {
         display: inline-block;
         background: rgba(30, 27, 92, 0.08);
         color: #1E1B5C;
-        padding: 5px 14px;
+        padding: 4px 12px;
         border-radius: 15px;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 600;
-        margin-top: 12px;
+        margin-top: 8px;
     }
     
     .stButton > button {
@@ -478,9 +497,13 @@ CUSTOM_CSS = """
     
     div[data-testid="stForm"] {
         background: white;
-        padding: 20px;
+        padding: 18px;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    div[data-testid="stForm"] [data-testid="stVerticalBlock"] {
+        gap: 0.6rem !important;
     }
     
     .stTextInput > div > div > input {
@@ -489,6 +512,11 @@ CUSTOM_CSS = """
         padding: 10px 12px;
         font-family: 'Poppins', sans-serif;
         font-size: 13px;
+    }
+    
+    .stTextInput label {
+        font-size: 12px !important;
+        margin-bottom: 2px !important;
     }
     
     .stTextInput > div > div > input:focus {

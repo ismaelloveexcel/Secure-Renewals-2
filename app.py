@@ -357,6 +357,15 @@ CUSTOM_CSS = """
         margin-bottom: 24px;
     }
     
+    .member-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
     .member-header {
         display: flex;
         justify-content: space-between;
@@ -370,7 +379,36 @@ CUSTOM_CSS = """
         font-size: 18px;
         font-weight: 600;
         color: #fff;
+    }
+    
+    .member-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
         text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .member-divider {
+        border: none;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        margin: 24px 0;
+    }
+    
+    .missing-text {
+        color: #ff9800 !important;
+    }
+    
+    .edit-section-header {
+        color: #ff9800;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 16px 0 12px 0;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255,255,255,0.1);
     }
     
     .member-grid {
@@ -450,16 +488,16 @@ CUSTOM_CSS = """
     }
     
     .missing-banner {
-        background: rgba(220, 38, 38, 0.05);
-        border-left: 3px solid #dc2626;
+        background: rgba(255, 152, 0, 0.1);
+        border-left: 3px solid #ff9800;
         border-radius: 0 8px 8px 0;
-        padding: 10px 14px;
-        margin-bottom: 16px;
+        padding: 12px 16px;
+        margin: 16px 0;
         display: flex;
         align-items: center;
-        gap: 8px;
-        color: #b91c1c;
-        font-size: 12px;
+        gap: 10px;
+        color: #ff9800;
+        font-size: 13px;
     }
     
     .confirmation-card {
@@ -1241,15 +1279,15 @@ def render_covered_members(employee_data, staff_number):
         current_passport = format_field(member.get('Passport number')) or ""
         
         eid_formatted = format_emirates_id(current_eid) if current_eid else ""
-        eid_display = eid_formatted if eid_formatted else '<span class="missing-field-text">⚠ Missing</span>'
-        visa_display = current_visa if current_visa else '<span class="missing-field-text">⚠ Missing</span>'
-        passport_display = current_passport if current_passport else '<span class="missing-field-text">⚠ Missing</span>'
+        eid_display = eid_formatted if eid_formatted else '<span class="missing-text">⚠ Missing</span>'
+        visa_display = current_visa if current_visa else '<span class="missing-text">⚠ Missing</span>'
+        passport_display = current_passport if current_passport else '<span class="missing-text">⚠ Missing</span>'
         
         missing_fields = []
         if not current_eid:
             missing_fields.append("Emirates ID")
         if not current_visa:
-            missing_fields.append("Visa Unified Number")
+            missing_fields.append("Visa Unified No.")
         if not current_passport:
             missing_fields.append("Passport")
         
@@ -1257,19 +1295,6 @@ def render_covered_members(employee_data, staff_number):
         if st.session_state.get(saved_key):
             st.success("✓ Information saved successfully!")
             del st.session_state[saved_key]
-        
-        missing_banner_html = ""
-        if missing_fields:
-            missing_list = ", ".join(missing_fields)
-            missing_banner_html = f'''
-            <div class="missing-info-banner">
-                <span class="missing-icon">⚠</span>
-                <div>
-                    <span class="missing-title">Missing Information</span><br>
-                    <span class="missing-desc">Please provide: {missing_list}</span>
-                </div>
-            </div>
-            '''
         
         st.markdown(f"""
         <div class="glass-card member-card">
@@ -1312,35 +1337,31 @@ def render_covered_members(employee_data, staff_number):
                         <div class="field-value">{passport_display}</div>
                     </div>
                     <div class="grid-cell">
-                        <div class="field-label">VISA UNIFIED NUMBER</div>
+                        <div class="field-label">VISA UNIFIED NO.</div>
                         <div class="field-value">{visa_display}</div>
                     </div>
                     <div class="grid-cell"></div>
                 </div>
             </div>
+        </div>
         """, unsafe_allow_html=True)
         
         if missing_fields:
+            st.markdown('<div class="edit-section-header">Complete Missing Information</div>', unsafe_allow_html=True)
+            
+            direct_inputs = {}
+            validation_errors = []
             field_labels = {
                 "National Identity": "Emirates ID",
                 "Visa Unified Number": "Visa Unified No.",
                 "Passport number": "Passport"
             }
-            direct_inputs = {}
-            validation_errors = []
-            
-            st.markdown(f"""
-            <div class="inline-edit-section">
-                <div class="inline-edit-title">Complete Missing Information</div>
-            </div>
-            """, unsafe_allow_html=True)
             
             input_cols = st.columns(3)
             
             with input_cols[0]:
                 if not current_eid:
-                    new_eid = st.text_input("Emirates ID", value="", placeholder="784-XXXX-XXXXXXX-X", key=f"eid_{idx}_{member_number}", label_visibility="collapsed")
-                    st.caption("Emirates ID")
+                    new_eid = st.text_input("Emirates ID", value="", placeholder="784-XXXX-XXXXXXX-X", key=f"eid_{idx}_{member_number}")
                     if new_eid and new_eid.strip():
                         valid, msg = validate_emirates_id(new_eid.strip())
                         if not valid:
@@ -1350,15 +1371,13 @@ def render_covered_members(employee_data, staff_number):
             
             with input_cols[1]:
                 if not current_visa:
-                    new_visa = st.text_input("Visa Unified No.", value="", placeholder="Enter number", key=f"visa_{idx}_{member_number}", label_visibility="collapsed")
-                    st.caption("Visa Unified No.")
+                    new_visa = st.text_input("Visa Unified No.", value="", placeholder="Enter visa number", key=f"visa_{idx}_{member_number}")
                     if new_visa and new_visa.strip():
                         direct_inputs["Visa Unified Number"] = new_visa.strip()
             
             with input_cols[2]:
                 if not current_passport:
-                    new_passport = st.text_input("Passport", value="", placeholder="Enter number", key=f"passport_{idx}_{member_number}", label_visibility="collapsed")
-                    st.caption("Passport Number")
+                    new_passport = st.text_input("Passport Number", value="", placeholder="Enter passport", key=f"passport_{idx}_{member_number}")
                     if new_passport and new_passport.strip():
                         direct_inputs["Passport number"] = new_passport.strip()
             
@@ -1366,27 +1385,25 @@ def render_covered_members(employee_data, staff_number):
                 for err in validation_errors:
                     st.error(err)
             
-            save_disabled = len(direct_inputs) == 0 or len(validation_errors) > 0
-            if st.button("💾 Save Information", key=f"save_member_{idx}_{member_number}", type="primary", disabled=save_disabled, use_container_width=True):
-                df = load_data()
-                for field, value in direct_inputs.items():
-                    old_val = ""
-                    if field in df.columns:
-                        old_val_series = df.loc[df['Member Number'] == member_number, field]
-                        if not old_val_series.empty:
-                            old_val = old_val_series.iloc[0] if pd.notna(old_val_series.iloc[0]) else ""
-                    df.loc[df['Member Number'] == member_number, field] = value
-                    log_audit_trail("data_added", staff_number, member_number, field_labels.get(field, field), str(old_val), value, "employee")
-                df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
-                df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
-                save_data(df)
-                st.cache_data.clear()
-                st.session_state[saved_key] = True
-                st.rerun()
-            
-            st.markdown(f"{missing_banner_html}</div>", unsafe_allow_html=True)
-        else:
-            st.markdown("</div>", unsafe_allow_html=True)
+            if len(direct_inputs) > 0 and len(validation_errors) == 0:
+                if st.button("Save", key=f"save_member_{idx}_{member_number}", type="primary"):
+                    df = load_data()
+                    for field, value in direct_inputs.items():
+                        old_val = ""
+                        if field in df.columns:
+                            old_val_series = df.loc[df['Member Number'] == member_number, field]
+                            if not old_val_series.empty:
+                                old_val = old_val_series.iloc[0] if pd.notna(old_val_series.iloc[0]) else ""
+                        df.loc[df['Member Number'] == member_number, field] = value
+                        log_audit_trail("data_added", staff_number, member_number, field_labels.get(field, field), str(old_val), value, "employee")
+                    df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
+                    df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
+                    save_data(df)
+                    st.cache_data.clear()
+                    st.session_state[saved_key] = True
+                    st.rerun()
+        
+        st.markdown("<hr class='member-divider'>", unsafe_allow_html=True)
 
 def render_confirmation_section(employee_data, staff_number):
     confirmed = employee_data['EmployeeConfirmed'].iloc[0] if 'EmployeeConfirmed' in employee_data.columns else ""

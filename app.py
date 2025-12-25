@@ -1346,7 +1346,9 @@ def render_covered_members(employee_data, staff_number):
         </div>
         """, unsafe_allow_html=True)
         
-        if missing_fields:
+        show_edit_section = missing_fields or True
+        
+        if show_edit_section:
             st.markdown('<div class="edit-section-header">Complete Missing Information</div>', unsafe_allow_html=True)
             
             direct_inputs = {}
@@ -1354,10 +1356,11 @@ def render_covered_members(employee_data, staff_number):
             field_labels = {
                 "National Identity": "Emirates ID",
                 "Visa Unified Number": "Visa Unified No.",
-                "Passport number": "Passport"
+                "Passport number": "Passport",
+                "Marital Status": "Marital Status"
             }
             
-            input_cols = st.columns(3)
+            input_cols = st.columns(4)
             
             with input_cols[0]:
                 if not current_eid:
@@ -1380,6 +1383,13 @@ def render_covered_members(employee_data, staff_number):
                     new_passport = st.text_input("Passport Number", value="", placeholder="Enter passport", key=f"passport_{idx}_{member_number}")
                     if new_passport and new_passport.strip():
                         direct_inputs["Passport number"] = new_passport.strip()
+            
+            with input_cols[3]:
+                marital_options = ["", "SINGLE", "MARRIED", "DIVORCED", "WIDOWED"]
+                current_idx = marital_options.index(marital_status) if marital_status in marital_options else 0
+                new_marital = st.selectbox("Update Marital Status", marital_options, index=0, key=f"marital_{idx}_{member_number}")
+                if new_marital and new_marital != marital_status:
+                    direct_inputs["Marital Status"] = new_marital
             
             if validation_errors:
                 for err in validation_errors:
@@ -1482,159 +1492,41 @@ def render_confirmation_section(employee_data, staff_number):
 def render_correction_form(employee_data, staff_number):
     st.markdown("""
     <div class="glass-card">
-        <div class="card-title">📝 Request Changes</div>
+        <div class="card-title">📝 Request Additional Changes</div>
         <p style="color: #666; font-size: 0.85em; margin-bottom: 15px;">
-            Select a member to request changes to existing information. Changes require HR approval.
+            If you have any other changes or corrections needed, please describe them below. HR will review your request.
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    editable_members = []
-    for _, member in employee_data.iterrows():
-        relation = member['Relation']
-        name = format_field(member.get('Member Full Name')) or f"{format_field(member.get('Member First Name')) or ''} {format_field(member.get('Member Middle Name')) or ''} {format_field(member.get('Member Last Name')) or ''}".strip()
-        name = ' '.join(name.split())
-        label = f"PRINCIPAL (Self): {name}" if relation == "PRINCIPAL" else f"{relation}: {name}"
-        editable_members.append({
-            "label": label,
-            "row": member,
-            "is_principal": relation == "PRINCIPAL"
-        })
+    change_description = st.text_area(
+        "Describe the changes you need",
+        placeholder="Please describe any corrections or updates needed for your information or your dependents' information. Include member name, what needs to be changed, and the correct value.\n\nExample: 'My spouse's name is spelled incorrectly. Current: John Smith, Correct: Jon Smith'",
+        key="change_description",
+        height=150
+    )
     
-    member_options = [m["label"] for m in editable_members]
-    selected_member = st.selectbox("Select Member", member_options, key="selected_member")
+    if st.button("📤 Submit Change Request", type="secondary", disabled=not change_description.strip()):
+        principal = employee_data[employee_data['Relation'] == 'PRINCIPAL'].iloc[0]
+        member_number = principal['Member Number']
+        
+        changes_list = [{"field": "General Change Request", "old": "", "new": change_description.strip()}]
+        save_change_request_db(staff_number, member_number, "General Request", changes_list, change_description.strip())
+        
+        log_audit_trail("change_requested", staff_number, member_number, "General Change Request", "", change_description.strip(), "employee")
+        
+        df = load_data()
+        df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
+        df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
+        save_data(df)
+        st.cache_data.clear()
+        
+        st.session_state['submission_success'] = True
+        st.session_state['submission_type'] = 'change_request'
+        st.rerun()
     
-    selected_idx = member_options.index(selected_member)
-    member_info = editable_members[selected_idx]
-    member_row = member_info["row"]
-    is_principal = member_info["is_principal"]
-    member_number = member_row['Member Number']
-    
-    current_gender = format_field(member_row.get('Gender')) or ""
-    current_dob = format_field(member_row.get('Date Of Birth')) or ""
-    current_nationality = format_field(member_row.get('Nationality')) or ""
-    current_marital = format_field(member_row.get('Marital Status')) or ""
-    current_eid = format_field(member_row.get('National Identity')) or ""
-    current_visa = format_field(member_row.get('Visa Unified Number')) or ""
-    current_passport = format_field(member_row.get('Passport number')) or ""
-    
-    change_requests = []
-    
-    has_existing_data = current_gender or current_dob or current_nationality or current_marital or current_eid or current_visa or current_passport
-    
-    if has_existing_data or not is_principal:
-        st.markdown('<p class="section-label" style="margin-top: 25px;">📝 Request Changes to Existing Data</p>', unsafe_allow_html=True)
-        st.caption("Changes to existing information require HR approval.")
-        
-        if not is_principal:
-            current_name = format_field(member_row.get('Member Full Name')) or f"{format_field(member_row.get('Member First Name')) or ''} {format_field(member_row.get('Member Middle Name')) or ''} {format_field(member_row.get('Member Last Name')) or ''}".strip()
-            current_name = ' '.join(current_name.split())
-            current_relation = format_field(member_row.get('Relation')) or ""
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                new_name = st.text_input("Name Change", value="", placeholder=f"Current: {current_name}", key="req_name")
-                if new_name and new_name != current_name:
-                    change_requests.append({"field": "Name", "old": current_name, "new": new_name, "column": "Member Full Name"})
-                
-                new_relation = st.selectbox("Relationship Change", ["", "SPOUSE", "CHILD"], index=0, key="req_relation")
-                if new_relation and new_relation != current_relation:
-                    change_requests.append({"field": "Relationship", "old": current_relation, "new": new_relation, "column": "Relation"})
-            
-            with col2:
-                if current_dob:
-                    new_dob_change = st.text_input("Date of Birth Change", value="", placeholder=f"Current: {current_dob}", key="req_dob")
-                    if new_dob_change and new_dob_change != current_dob:
-                        change_requests.append({"field": "Date of Birth", "old": current_dob, "new": new_dob_change, "column": "Date Of Birth"})
-        
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            if current_gender:
-                gender_options = ["", "MALE", "FEMALE"]
-                new_gender_change = st.selectbox("Change Gender", gender_options, index=0, key="req_gender")
-                if new_gender_change and new_gender_change != current_gender:
-                    change_requests.append({"field": "Gender", "old": current_gender, "new": new_gender_change, "column": "Gender"})
-            if current_nationality:
-                new_nationality_change = st.text_input("Change Nationality", value="", placeholder=f"Current: {current_nationality}", key="req_nationality")
-                if new_nationality_change and new_nationality_change != current_nationality:
-                    change_requests.append({"field": "Nationality", "old": current_nationality, "new": new_nationality_change, "column": "Nationality"})
-        with col2:
-            if current_marital:
-                marital_options = ["", "SINGLE", "MARRIED", "DIVORCED", "WIDOWED"]
-                new_marital_change = st.selectbox("Change Marital Status", marital_options, index=0, key="req_marital")
-                if new_marital_change and new_marital_change != current_marital:
-                    change_requests.append({"field": "Marital Status", "old": current_marital, "new": new_marital_change, "column": "Marital Status"})
-        with col3:
-            if current_eid:
-                new_eid_change = st.text_input("Change Emirates ID", value="", placeholder=f"Current: {format_emirates_id(current_eid)}", key="req_eid")
-                if new_eid_change and new_eid_change != current_eid:
-                    change_requests.append({"field": "Emirates ID", "old": current_eid, "new": new_eid_change, "column": "National Identity"})
-            if current_visa:
-                new_visa_change = st.text_input("Change Visa No.", value="", placeholder=f"Current: {current_visa}", key="req_visa")
-                if new_visa_change and new_visa_change != current_visa:
-                    change_requests.append({"field": "Visa Unified Number", "old": current_visa, "new": new_visa_change, "column": "Visa Unified Number"})
-        with col4:
-            if current_passport:
-                new_passport_change = st.text_input("Change Passport", value="", placeholder=f"Current: {current_passport}", key="req_passport")
-                if new_passport_change and new_passport_change != current_passport:
-                    change_requests.append({"field": "Passport Number", "old": current_passport, "new": new_passport_change, "column": "Passport number"})
-    
-    if change_requests:
-        st.markdown('<p class="section-label" style="margin-top: 20px;">Pending Changes (Require Approval)</p>', unsafe_allow_html=True)
-        st.markdown('<div class="change-log">', unsafe_allow_html=True)
-        for change in change_requests:
-            st.markdown(f"""
-            <div class="change-item">
-                <strong>{change['field']}:</strong>
-                <span class="old-value">{change['old']}</span> → 
-                <span class="new-value">{change['new']}</span>
-            </div>
-            """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        remarks = st.text_area(
-            "Reason for changes (Required)",
-            placeholder="e.g., 'Emirates ID was renewed' or 'Spelling correction'",
-            key="change_remarks",
-            label_visibility="collapsed"
-        )
-        
-        submit_disabled = not remarks.strip()
-        
-        change_validation_errors = []
-        for change in change_requests:
-            if change["field"] == "Emirates ID":
-                valid, msg = validate_emirates_id(change["new"])
-                if not valid:
-                    change_validation_errors.append(f"Emirates ID: {msg}")
-            if change["field"] == "Date of Birth":
-                valid, msg = validate_date_of_birth(change["new"])
-                if not valid:
-                    change_validation_errors.append(f"Date of Birth: {msg}")
-        
-        if change_validation_errors:
-            for err in change_validation_errors:
-                st.error(err)
-        
-        if st.button("📤 Submit Change Request", type="secondary", disabled=submit_disabled or len(change_validation_errors) > 0):
-            changes_list = [{"field": c["field"], "old": c["old"], "new": c["new"]} for c in change_requests]
-            save_change_request_db(staff_number, member_number, selected_member, changes_list, remarks)
-            
-            for change in changes_list:
-                log_audit_trail("change_requested", staff_number, member_number, change["field"], change["old"], change["new"], "employee")
-            
-            df = load_data()
-            df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
-            df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
-            save_data(df)
-            st.cache_data.clear()
-            
-            st.session_state['submission_success'] = True
-            st.session_state['submission_type'] = 'change_request'
-            st.rerun()
-        
-        if submit_disabled:
-            st.caption("⚠️ Please provide a reason for the changes")
+    if not change_description.strip():
+        st.caption("⚠️ Please describe the changes you need")
 
 def render_dashboard():
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)

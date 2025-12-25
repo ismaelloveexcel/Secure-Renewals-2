@@ -779,7 +779,8 @@ def render_expired_page():
     """, unsafe_allow_html=True)
 
 def render_login():
-    login_css = """
+    st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+    st.markdown("""
     <style>
         [data-testid="stAppViewBlockContainer"] {
             padding-top: 1rem !important;
@@ -789,8 +790,7 @@ def render_login():
             gap: 0.5rem !important;
         }
     </style>
-    """
-    st.markdown(CUSTOM_CSS + login_css, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
     logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" style="width:56px;height:56px;display:block;margin:0 auto 10px;">' if LOGO_BASE64 else ''
     

@@ -434,6 +434,21 @@ CUSTOM_CSS = """
         font-size: 13px;
     }
     
+    .inline-edit-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 20px;
+        padding-top: 16px;
+    }
+    
+    .inline-edit-title {
+        color: #ff9800;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+    }
+    
     .missing-banner {
         background: rgba(220, 38, 38, 0.05);
         border-left: 3px solid #dc2626;
@@ -1303,8 +1318,6 @@ def render_covered_members(employee_data, staff_number):
                     <div class="grid-cell"></div>
                 </div>
             </div>
-            {missing_banner_html}
-        </div>
         """, unsafe_allow_html=True)
         
         if missing_fields:
@@ -1316,57 +1329,64 @@ def render_covered_members(employee_data, staff_number):
             direct_inputs = {}
             validation_errors = []
             
-            input_cols = st.columns(len(missing_fields) + 1)
-            col_idx = 0
+            st.markdown(f"""
+            <div class="inline-edit-section">
+                <div class="inline-edit-title">Complete Missing Information</div>
+            </div>
+            """, unsafe_allow_html=True)
             
-            if not current_eid:
-                with input_cols[col_idx]:
-                    new_eid = st.text_input("Emirates ID", value="", placeholder="784XXXXXXXXXXX", key=f"eid_{idx}_{member_number}")
+            input_cols = st.columns(3)
+            
+            with input_cols[0]:
+                if not current_eid:
+                    new_eid = st.text_input("Emirates ID", value="", placeholder="784-XXXX-XXXXXXX-X", key=f"eid_{idx}_{member_number}", label_visibility="collapsed")
+                    st.caption("Emirates ID")
                     if new_eid and new_eid.strip():
                         valid, msg = validate_emirates_id(new_eid.strip())
                         if not valid:
                             validation_errors.append(msg)
                         else:
                             direct_inputs["National Identity"] = new_eid.strip()
-                col_idx += 1
             
-            if not current_visa:
-                with input_cols[col_idx]:
-                    new_visa = st.text_input("Visa Unified No.", value="", placeholder="Enter number", key=f"visa_{idx}_{member_number}")
+            with input_cols[1]:
+                if not current_visa:
+                    new_visa = st.text_input("Visa Unified No.", value="", placeholder="Enter number", key=f"visa_{idx}_{member_number}", label_visibility="collapsed")
+                    st.caption("Visa Unified No.")
                     if new_visa and new_visa.strip():
                         direct_inputs["Visa Unified Number"] = new_visa.strip()
-                col_idx += 1
             
-            if not current_passport:
-                with input_cols[col_idx]:
-                    new_passport = st.text_input("Passport", value="", placeholder="Enter number", key=f"passport_{idx}_{member_number}")
+            with input_cols[2]:
+                if not current_passport:
+                    new_passport = st.text_input("Passport", value="", placeholder="Enter number", key=f"passport_{idx}_{member_number}", label_visibility="collapsed")
+                    st.caption("Passport Number")
                     if new_passport and new_passport.strip():
                         direct_inputs["Passport number"] = new_passport.strip()
-                col_idx += 1
-            
-            with input_cols[col_idx]:
-                st.write("")
-                save_disabled = len(direct_inputs) == 0 or len(validation_errors) > 0
-                if st.button("Save", key=f"save_member_{idx}_{member_number}", type="primary", disabled=save_disabled):
-                    df = load_data()
-                    for field, value in direct_inputs.items():
-                        old_val = ""
-                        if field in df.columns:
-                            old_val_series = df.loc[df['Member Number'] == member_number, field]
-                            if not old_val_series.empty:
-                                old_val = old_val_series.iloc[0] if pd.notna(old_val_series.iloc[0]) else ""
-                        df.loc[df['Member Number'] == member_number, field] = value
-                        log_audit_trail("data_added", staff_number, member_number, field_labels.get(field, field), str(old_val), value, "employee")
-                    df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
-                    df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
-                    save_data(df)
-                    st.cache_data.clear()
-                    st.session_state[saved_key] = True
-                    st.rerun()
             
             if validation_errors:
                 for err in validation_errors:
                     st.error(err)
+            
+            save_disabled = len(direct_inputs) == 0 or len(validation_errors) > 0
+            if st.button("💾 Save Information", key=f"save_member_{idx}_{member_number}", type="primary", disabled=save_disabled, use_container_width=True):
+                df = load_data()
+                for field, value in direct_inputs.items():
+                    old_val = ""
+                    if field in df.columns:
+                        old_val_series = df.loc[df['Member Number'] == member_number, field]
+                        if not old_val_series.empty:
+                            old_val = old_val_series.iloc[0] if pd.notna(old_val_series.iloc[0]) else ""
+                    df.loc[df['Member Number'] == member_number, field] = value
+                    log_audit_trail("data_added", staff_number, member_number, field_labels.get(field, field), str(old_val), value, "employee")
+                df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
+                df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
+                save_data(df)
+                st.cache_data.clear()
+                st.session_state[saved_key] = True
+                st.rerun()
+            
+            st.markdown(f"{missing_banner_html}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown("</div>", unsafe_allow_html=True)
 
 def render_confirmation_section(employee_data, staff_number):
     confirmed = employee_data['EmployeeConfirmed'].iloc[0] if 'EmployeeConfirmed' in employee_data.columns else ""

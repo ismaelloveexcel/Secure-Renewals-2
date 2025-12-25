@@ -803,8 +803,18 @@ SESSION_TIMEOUT_JS = f"""
 <script>
     var sessionTimeout = {SESSION_TIMEOUT_MINUTES * 60 * 1000};
     var warningTime = {(SESSION_TIMEOUT_MINUTES - 2) * 60 * 1000};
+    var redirectDelay = 2000; // Delay before redirecting to login after session expires
     var sessionTimer;
     var warningTimer;
+    
+    // Safely insert element at the top of document body
+    function insertAtBodyTop(element) {{
+        if (document.body.firstChild) {{
+            document.body.insertBefore(element, document.body.firstChild);
+        }} else {{
+            document.body.appendChild(element);
+        }}
+    }}
     
     // Create warning banner element
     function createWarningBanner() {{
@@ -826,7 +836,7 @@ SESSION_TIMEOUT_JS = f"""
         removeWarningBanner();
         
         warningTimer = setTimeout(function() {{
-            document.body.insertBefore(createWarningBanner(), document.body.firstChild);
+            insertAtBodyTop(createWarningBanner());
         }}, warningTime);
         
         sessionTimer = setTimeout(function() {{
@@ -834,8 +844,8 @@ SESSION_TIMEOUT_JS = f"""
             var expiredBanner = document.createElement('div');
             expiredBanner.innerHTML = '🔒 Session expired due to inactivity. Redirecting to login...';
             expiredBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#f44336;color:#fff;padding:14px 20px;text-align:center;font-weight:600;font-size:14px;z-index:9999;';
-            document.body.insertBefore(expiredBanner, document.body.firstChild);
-            setTimeout(function() {{ window.location.reload(); }}, 2000);
+            insertAtBodyTop(expiredBanner);
+            setTimeout(function() {{ window.location.reload(); }}, redirectDelay);
         }}, sessionTimeout);
     }}
     

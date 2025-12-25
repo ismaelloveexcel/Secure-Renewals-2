@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Boolean
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -65,8 +66,6 @@ def init_db():
             Base.metadata.create_all(bind=engine)
         except Exception as e:
             print(f"Error creating tables: {e}")
-
-from contextlib import contextmanager
 
 @contextmanager
 def get_db_session():

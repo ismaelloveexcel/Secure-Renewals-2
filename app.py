@@ -68,6 +68,13 @@ CUSTOM_CSS = """
         font-size: 20px;
     }
     
+    .company-logo-img {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        object-fit: contain;
+    }
+    
     .header-title h1 {
         margin: 0;
         font-size: 16px;
@@ -385,6 +392,15 @@ CUSTOM_CSS = """
         font-size: 22px;
     }
     
+    .login-logo-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        margin: 0 auto 16px;
+        display: block;
+        object-fit: contain;
+    }
+    
     .login-title {
         color: #1E1B5C;
         font-size: 18px;
@@ -658,7 +674,7 @@ def render_login():
     st.markdown(f"""
     <div class="login-container">
         <div class="login-header">
-            <div class="login-logo">🏥</div>
+            <img src="attached_assets/Untitled_design_(7)_1766689233925.gif" alt="Logo" class="login-logo-img">
             <h1 class="login-title">Medical Insurance Verification</h1>
             <p class="login-subtitle">Employee Self-Service Portal</p>
             <div class="login-badge">Policy Year {POLICY_YEAR}</div>
@@ -714,7 +730,7 @@ def render_header(principal_name, staff_number):
     <div class="main-header">
         <div class="header-content">
             <div class="header-left">
-                <div class="company-logo">🏥</div>
+                <img src="attached_assets/Untitled_design_(7)_1766689233925.gif" alt="Logo" class="company-logo-img">
                 <div class="header-title">
                     <h1>Medical Insurance Verification</h1>
                     <div class="subtitle">Employee Self-Service Portal</div>

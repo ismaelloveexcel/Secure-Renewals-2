@@ -724,54 +724,56 @@ CUSTOM_CSS = """
     
     .stTextInput > div > div > input {
         border-radius: 6px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #cbd5e1;
         padding: 10px 12px;
         font-family: 'Poppins', sans-serif;
         font-size: 13px;
-        background: #f8fafc !important;
+        background: #f1f5f9 !important;
         color: #0f172a !important;
     }
     
     .stTextInput label {
         font-size: 12px !important;
         margin-bottom: 4px !important;
-        color: #475569 !important;
+        color: #334155 !important;
     }
     
     .stTextInput > div > div > input:focus {
         border-color: #2563eb;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        background: #ffffff !important;
     }
     
     .stSelectbox > div > div {
         border-radius: 6px;
         font-size: 13px;
-        background: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
+        background: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
     }
     
     .stSelectbox label {
         font-size: 12px !important;
-        color: #475569 !important;
+        color: #334155 !important;
     }
     
     .stTextArea > div > div > textarea {
         border-radius: 6px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #cbd5e1;
         font-family: 'Poppins', sans-serif;
         font-size: 13px;
-        background: #f8fafc !important;
+        background: #f1f5f9 !important;
         color: #0f172a !important;
     }
     
     .stTextArea label {
         font-size: 12px !important;
-        color: #475569 !important;
+        color: #334155 !important;
     }
     
     .stTextArea > div > div > textarea:focus {
         border-color: #2563eb;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        background: #ffffff !important;
     }
     
     .stRadio > div {
@@ -781,11 +783,11 @@ CUSTOM_CSS = """
     .stRadio label {
         padding: 10px 14px !important;
         font-size: 13px !important;
-        border: 1px solid #e2e8f0 !important;
+        border: 1px solid #cbd5e1 !important;
         border-radius: 6px !important;
         margin-bottom: 6px !important;
         color: #0f172a !important;
-        background: #f8fafc !important;
+        background: #f1f5f9 !important;
     }
     
     .stCheckbox label {
@@ -1450,13 +1452,15 @@ def render_covered_members(employee_data, staff_number):
                     if new_passport and new_passport.strip():
                         direct_inputs["Passport number"] = new_passport.strip()
         
-        st.markdown('<div class="edit-section-header" style="color: #38b6ff;">Update Information</div>', unsafe_allow_html=True)
+        st.markdown('<div class="edit-section-header" style="color: #2563eb;">Update Information</div>', unsafe_allow_html=True)
         
         update_cols = st.columns(3)
         with update_cols[0]:
-            marital_options = ["", "SINGLE", "MARRIED", "DIVORCED", "WIDOWED"]
-            new_marital = st.selectbox("Update Marital Status", marital_options, index=0, key=f"marital_{idx}_{member_number}")
-            if new_marital and new_marital != marital_status:
+            marital_options = ["SINGLE", "MARRIED", "DIVORCED", "WIDOWED"]
+            current_marital = marital_status.upper() if marital_status and marital_status != "—" else ""
+            default_idx = marital_options.index(current_marital) if current_marital in marital_options else 0
+            new_marital = st.selectbox("Update Marital Status", marital_options, index=default_idx, key=f"marital_{idx}_{member_number}")
+            if new_marital and new_marital.upper() != current_marital:
                 direct_inputs["Marital Status"] = new_marital
         
         if validation_errors:

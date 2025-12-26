@@ -2158,10 +2158,6 @@ def render_dashboard():
             </div>
             <div class="header-right-section">
                 <div class="header-policy-badge">Policy {POLICY_YEAR}</div>
-                <div class="header-user-info">
-                    <div class="header-user-name">{principal_name}</div>
-                    <div class="header-user-id">{staff_number}</div>
-                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)

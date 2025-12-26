@@ -1216,7 +1216,7 @@ def render_login():
             color: #333 !important;
             background: linear-gradient(145deg, #e6e6e6, #cccccc) !important;
             border: none !important;
-            border-radius: 50px !important;
+            border-radius: 8px !important;
             box-shadow: 
                 6px 6px 12px rgba(0, 0, 0, 0.15),
                 -4px -4px 10px rgba(255, 255, 255, 0.8),

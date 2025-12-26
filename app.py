@@ -733,6 +733,52 @@ CUSTOM_CSS = """
         background: rgba(255,255,255,0.15) !important;
     }
     
+    .signout-container {
+        text-align: center;
+        margin-top: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .signout-container .stButton > button,
+    .signout-container .stButton > button > div,
+    .signout-container .stButton > button > div > p,
+    .signout-container .stButton > button span {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #64748b !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        font-family: 'Inter', sans-serif !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        padding: 8px 16px !important;
+        position: relative;
+        transition: all 0.3s ease !important;
+        width: auto !important;
+    }
+    
+    .signout-container .stButton > button::after {
+        content: '';
+        position: absolute;
+        bottom: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: #23c483;
+        transition: width 0.3s ease;
+    }
+    
+    .signout-container .stButton > button:hover {
+        color: #23c483 !important;
+        background: transparent !important;
+    }
+    
+    .signout-container .stButton > button:hover::after {
+        width: 60%;
+    }
+    
     .section-label {
         color: #64748b;
         font-size: 12px;
@@ -2016,13 +2062,6 @@ def render_dashboard():
     principal = employee_data[employee_data['Relation'] == 'PRINCIPAL'].iloc[0]
     principal_name = principal['Principal Name']
     
-    # Simple sign out in top right
-    signout_col1, signout_col2 = st.columns([6, 1])
-    with signout_col2:
-        if st.button("Sign Out", key="header_signout", type="secondary"):
-            st.session_state.clear()
-            st.rerun()
-    
     col1, col2, col3 = st.columns([1, 2.5, 1])
     with col2:
         render_employee_snapshot(principal, staff_number)
@@ -2034,6 +2073,13 @@ def render_dashboard():
             Need help? <a href="https://wa.me/971564966546" target="_blank" style="color: #25D366; text-decoration: none; font-weight: 600;">WhatsApp HR Support</a>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Sign out button at bottom with login page styling
+        st.markdown('<div class="signout-container">', unsafe_allow_html=True)
+        if st.button("Sign Out", key="footer_signout", type="secondary"):
+            st.session_state.clear()
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
 def generate_excel_report():
     df = load_data()

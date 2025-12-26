@@ -687,7 +687,7 @@ CUSTOM_CSS = """
         border-radius: 8px;
         width: 100%;
         transition: all 0.2s ease;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Aptos', 'Calibri', sans-serif;
         box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
     }
     
@@ -735,7 +735,7 @@ CUSTOM_CSS = """
         border-radius: 6px;
         border: 1px solid #cbd5e1;
         padding: 10px 12px;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Aptos', 'Calibri', sans-serif;
         font-size: 13px;
         background: #f1f5f9 !important;
         color: #0f172a !important;
@@ -768,7 +768,7 @@ CUSTOM_CSS = """
     .stTextArea > div > div > textarea {
         border-radius: 6px;
         border: 1px solid #cbd5e1;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Aptos', 'Calibri', sans-serif;
         font-size: 13px;
         background: #f1f5f9 !important;
         color: #0f172a !important;

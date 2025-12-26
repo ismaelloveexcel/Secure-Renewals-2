@@ -1226,9 +1226,9 @@ def render_login():
             border: none !important;
             background: none !important;
             background-color: transparent !important;
-            text-transform: uppercase !important;
-            letter-spacing: 1px !important;
-            padding: 12px 24px !important;
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+            padding: 12px 0 !important;
             transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1) !important;
             transition-duration: 400ms !important;
             transition-property: color !important;

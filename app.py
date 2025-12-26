@@ -1074,22 +1074,25 @@ def render_login():
             font-weight: 700 !important;
         }
         [data-testid="stForm"] .stTextInput > div > div > input {
-            background: #f0f4f8 !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 10px !important;
+            border: none !important;
+            outline: none !important;
+            border-radius: 15px !important;
+            padding: 1em !important;
+            background-color: #ccc !important;
+            box-shadow: inset 2px 5px 10px rgba(0,0,0,0.3) !important;
+            transition: 300ms ease-in-out !important;
             color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
-            padding: 12px 14px !important;
             font-size: 14px !important;
-            transition: all 0.2s ease !important;
         }
         [data-testid="stForm"] .stTextInput > div > div > input:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-            background: #ffffff !important;
+            background-color: white !important;
+            transform: scale(1.05) !important;
+            box-shadow: 13px 13px 100px #969696,
+                       -13px -13px 100px #ffffff !important;
         }
         [data-testid="stForm"] .stTextInput > div > div > input::placeholder {
-            color: #94a3b8 !important;
+            color: #666 !important;
         }
         [data-testid="stForm"] .stFormSubmitButton {
             position: relative;

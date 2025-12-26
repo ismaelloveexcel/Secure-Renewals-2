@@ -97,9 +97,9 @@ CUSTOM_CSS = """
     }
     
     .login-card h1 {
-        color: #0f172a;
+        color: #64748b;
         font-size: 20px;
-        font-weight: 600;
+        font-weight: 500;
         margin: 0 0 6px 0;
         line-height: 1.3;
     }
@@ -264,9 +264,9 @@ CUSTOM_CSS = """
     }
     
     .card-title {
-        color: #0f172a;
+        color: #64748b;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.8px;
         margin-bottom: 12px;
@@ -295,7 +295,7 @@ CUSTOM_CSS = """
     }
     
     .snapshot-value {
-        color: #0f172a;
+        color: #64748b;
         font-size: 13px;
         font-weight: 500;
     }
@@ -320,9 +320,9 @@ CUSTOM_CSS = """
     }
     
     .member-name {
-        color: #0f172a;
+        color: #64748b;
         font-size: 15px;
-        font-weight: 600;
+        font-weight: 500;
     }
     
     .member-badge {
@@ -368,7 +368,7 @@ CUSTOM_CSS = """
     }
     
     .member-detail-value {
-        color: #0f172a;
+        color: #64748b;
         font-weight: 500;
     }
     
@@ -426,7 +426,7 @@ CUSTOM_CSS = """
     }
     
     .field-value {
-        color: #0f172a;
+        color: #64748b;
         font-weight: 500;
         font-size: 13px;
     }
@@ -738,7 +738,7 @@ CUSTOM_CSS = """
         font-family: 'Inter', sans-serif;
         font-size: 13px;
         background: #f1f5f9 !important;
-        color: #0f172a !important;
+        color: #64748b !important;
     }
     
     .stTextInput label {
@@ -771,7 +771,7 @@ CUSTOM_CSS = """
         font-family: 'Inter', sans-serif;
         font-size: 13px;
         background: #f1f5f9 !important;
-        color: #0f172a !important;
+        color: #64748b !important;
     }
     
     .stTextArea label {
@@ -795,17 +795,17 @@ CUSTOM_CSS = """
         border: 1px solid #cbd5e1 !important;
         border-radius: 6px !important;
         margin-bottom: 6px !important;
-        color: #0f172a !important;
+        color: #64748b !important;
         background: #f1f5f9 !important;
     }
     
     .stCheckbox label {
         font-size: 13px !important;
-        color: #0f172a !important;
+        color: #64748b !important;
     }
     
     .stCheckbox label span {
-        color: #0f172a !important;
+        color: #64748b !important;
     }
     
     .expired-notice {
@@ -1177,7 +1177,7 @@ def render_login():
             background-color: #e8edf3 !important;
             box-shadow: inset 1px 2px 4px rgba(0,0,0,0.06) !important;
             transition: all 0.3s ease !important;
-            color: #0f172a !important;
+            color: #64748b !important;
             font-family: 'Inter', sans-serif !important;
             font-size: 12px !important;
             line-height: 1.4 !important;
@@ -1218,7 +1218,7 @@ def render_login():
         [data-testid="stForm"] button,
         button[data-testid="stBaseButton-secondaryFormSubmit"] {
             font-size: 14px !important;
-            color: #0f172a !important;
+            color: #64748b !important;
             font-family: 'Inter', sans-serif !important;
             font-weight: 700 !important;
             cursor: pointer;
@@ -1244,7 +1244,7 @@ def render_login():
             font-size: 14px !important;
             letter-spacing: 0 !important;
             text-transform: none !important;
-            color: #0f172a !important;
+            color: #64748b !important;
         }
         [data-testid="stForm"] .stFormSubmitButton > button:focus,
         [data-testid="stForm"] .stFormSubmitButton > button:hover,
@@ -1277,7 +1277,7 @@ def render_login():
         }
         .login-help {
             font-family: 'Inter', sans-serif !important;
-            color: #0f172a !important;
+            color: #64748b !important;
         }
         .login-help a {
             color: #25D366 !important;
@@ -1325,7 +1325,7 @@ def render_login():
             background: #f1f5f9 !important;
             border: 1px solid #cbd5e1 !important;
             border-radius: 8px;
-            color: #0f172a !important;
+            color: #64748b !important;
             font-size: 14px;
         }
         .login-glass-card .stTextInput label {

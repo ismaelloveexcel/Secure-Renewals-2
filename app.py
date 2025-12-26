@@ -1234,6 +1234,18 @@ def render_login():
             transition-property: color !important;
             box-shadow: none !important;
         }
+        [data-testid="stForm"] .stFormSubmitButton > button *,
+        [data-testid="stForm"] .stFormSubmitButton button *,
+        [data-testid="stForm"] .stFormSubmitButton button p,
+        [data-testid="stForm"] .stFormSubmitButton button span,
+        [data-testid="stForm"] .stFormSubmitButton button div {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 700 !important;
+            font-size: 14px !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
+            color: #0f172a !important;
+        }
         [data-testid="stForm"] .stFormSubmitButton > button:focus,
         [data-testid="stForm"] .stFormSubmitButton > button:hover,
         button[data-testid="stBaseButton-secondaryFormSubmit"]:hover {

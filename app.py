@@ -46,22 +46,70 @@ SESSION_TIMEOUT_MINUTES = 15
 
 CUSTOM_CSS = """
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750;800;850&display=swap');
+    
+    /* =========================
+       1) DESIGN TOKENS
+       ========================= */
+    :root {
+        /* Brand */
+        --brand-900: #0B1F3B;
+        --brand-700: #123B6E;
+        --accent-600: #21C17A;
+        --warn-600: #F59E0B;
+        --danger-600: #EF4444;
+        
+        /* Neutrals */
+        --bg: #b4b4b4;
+        --ink-900: #0F172A;
+        --ink-700: #334155;
+        --ink-500: #64748B;
+        --ink-300: #94A3B8;
+        
+        --surface-0: rgba(255,255,255,.92);
+        --surface-1: rgba(255,255,255,.84);
+        --surface-2: rgba(248,250,252,.90);
+        
+        --border: rgba(15,23,42,.10);
+        --border-strong: rgba(15,23,42,.16);
+        
+        /* Layout */
+        --radius: 16px;
+        --radius-sm: 12px;
+        
+        --shadow-sm: 0 6px 18px rgba(15,23,42,.08);
+        --shadow-md: 0 12px 30px rgba(15,23,42,.12);
+        
+        /* Typography */
+        --font: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
     
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     .stDeployButton {display: none;}
     
+    /* =========================
+       2) APP BACKGROUND + NOISE
+       ========================= */
     .stApp {
-        font-family: 'Inter', sans-serif;
-        background: #f5f7fb;
+        font-family: var(--font);
+        color: var(--ink-900);
+        background:
+            radial-gradient(1200px 600px at 20% 10%, rgba(255,255,255,.35), transparent 60%),
+            radial-gradient(900px 500px at 80% 0%, rgba(33,193,122,.18), transparent 55%),
+            linear-gradient(180deg, rgba(180,180,180,1) 0%, rgba(210,214,222,1) 100%);
+        position: relative;
     }
+    
 
+    /* =========================
+       3) PAGE CONTAINER
+       ========================= */
     .page-shell {
-        max-width: 1100px;
+        max-width: 1160px;
         margin: 0 auto;
-        padding: 8px 14px 36px;
+        padding: 28px 20px 64px;
         display: flex;
         flex-direction: column;
         gap: 16px;
@@ -69,15 +117,22 @@ CUSTOM_CSS = """
 
     .section-grid {
         display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 14px;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 16px;
         align-items: start;
+    }
+    
+    @media (max-width: 980px) {
+        .section-grid { grid-template-columns: 1fr; }
     }
 
     .section-divider {
         margin: 6px 0 4px;
     }
     
+    /* =========================
+       4) LOGIN STYLES
+       ========================= */
     .login-page [data-testid="stAppViewBlockContainer"] {
         padding: 0 !important;
         max-width: 100% !important;
@@ -89,21 +144,19 @@ CUSTOM_CSS = """
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 20px;
+        padding: 24px 18px;
         box-sizing: border-box;
-        background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 50%, #faf5ff 100%);
     }
     
     .login-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(20px);
-        padding: 24px 22px;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.1);
-        width: 100%;
-        max-width: 320px;
+        width: min(420px, 100%);
+        background: var(--surface-0);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        box-shadow: 0 22px 60px rgba(15,23,42,.18);
+        padding: 26px 24px;
         text-align: center;
-        border: 1px solid rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
     }
     
     .login-card-header {
@@ -117,51 +170,64 @@ CUSTOM_CSS = """
     }
     
     .login-card h1 {
-        color: #64748b;
-        font-size: 20px;
-        font-weight: 500;
-        margin: 0 0 6px 0;
-        line-height: 1.3;
+        color: var(--brand-900);
+        font-size: 22px;
+        font-weight: 750;
+        margin: 10px 0 6px 0;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
     }
     
     .login-card .subtitle {
-        color: #475569;
+        color: var(--ink-500);
         font-size: 14px;
         margin: 0;
     }
     
     .login-card .policy-tag {
-        display: inline-block;
-        background: rgba(35, 196, 131, 0.1);
-        color: #23c483;
-        padding: 6px 14px;
-        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(33,193,122,.14);
+        color: #0E5F3D;
+        border: 1px solid rgba(33,193,122,.22);
         font-size: 12px;
-        font-weight: 600;
-        margin-top: 14px;
+        font-weight: 650;
+        margin-top: 10px;
     }
     
     .login-help {
         margin-top: 18px;
         font-size: 13px;
-        color: #64748b;
+        color: var(--ink-500);
     }
     
     .login-help a {
-        color: #23c483;
+        color: var(--accent-600);
         text-decoration: none;
         font-weight: 600;
     }
     
+    /* =========================
+       5) MAIN HEADER + CARDS
+       ========================= */
     .main-header {
-        background: rgba(255, 255, 255, 0.92);
+        background: var(--surface-0);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        padding: 22px 22px;
         backdrop-filter: blur(10px);
-        padding: 20px 24px;
         margin-bottom: 20px;
-        color: #64748b;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .main-header:hover {
+        box-shadow: var(--shadow-md);
+        border-color: var(--border-strong);
+        transform: translateY(-1px);
+        transition: 160ms ease;
     }
     
     .header-content {
@@ -197,13 +263,13 @@ CUSTOM_CSS = """
     .header-title h1 {
         margin: 0;
         font-size: 16px;
-        font-weight: 500;
-        color: #64748b;
+        font-weight: 650;
+        color: var(--ink-700);
     }
     
     .header-title .subtitle {
         font-size: 12px;
-        color: #94a3b8;
+        color: var(--ink-500);
         margin-top: 3px;
         font-weight: 400;
     }
@@ -215,15 +281,16 @@ CUSTOM_CSS = """
     }
     
     .policy-badge {
-        background: rgba(35, 196, 131, 0.1);
-        border: 1px solid rgba(35, 196, 131, 0.3);
-        color: #23c483;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(33,193,122,.14);
+        color: #0E5F3D;
+        border: 1px solid rgba(33,193,122,.22);
+        font-size: 12px;
+        font-weight: 650;
     }
     
     .user-block {
@@ -232,13 +299,13 @@ CUSTOM_CSS = """
     
     .user-name {
         font-size: 13px;
-        font-weight: 500;
-        color: #64748b;
+        font-weight: 650;
+        color: var(--ink-700);
     }
     
     .user-id {
         font-size: 11px;
-        color: #94a3b8;
+        color: var(--ink-500);
         margin-bottom: 4px;
     }
     
@@ -246,7 +313,7 @@ CUSTOM_CSS = """
         display: inline-block;
         background: transparent;
         border: none;
-        color: #64748b;
+        color: var(--ink-500);
         padding: 4px 0;
         font-size: 11px;
         font-weight: 500;
@@ -266,12 +333,12 @@ CUSTOM_CSS = """
         left: 0;
         width: 0;
         height: 2px;
-        background: #23c483;
+        background: var(--accent-600);
         transition: width 0.3s ease;
     }
     
     .header-signout-link:hover {
-        color: #23c483;
+        color: var(--accent-600);
     }
     
     .header-signout-link:hover::after {
@@ -279,16 +346,16 @@ CUSTOM_CSS = """
     }
     
     .status-strip {
-        background: rgba(255, 255, 255, 0.7);
-        border-bottom: 1px solid #e2e8f0;
+        background: var(--surface-1);
+        border: 1px solid var(--border);
         padding: 12px 16px;
         margin: 0 0 6px 0;
-        border-radius: 10px;
+        border-radius: var(--radius-sm);
         display: flex;
         justify-content: space-between;
         gap: 18px;
         font-size: 12px;
-        color: #475569;
+        color: var(--ink-700);
     }
     
     .status-item {
@@ -297,12 +364,28 @@ CUSTOM_CSS = """
         gap: 6px;
     }
 
-    .summary-card {
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 12px;
-        padding: 14px 16px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+    /* =========================
+       6) CARDS + STATS
+       ========================= */
+    .glass-card, .summary-card, .member-card, .confirmation-card, .edit-form-card {
+        background: rgba(255,255,255,.92) !important;
+        border: 1px solid rgba(15,23,42,.10) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 6px 18px rgba(15,23,42,.08) !important;
+        padding: 22px 22px !important;
+        backdrop-filter: blur(10px) !important;
+        margin-bottom: 14px !important;
+    }
+    
+    .glass-card:hover, .summary-card:hover, .member-card:hover {
+        box-shadow: 0 12px 30px rgba(15,23,42,.12) !important;
+        border-color: rgba(15,23,42,.16) !important;
+        transform: translateY(-1px);
+        transition: 160ms ease;
+    }
+    
+    .glass-card--accent {
+        border-top: 3px solid rgba(18,59,110,.65) !important;
     }
 
     .summary-card .card-title {
@@ -312,28 +395,29 @@ CUSTOM_CSS = """
     .key-metrics {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
+        gap: 12px;
     }
 
     .metric-tile {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 10px 12px;
+        background: var(--surface-2);
+        border: 1px solid rgba(15,23,42,.08);
+        border-radius: 14px;
+        padding: 14px 14px;
     }
 
     .metric-label {
         font-size: 11px;
+        letter-spacing: .10em;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #94a3b8;
-        margin-bottom: 4px;
+        color: var(--ink-500);
+        font-weight: 750;
     }
 
     .metric-value {
-        color: #0f172a;
-        font-weight: 600;
-        font-size: 14px;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--ink-900);
+        margin-top: 6px;
     }
 
     .list-row {
@@ -341,9 +425,9 @@ CUSTOM_CSS = """
         justify-content: space-between;
         gap: 6px;
         padding: 8px 0;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid rgba(15,23,42,.06);
         font-size: 12px;
-        color: #475569;
+        color: var(--ink-700);
     }
 
     .list-row:last-child {
@@ -353,20 +437,80 @@ CUSTOM_CSS = """
     .list-label {
         text-transform: uppercase;
         letter-spacing: 0.4px;
-        color: #94a3b8;
-        font-weight: 600;
+        color: var(--ink-500);
+        font-weight: 750;
         font-size: 11px;
     }
 
     .list-value {
-        font-weight: 600;
-        color: #64748b;
+        font-weight: 650;
+        color: var(--ink-700);
     }
     
+    /* Card header row */
+    .card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(15,23,42,.06);
+        margin-bottom: 14px;
+    }
+    
+    .card-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        letter-spacing: .10em;
+        text-transform: uppercase;
+        color: var(--ink-500);
+        font-weight: 750;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(15,23,42,.06);
+    }
+    
+    .badge {
+        font-size: 11px;
+        font-weight: 750;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(248,250,252,.85);
+        color: var(--ink-700);
+    }
+    
+    .badge--principal, .badge-principal { 
+        background: rgba(33,193,122,.14); 
+        border-color: rgba(33,193,122,.25); 
+        color: #0E5F3D; 
+    }
+    
+    .badge--spouse, .badge-spouse { 
+        background: rgba(139,92,246,.12); 
+        border-color: rgba(139,92,246,.22); 
+        color: #4C1D95; 
+    }
+    
+    .badge--warn { 
+        background: rgba(245,158,11,.14); 
+        border-color: rgba(245,158,11,.22); 
+        color: #7A4B00; 
+    }
+    
+    .badge-child {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    
+    /* =========================
+       7) CENTERED HEADER
+       ========================= */
     .centered-header {
         text-align: center;
-        margin-bottom: 20px;
-        padding: 10px 0;
+        padding: 18px 0 26px;
     }
     
     .centered-header-logo {
@@ -378,23 +522,32 @@ CUSTOM_CSS = """
     }
     
     .centered-header-title {
-        color: #64748b;
-        font-size: 18px;
-        font-weight: 500;
-        margin-bottom: 4px;
+        font-size: 30px;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        margin: 10px 0 6px;
+        color: var(--brand-900);
+        font-weight: 750;
     }
     
     .centered-header-subtitle {
-        color: #94a3b8;
-        font-size: 13px;
-        font-weight: 400;
-        margin-bottom: 4px;
+        font-size: 14px;
+        color: var(--ink-500);
+        margin: 0 0 4px 0;
     }
     
     .centered-header-year {
-        color: #23c483;
-        font-size: 14px;
-        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(33,193,122,.14);
+        color: #0E5F3D;
+        border: 1px solid rgba(33,193,122,.22);
+        font-size: 12px;
+        font-weight: 650;
+        margin-top: 10px;
     }
     
     .header-logo-placeholder {
@@ -408,15 +561,16 @@ CUSTOM_CSS = """
     }
     
     .header-policy-badge {
-        background: rgba(35, 196, 131, 0.1);
-        border: 1px solid rgba(35, 196, 131, 0.3);
-        color: #23c483;
-        padding: 6px 14px;
-        border-radius: 16px;
-        font-size: 11px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(33,193,122,.14);
+        color: #0E5F3D;
+        border: 1px solid rgba(33,193,122,.22);
+        font-size: 12px;
+        font-weight: 650;
     }
     
     .header-user-info {
@@ -424,37 +578,19 @@ CUSTOM_CSS = """
     }
     
     .header-user-name {
-        color: #64748b;
+        color: var(--ink-700);
         font-size: 13px;
-        font-weight: 500;
+        font-weight: 650;
     }
     
     .header-user-id {
-        color: #94a3b8;
+        color: var(--ink-500);
         font-size: 11px;
     }
     
-    .glass-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 14px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
-    }
-    
-    .card-title {
-        color: #64748b;
-        font-size: 12px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
+    /* =========================
+       8) SNAPSHOT + MEMBER DETAILS
+       ========================= */
     .snapshot-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -468,27 +604,18 @@ CUSTOM_CSS = """
     }
     
     .snapshot-label {
-        color: #64748b;
         font-size: 11px;
+        letter-spacing: .10em;
         text-transform: uppercase;
-        letter-spacing: 0.4px;
-        font-weight: 500;
+        color: var(--ink-500);
+        font-weight: 750;
     }
     
     .snapshot-value {
-        color: #64748b;
-        font-size: 13px;
-        font-weight: 500;
-    }
-    
-    .member-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 14px;
-        margin-bottom: 14px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        font-size: 14px;
+        color: var(--ink-900);
+        font-weight: 650;
+        margin-top: 6px;
     }
     
     .member-header {
@@ -497,37 +624,22 @@ CUSTOM_CSS = """
         align-items: center;
         margin-bottom: 12px;
         padding-bottom: 10px;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid rgba(15,23,42,.06);
     }
     
     .member-name {
-        color: #64748b;
+        color: var(--ink-700);
         font-size: 15px;
-        font-weight: 500;
+        font-weight: 650;
     }
     
     .member-badge {
-        padding: 3px 10px;
-        border-radius: 10px;
-        font-size: 10px;
-        font-weight: 600;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 750;
         text-transform: uppercase;
         letter-spacing: 0.4px;
-    }
-    
-    .badge-principal {
-        background: rgba(35, 196, 131, 0.1);
-        color: #23c483;
-    }
-    
-    .badge-spouse {
-        background: rgba(147, 51, 234, 0.1);
-        color: #9333ea;
-    }
-    
-    .badge-child {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
     }
     
     .member-details {
@@ -545,61 +657,61 @@ CUSTOM_CSS = """
     }
     
     .member-detail-label {
-        color: #64748b;
+        color: var(--ink-500);
     }
     
     .member-detail-value {
-        color: #64748b;
-        font-weight: 500;
+        color: var(--ink-900);
+        font-weight: 650;
     }
     
     .missing-value {
-        color: #f97316;
-        font-size: 11px;
-        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 750;
+        color: #7A4B00;
+        background: rgba(245,158,11,.14);
+        border: 1px solid rgba(245,158,11,.22);
+        padding: 6px 10px;
+        border-radius: 999px;
     }
     
     .member-divider {
         border: none;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid rgba(15,23,42,.06);
         margin: 12px 0;
     }
     
     .missing-text {
-        color: #f97316 !important;
-        font-weight: 600;
+        color: #7A4B00 !important;
+        font-weight: 750;
     }
     
-    .edit-form-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 16px;
-        margin: 14px 0;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
-    }
-    
+    /* =========================
+       9) EDIT FORM SECTIONS
+       ========================= */
     .edit-section-header {
-        color: #ea580c;
-        font-size: 11px;
-        font-weight: 600;
+        color: #7A4B00;
+        font-size: 12px;
+        font-weight: 850;
         text-transform: uppercase;
-        letter-spacing: 0.6px;
+        letter-spacing: 0.10em;
         margin: 0 0 12px 0;
-        font-family: 'Inter', sans-serif;
+        font-family: var(--font);
     }
     
     .edit-section-header-green {
-        color: #23c483;
-        font-size: 11px;
-        font-weight: 600;
+        color: var(--accent-600);
+        font-size: 12px;
+        font-weight: 850;
         text-transform: uppercase;
-        letter-spacing: 0.6px;
+        letter-spacing: 0.10em;
         margin: 16px 0 12px 0;
         padding-top: 12px;
-        border-top: 1px solid #e2e8f0;
-        font-family: 'Inter', sans-serif;
+        border-top: 1px solid rgba(15,23,42,.06);
+        font-family: var(--font);
     }
     
     .member-grid {
@@ -611,7 +723,15 @@ CUSTOM_CSS = """
     .grid-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
+        gap: 14px 18px;
+    }
+    
+    @media (max-width: 980px) {
+        .grid-row { grid-template-columns: 1fr 1fr; }
+    }
+    
+    @media (max-width: 560px) {
+        .grid-row { grid-template-columns: 1fr; }
     }
     
     .grid-cell {
@@ -619,29 +739,44 @@ CUSTOM_CSS = """
     }
     
     .field-label {
-        color: #64748b;
-        font-size: 10px;
+        font-size: 11px;
+        letter-spacing: .10em;
         text-transform: uppercase;
+        color: var(--ink-500);
+        font-weight: 750;
         margin-bottom: 3px;
-        font-weight: 500;
-        letter-spacing: 0.3px;
     }
     
     .field-value {
-        color: #64748b;
-        font-weight: 500;
-        font-size: 13px;
+        font-size: 14px;
+        color: var(--ink-900);
+        font-weight: 650;
+        margin-top: 6px;
     }
     
-    .missing-field-text {
-        color: #f97316;
+    .field-value-muted {
+        color: var(--ink-500);
         font-weight: 600;
     }
     
+    .missing-field-text {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+        font-size: 12px;
+        font-weight: 750;
+        color: #7A4B00;
+        background: rgba(245,158,11,.14);
+        border: 1px solid rgba(245,158,11,.22);
+        padding: 6px 10px;
+        border-radius: 999px;
+    }
+    
     .missing-info-banner {
-        background: rgba(249, 115, 22, 0.08);
-        border-left: 3px solid #f97316;
-        border-radius: 0 8px 8px 0;
+        background: rgba(245,158,11,.14);
+        border-left: 3px solid var(--warn-600);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
         padding: 10px 14px;
         margin-top: 12px;
         display: flex;
@@ -650,121 +785,115 @@ CUSTOM_CSS = """
     }
     
     .missing-icon {
-        color: #f97316;
+        color: var(--warn-600);
         font-size: 16px;
     }
     
     .missing-title {
-        color: #ea580c;
-        font-weight: 600;
+        color: #7A4B00;
+        font-weight: 750;
         font-size: 13px;
     }
     
     .missing-desc {
-        color: #64748b;
+        color: var(--ink-500);
         font-size: 12px;
     }
     
     .inline-edit-section {
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid rgba(15,23,42,.06);
         margin-top: 12px;
         padding-top: 10px;
     }
     
     .inline-edit-title {
-        color: #ea580c;
-        font-size: 11px;
-        font-weight: 600;
+        color: #7A4B00;
+        font-size: 12px;
+        font-weight: 850;
         text-transform: uppercase;
-        letter-spacing: 0.6px;
+        letter-spacing: 0.10em;
         margin-bottom: 8px;
     }
     
     .missing-banner {
-        background: rgba(249, 115, 22, 0.06);
-        border-left: 3px solid #f97316;
-        border-radius: 0 8px 8px 0;
+        background: rgba(245,158,11,.14);
+        border-left: 3px solid var(--warn-600);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
         padding: 10px 12px;
         margin: 10px 0;
         display: flex;
         align-items: center;
         gap: 10px;
-        color: #ea580c;
+        color: #7A4B00;
         font-size: 12px;
+        font-weight: 750;
     }
     
-    .confirmation-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 14px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
-    }
-    
+    /* =========================
+       10) RADIO + CONFIRMATION
+       ========================= */
     .radio-option {
         display: flex;
         align-items: center;
         gap: 8px;
         padding: 10px 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
         margin-bottom: 8px;
         cursor: pointer;
-        transition: all 0.2s;
-        background: rgba(255, 255, 255, 0.6);
+        transition: all 160ms ease;
+        background: var(--surface-1);
     }
     
     .radio-option:hover {
-        border-color: #23c483;
-        background: rgba(35, 196, 131, 0.04);
+        border-color: var(--accent-600);
+        background: rgba(33,193,122,.04);
     }
     
     .radio-option.selected {
-        border-color: #23c483;
-        background: rgba(35, 196, 131, 0.08);
+        border-color: var(--accent-600);
+        background: rgba(33,193,122,.08);
     }
     
     .success-message {
-        background: rgba(16, 185, 129, 0.08);
-        border-radius: 12px;
+        background: rgba(33,193,122,.08);
+        border-radius: var(--radius);
         padding: 24px;
         text-align: center;
         margin: 14px 0;
-        border: 1px solid rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(33,193,122,.2);
     }
     
     .success-icon {
         width: 48px;
         height: 48px;
-        background: rgba(16, 185, 129, 0.12);
+        background: rgba(33,193,122,.12);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 12px;
         font-size: 22px;
-        color: #10b981;
+        color: var(--accent-600);
     }
     
     .success-title {
-        color: #0f172a;
+        color: var(--ink-900);
         font-size: 16px;
-        font-weight: 600;
+        font-weight: 800;
         margin-bottom: 6px;
     }
     
     .success-desc {
-        color: #475569;
+        color: var(--ink-700);
         font-size: 13px;
         line-height: 1.5;
     }
     
     .change-log {
-        background: rgba(249, 115, 22, 0.06);
-        border: 1px solid rgba(249, 115, 22, 0.2);
-        border-radius: 10px;
+        background: rgba(245,158,11,.06);
+        border: 1px solid rgba(245,158,11,.2);
+        border-radius: 14px;
         padding: 14px;
         margin-top: 14px;
     }
@@ -773,9 +902,9 @@ CUSTOM_CSS = """
         display: flex;
         gap: 8px;
         padding: 6px 0;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid rgba(15,23,42,.06);
         font-size: 13px;
-        color: #0f172a;
+        color: var(--ink-900);
     }
     
     .change-item:last-child {
@@ -783,15 +912,18 @@ CUSTOM_CSS = """
     }
     
     .old-value {
-        color: #f87171;
+        color: var(--danger-600);
         text-decoration: line-through;
     }
     
     .new-value {
-        color: #22c55e;
-        font-weight: 500;
+        color: var(--accent-600);
+        font-weight: 650;
     }
     
+    /* =========================
+       11) LOGIN FORM
+       ========================= */
     .login-container {
         max-width: 280px;
         margin: 0 auto;
@@ -823,7 +955,7 @@ CUSTOM_CSS = """
     .login-logo {
         width: 40px;
         height: 40px;
-        background: #23c483;
+        background: var(--accent-600);
         border-radius: 12px;
         margin: 0 auto 14px;
         display: flex;
@@ -842,11 +974,12 @@ CUSTOM_CSS = """
     }
     
     .login-title {
-        color: #0f172a;
-        font-size: 20px;
-        font-weight: 600;
+        color: var(--brand-900);
+        font-size: 22px;
+        font-weight: 750;
         margin-bottom: 4px;
-        line-height: 1.2;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
     }
     
     @media (max-width: 480px) {
@@ -860,48 +993,65 @@ CUSTOM_CSS = """
     }
     
     .login-subtitle {
-        color: #64748b;
+        color: var(--ink-500);
         font-size: 13px;
         font-weight: 400;
         margin-top: 4px;
     }
     
     .login-badge {
-        display: inline-block;
-        background: rgba(35, 196, 131, 0.1);
-        color: #23c483;
-        padding: 5px 14px;
-        border-radius: 14px;
-        font-size: 11px;
-        font-weight: 600;
-        margin-top: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(33,193,122,.14);
+        color: #0E5F3D;
+        border: 1px solid rgba(33,193,122,.22);
+        font-size: 12px;
+        font-weight: 650;
+        margin-top: 10px;
     }
     
+    /* =========================
+       12) BUTTONS
+       ========================= */
     .stButton > button {
-        background: #23c483;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border-radius: 12px;
+        padding: 11px 16px;
+        font-size: 13px;
+        font-weight: 800;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: 160ms ease;
+        background: linear-gradient(180deg, rgba(33,193,122,1), rgba(22,163,74,1));
         color: white;
-        border: none;
-        padding: 10px 20px;
-        font-weight: 600;
-        font-size: 12px;
-        letter-spacing: 0.4px;
-        text-transform: uppercase;
-        border-radius: 8px;
+        box-shadow: 0 10px 22px rgba(22,163,74,.22);
         width: 100%;
-        transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif;
-        box-shadow: 0 2px 6px rgba(35, 196, 131, 0.2);
+        font-family: var(--font);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
     }
     
     .stButton > button:hover {
-        background: #1ea76f;
-        box-shadow: 0 3px 10px rgba(35, 196, 131, 0.3);
+        transform: translateY(-1px);
+        filter: brightness(1.02);
+    }
+    
+    .stButton > button:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+        transform: none;
     }
     
     .signout-btn button {
-        background: transparent !important;
-        border: 1px solid rgba(255,255,255,0.3) !important;
-        color: white !important;
+        background: var(--surface-2) !important;
+        border: 1px solid var(--border) !important;
+        color: var(--ink-900) !important;
         padding: 8px 16px !important;
         font-size: 11px !important;
         letter-spacing: 0.5px !important;
@@ -909,7 +1059,8 @@ CUSTOM_CSS = """
     }
     
     .signout-btn button:hover {
-        background: rgba(255,255,255,0.15) !important;
+        border-color: var(--border-strong) !important;
+        transform: translateY(-1px) !important;
     }
     
     .signout-container {
@@ -929,49 +1080,52 @@ CUSTOM_CSS = """
     }
     
     .signout-container .stButton > button {
-        background: #23c483 !important;
+        background: linear-gradient(180deg, rgba(33,193,122,1), rgba(22,163,74,1)) !important;
         color: white !important;
         border: none !important;
-        padding: 10px 40px !important;
-        font-weight: 600 !important;
-        font-size: 12px !important;
+        padding: 11px 40px !important;
+        font-weight: 800 !important;
+        font-size: 13px !important;
         letter-spacing: 0.4px !important;
         text-transform: uppercase !important;
-        border-radius: 8px !important;
-        font-family: 'Inter', sans-serif !important;
-        box-shadow: 0 2px 6px rgba(35, 196, 131, 0.2) !important;
-        transition: all 0.2s ease !important;
+        border-radius: 12px !important;
+        font-family: var(--font) !important;
+        box-shadow: 0 10px 22px rgba(22,163,74,.22) !important;
+        transition: 160ms ease !important;
         width: auto !important;
     }
     
     .signout-container .stButton > button:hover {
-        background: #1ea76f !important;
-        box-shadow: 0 3px 10px rgba(35, 196, 131, 0.3) !important;
+        transform: translateY(-1px) !important;
+        filter: brightness(1.02) !important;
     }
     
     .section-label {
-        color: #64748b;
+        margin-top: 18px;
         font-size: 12px;
+        letter-spacing: .10em;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-bottom: 8px;
-        font-weight: 600;
+        font-weight: 850;
+        color: var(--brand-700);
     }
 
     .section-heading {
-        color: #0f172a;
+        color: var(--ink-900);
         font-size: 15px;
-        font-weight: 600;
+        font-weight: 800;
         margin: 6px 0 10px 0;
         letter-spacing: 0.2px;
     }
     
+    /* =========================
+       13) FORM CONTROLS
+       ========================= */
     div[data-testid="stForm"] {
-        background: rgba(255, 255, 255, 0.85);
+        background: var(--surface-0);
         padding: 14px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
-        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
     }
     
     div[data-testid="stForm"] [data-testid="stVerticalBlock"] {
@@ -979,57 +1133,69 @@ CUSTOM_CSS = """
     }
     
     .stTextInput > div > div > input {
-        border-radius: 6px;
-        border: 1px solid #cbd5e1;
-        padding: 10px 12px;
-        font-family: 'Inter', sans-serif;
-        font-size: 13px;
-        background: #f1f5f9 !important;
-        color: #64748b !important;
+        width: 100%;
+        background: var(--surface-2);
+        border: 1px solid rgba(15,23,42,.14);
+        border-radius: 12px;
+        padding: 12px 12px;
+        font-size: 14px;
+        font-family: var(--font);
+        color: var(--ink-900);
+        outline: none;
     }
     
     .stTextInput label {
         font-size: 12px !important;
         margin-bottom: 4px !important;
-        color: #64748b !important;
+        color: var(--ink-500) !important;
+        font-weight: 750 !important;
+        letter-spacing: .10em !important;
+        text-transform: uppercase !important;
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #23c483;
-        box-shadow: 0 0 0 2px rgba(35, 196, 131, 0.15);
-        background: #ffffff !important;
+        border-color: rgba(18,59,110,.55);
+        box-shadow: 0 0 0 4px rgba(18,59,110,.14);
     }
     
     .stSelectbox > div > div {
-        border-radius: 6px;
-        font-size: 13px;
-        background: #f1f5f9 !important;
-        border: 1px solid #cbd5e1 !important;
+        border-radius: 12px;
+        font-size: 14px;
+        background: var(--surface-2) !important;
+        border: 1px solid rgba(15,23,42,.14) !important;
     }
     
     .stSelectbox label {
         font-size: 12px !important;
-        color: #64748b !important;
+        color: var(--ink-500) !important;
+        font-weight: 750 !important;
+        letter-spacing: .10em !important;
+        text-transform: uppercase !important;
     }
     
     .stTextArea > div > div > textarea {
-        border-radius: 6px;
-        border: 1px solid #cbd5e1;
-        font-family: 'Inter', sans-serif;
-        font-size: 13px;
-        background: #f1f5f9 !important;
-        color: #64748b !important;
+        width: 100%;
+        background: var(--surface-2);
+        border: 1px solid rgba(15,23,42,.14);
+        border-radius: 12px;
+        padding: 12px 12px;
+        font-size: 14px;
+        font-family: var(--font);
+        color: var(--ink-900);
+        outline: none;
     }
     
     .stTextArea label {
         font-size: 12px !important;
-        color: #64748b !important;
+        color: var(--ink-500) !important;
+        font-weight: 750 !important;
+        letter-spacing: .10em !important;
+        text-transform: uppercase !important;
     }
     
     .stTextArea > div > div > textarea:focus {
-        border-color: #23c483;
-        box-shadow: 0 0 0 2px rgba(35, 196, 131, 0.15);
-        background: #ffffff !important;
+        border-color: rgba(18,59,110,.55);
+        box-shadow: 0 0 0 4px rgba(18,59,110,.14);
     }
     
     .stRadio > div {
@@ -1038,48 +1204,49 @@ CUSTOM_CSS = """
     
     .stRadio label {
         padding: 10px 14px !important;
-        font-size: 13px !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 6px !important;
+        font-size: 14px !important;
+        border: 1px solid rgba(15,23,42,.14) !important;
+        border-radius: 12px !important;
         margin-bottom: 6px !important;
-        color: #64748b !important;
-        background: #f1f5f9 !important;
+        color: var(--ink-900) !important;
+        background: var(--surface-2) !important;
     }
     
     .stCheckbox label {
-        font-size: 13px !important;
-        color: #64748b !important;
+        font-size: 14px !important;
+        color: var(--ink-700) !important;
     }
     
     .stCheckbox label span {
-        color: #64748b !important;
+        color: var(--ink-700) !important;
     }
     
     .expired-notice {
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 16px;
+        background: var(--surface-0);
+        border-radius: 22px;
         padding: 36px 28px;
         text-align: center;
         max-width: 380px;
         margin: 60px auto;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-        border: 1px solid #e2e8f0;
+        box-shadow: 0 22px 60px rgba(15,23,42,.18);
+        border: 1px solid var(--border);
     }
     
     .inline-error {
-        color: #dc2626;
+        color: var(--danger-600);
         font-size: 12px;
         margin-top: 4px;
+        font-weight: 650;
     }
     
     .field-hint {
-        color: #64748b;
+        color: var(--ink-500);
         font-size: 12px;
         margin-top: 4px;
     }
     
     p {
-        color: #475569 !important;
+        color: var(--ink-700) !important;
     }
 </style>
 """

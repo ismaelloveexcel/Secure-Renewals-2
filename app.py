@@ -1216,17 +1216,17 @@ def render_login():
         [data-testid="stForm"] .stFormSubmitButton > button,
         [data-testid="stForm"] .stFormSubmitButton button,
         button[data-testid="stBaseButton-secondaryFormSubmit"] {
-            font-size: 14px !important;
+            font-size: 13px !important;
             color: #0f172a !important;
-            font-family: 'Aptos', 'Calibri', sans-serif !important;
-            font-weight: 800 !important;
+            font-family: 'Aptos', 'Calibri', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            font-weight: 600 !important;
             cursor: pointer;
             position: relative;
             border: none !important;
             background: none !important;
             background-color: transparent !important;
             text-transform: uppercase !important;
-            letter-spacing: 2px !important;
+            letter-spacing: 1.5px !important;
             padding: 12px 24px !important;
             transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1) !important;
             transition-duration: 400ms !important;

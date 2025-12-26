@@ -1176,7 +1176,6 @@ def render_login():
             <div class="login-card-title">
                 {logo_html}
                 <h1>Medical Insurance<br>Verification</h1>
-                <p class="subtitle">Employee Self-Service Portal</p>
                 <span class="badge">Policy Year {POLICY_YEAR}</span>
             </div>
             """, unsafe_allow_html=True)

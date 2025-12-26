@@ -2759,15 +2759,15 @@ def render_admin_login():
 
 def get_query_params():
     """Get query params with backward compatibility for older Streamlit versions."""
-    try:
+    # Check which API is available
+    if hasattr(st, 'query_params'):
         # Newer Streamlit versions (1.30+)
         return st.query_params
-    except AttributeError:
+    elif hasattr(st, 'experimental_get_query_params'):
         # Older Streamlit versions
-        try:
-            return st.experimental_get_query_params()
-        except:
-            return {}
+        return st.experimental_get_query_params()
+    else:
+        return {}
 
 def main():
     query_params = get_query_params()

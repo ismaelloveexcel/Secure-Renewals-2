@@ -45,7 +45,7 @@ CUSTOM_CSS = """
     .stDeployButton {display: none;}
     
     .stApp {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Aptos', 'Calibri', sans-serif;
         background: #f5f7fb;
     }
     
@@ -1038,14 +1038,16 @@ def render_login():
         .login-card-title h1 {
             color: #0f172a;
             font-size: 22px;
-            font-weight: 600;
+            font-weight: 700;
+            font-family: 'Aptos', 'Calibri', sans-serif;
             margin: 0 0 4px 0;
             line-height: 1.3;
             text-shadow: 0 1px 2px rgba(255,255,255,0.2);
         }
         .login-card-title .subtitle {
-            color: #334155;
+            color: #0f172a;
             font-size: 13px;
+            font-family: 'Aptos', 'Calibri', sans-serif;
             margin: 0;
         }
         .login-card-title .badge {
@@ -1056,26 +1058,38 @@ def render_login():
             border-radius: 12px;
             font-size: 11px;
             font-weight: 700;
+            font-family: 'Aptos', 'Calibri', sans-serif;
             margin-top: 10px;
             backdrop-filter: blur(10px);
         }
         .login-page-wrapper .stTextInput label {
             color: #0f172a !important;
+            font-family: 'Aptos', 'Calibri', sans-serif !important;
+            font-weight: 400 !important;
         }
         .login-page-wrapper .stTextInput > div > div > input {
-            background: rgba(255,255,255,0.95) !important;
-            border: 1px solid rgba(255,255,255,0.6) !important;
+            background: #e8eef5 !important;
+            border: 1px solid #d1d9e6 !important;
             color: #0f172a !important;
+            font-family: 'Aptos', 'Calibri', sans-serif !important;
         }
         .login-page-wrapper .stFormSubmitButton > button {
             background: rgba(255,255,255,0.95) !important;
             color: #1e40af !important;
             border: none !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
+            font-family: 'Aptos', 'Calibri', sans-serif !important;
         }
         .login-page-wrapper .stFormSubmitButton > button:hover {
             background: #ffffff !important;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        }
+        .login-help {
+            font-family: 'Aptos', 'Calibri', sans-serif !important;
+            color: #0f172a !important;
+        }
+        .login-help a {
+            color: #25D366 !important;
         }
         .login-page-wrapper {
             display: flex;

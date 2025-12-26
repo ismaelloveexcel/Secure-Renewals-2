@@ -1002,28 +1002,123 @@ def render_login():
     st.markdown("""
     <style>
         [data-testid="stAppViewBlockContainer"] {
-            padding-top: 1rem !important;
-            padding-bottom: 1rem !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            background: #b4b4b4 !important;
+            min-height: 100vh;
+        }
+        [data-testid="stMainBlockContainer"] {
+            background: #b4b4b4 !important;
+        }
+        .stApp {
+            background: #b4b4b4 !important;
         }
         [data-testid="stVerticalBlock"] {
             gap: 0.5rem !important;
         }
+        .login-glass-card {
+            background: rgba(255,255,255,0.92);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 340px;
+            margin: 0 auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .login-glass-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+            opacity: 0.045;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+        }
+        .login-glass-card .stTextInput > div > div > input {
+            background: #f1f5f9 !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px;
+            color: #0f172a !important;
+            font-size: 14px;
+        }
+        .login-glass-card .stTextInput label {
+            color: #475569 !important;
+            font-size: 13px !important;
+        }
+        .login-card-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-card-header h2 {
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+        }
+        .login-card-header p {
+            color: #475569;
+            font-size: 13px;
+            margin: 0;
+        }
+        .login-page-header {
+            text-align: center;
+            padding: 40px 20px 30px;
+        }
+        .login-page-header h1 {
+            color: #0f172a;
+            font-size: 26px;
+            font-weight: 600;
+            margin: 0 0 6px 0;
+            line-height: 1.2;
+        }
+        .login-page-header .subtitle {
+            color: #475569;
+            font-size: 14px;
+            margin: 0;
+        }
+        .login-page-header .badge {
+            display: inline-block;
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            padding: 6px 16px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        .login-help {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #64748b;
+        }
+        .login-help a {
+            color: #25D366;
+            text-decoration: none;
+            font-weight: 600;
+        }
     </style>
     """, unsafe_allow_html=True)
     
-    logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" style="width:56px;height:56px;display:block;margin:0 auto 10px;">' if LOGO_BASE64 else ''
+    logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" style="width:56px;height:56px;display:block;margin:0 auto 12px;border-radius:10px;">' if LOGO_BASE64 else ''
     
     st.markdown(f"""
-    <div style="text-align:center; padding-top:3vh;">
+    <div class="login-page-header">
         {logo_html}
-        <h1 style="color:#1E1B5C; font-size:24px; font-weight:600; margin:0 0 4px 0; line-height:1.2;">Medical Insurance<br>Verification</h1>
-        <p style="color:#888; font-size:13px; margin:0;">Employee Self-Service Portal</p>
-        <span style="display:inline-block; background:rgba(30,27,92,0.08); color:#1E1B5C; padding:5px 14px; border-radius:12px; font-size:12px; font-weight:600; margin-top:10px;">Policy Year {POLICY_YEAR}</span>
+        <h1>Medical Insurance<br>Verification</h1>
+        <p class="subtitle">Employee Self-Service Portal</p>
+        <span class="badge">Policy Year {POLICY_YEAR}</span>
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([1, 1.5, 1])
+    col1, col2, col3 = st.columns([1, 1.8, 1])
     with col2:
+        st.markdown('<div class="login-glass-card">', unsafe_allow_html=True)
         with st.form("login_form"):
             staff_number = st.text_input(
                 "Staff Number",
@@ -1055,10 +1150,11 @@ def render_login():
                         st.rerun()
                     else:
                         st.error(error_msg)
+        st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("""
-        <div style="text-align:center; margin-top:12px; font-size:13px; color:#aaa;">
-            Need help? <a href="https://wa.me/971564966546" target="_blank" style="color:#25D366; text-decoration:none; font-weight:600;">WhatsApp HR</a>
+        <div class="login-help">
+            Need help? <a href="https://wa.me/971564966546" target="_blank">WhatsApp HR</a>
         </div>
         """, unsafe_allow_html=True)
 

@@ -106,13 +106,46 @@ CUSTOM_CSS = """
     /* =========================
        3) PAGE CONTAINER
        ========================= */
-    .page-shell {
+    .page, .page-shell {
         max-width: 1160px;
         margin: 0 auto;
         padding: 28px 20px 64px;
         display: flex;
         flex-direction: column;
         gap: 16px;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 16px;
+    }
+    
+    .page-title {
+        color: #0B1F3B !important;
+        font-size: 26px !important;
+        font-weight: 750 !important;
+        margin: 0 0 6px 0;
+        line-height: 1.15;
+    }
+    
+    .page-subtitle {
+        color: #64748B !important;
+        font-size: 14px !important;
+        margin: 0;
+    }
+    
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        background: rgba(33,193,122,.14);
+        color: #0E5F3D;
+        border: 1px solid rgba(33,193,122,.22);
+        font-size: 12px;
+        font-weight: 650;
+        margin-top: 10px;
     }
 
     .section-grid {
@@ -128,6 +161,67 @@ CUSTOM_CSS = """
 
     .section-divider {
         margin: 6px 0 4px;
+    }
+    
+    /* Stats grid */
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    
+    .stat {
+        background: rgba(248,250,252,.90);
+        border: 1px solid rgba(15,23,42,.08);
+        border-radius: 14px;
+        padding: 14px 14px;
+    }
+    
+    .stat .k {
+        font-size: 11px;
+        letter-spacing: .10em;
+        text-transform: uppercase;
+        color: #64748B;
+        font-weight: 750;
+    }
+    
+    .stat .v {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0F172A;
+        margin-top: 6px;
+    }
+    
+    /* Key-value blocks */
+    .k {
+        font-size: 11px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: #64748B;
+        font-weight: 700;
+    }
+    
+    .v {
+        font-weight: 600;
+        color: #334155;
+    }
+    
+    .missing {
+        color: #F59E0B !important;
+        font-style: italic;
+    }
+    
+    /* Badge variants */
+    .badge--principal {
+        background: rgba(33,193,122,.14);
+        color: #0E5F3D;
+        border: 1px solid rgba(33,193,122,.22);
+    }
+    
+    .badge--spouse {
+        background: rgba(18,59,110,.10);
+        color: #123B6E;
+        border: 1px solid rgba(18,59,110,.18);
     }
     
     /* =========================
@@ -150,11 +244,11 @@ CUSTOM_CSS = """
     
     .login-card {
         width: min(420px, 100%);
-        background: var(--surface-0);
-        border: 1px solid var(--border);
-        border-radius: 22px;
-        box-shadow: 0 22px 60px rgba(15,23,42,.18);
-        padding: 26px 24px;
+        background: rgba(255,255,255,.92) !important;
+        border: 1px solid rgba(15,23,42,.10) !important;
+        border-radius: 22px !important;
+        box-shadow: 0 22px 60px rgba(15,23,42,.18) !important;
+        padding: 26px 24px !important;
         text-align: center;
         backdrop-filter: blur(12px);
     }
@@ -170,17 +264,17 @@ CUSTOM_CSS = """
     }
     
     .login-card h1 {
-        color: var(--brand-900);
-        font-size: 22px;
-        font-weight: 750;
+        color: #0B1F3B !important;
+        font-size: 22px !important;
+        font-weight: 750 !important;
         margin: 10px 0 6px 0;
         line-height: 1.15;
         letter-spacing: -0.02em;
     }
     
     .login-card .subtitle {
-        color: var(--ink-500);
-        font-size: 14px;
+        color: #64748B !important;
+        font-size: 14px !important;
         margin: 0;
     }
     
@@ -367,7 +461,7 @@ CUSTOM_CSS = """
     /* =========================
        6) CARDS + STATS
        ========================= */
-    .glass-card, .summary-card, .member-card, .confirmation-card, .edit-form-card {
+    .card, .glass-card, .summary-card, .member-card, .confirmation-card, .edit-form-card {
         background: rgba(255,255,255,.92) !important;
         border: 1px solid rgba(15,23,42,.10) !important;
         border-radius: 16px !important;
@@ -377,14 +471,14 @@ CUSTOM_CSS = """
         margin-bottom: 14px !important;
     }
     
-    .glass-card:hover, .summary-card:hover, .member-card:hover {
+    .card:hover, .glass-card:hover, .summary-card:hover, .member-card:hover {
         box-shadow: 0 12px 30px rgba(15,23,42,.12) !important;
         border-color: rgba(15,23,42,.16) !important;
         transform: translateY(-1px);
         transition: 160ms ease;
     }
     
-    .glass-card--accent {
+    .card--accent, .glass-card--accent {
         border-top: 3px solid rgba(18,59,110,.65) !important;
     }
 
@@ -1134,23 +1228,27 @@ CUSTOM_CSS = """
     
     .stTextInput > div > div > input {
         width: 100%;
-        background: var(--surface-2);
-        border: 1px solid rgba(15,23,42,.14);
-        border-radius: 12px;
-        padding: 12px 12px;
-        font-size: 14px;
-        font-family: var(--font);
-        color: var(--ink-900);
+        background: rgba(248,250,252,.90) !important;
+        border: 1px solid rgba(15,23,42,.14) !important;
+        border-radius: 12px !important;
+        padding: 12px 12px !important;
+        font-size: 14px !important;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+        color: #0F172A !important;
         outline: none;
     }
     
     .stTextInput label {
         font-size: 12px !important;
         margin-bottom: 4px !important;
-        color: var(--ink-500) !important;
+        color: #64748B !important;
         font-weight: 750 !important;
         letter-spacing: .10em !important;
         text-transform: uppercase !important;
+    }
+    
+    .stTextInput label p {
+        color: #64748B !important;
     }
     
     .stTextInput > div > div > input:focus {

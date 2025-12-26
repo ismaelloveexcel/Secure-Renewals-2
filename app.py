@@ -610,109 +610,112 @@ CUSTOM_CSS = """
     }
     
     .login-logo {
-        width: 36px;
-        height: 36px;
-        background: #1E1B5C;
-        border-radius: 10px;
-        margin: 0 auto 12px;
+        width: 40px;
+        height: 40px;
+        background: #2563eb;
+        border-radius: 12px;
+        margin: 0 auto 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 20px;
     }
     
     .login-logo-img {
-        width: 52px;
-        height: 52px;
-        border-radius: 8px;
-        margin: 0 auto 10px;
+        width: 56px;
+        height: 56px;
+        border-radius: 10px;
+        margin: 0 auto 12px;
         display: block;
         object-fit: contain;
     }
     
     .login-title {
-        color: #e6ebff;
-        font-size: 18px;
+        color: #0f172a;
+        font-size: 20px;
         font-weight: 600;
-        margin-bottom: 2px;
+        margin-bottom: 4px;
         line-height: 1.2;
     }
     
     @media (max-width: 480px) {
         .login-logo-img {
-            width: 56px;
-            height: 56px;
+            width: 60px;
+            height: 60px;
         }
         .login-title {
-            font-size: 20px;
+            font-size: 22px;
         }
     }
     
     .login-subtitle {
-        color: #b5bcd9;
-        font-size: 11px;
+        color: #64748b;
+        font-size: 13px;
         font-weight: 400;
-        margin-top: 2px;
+        margin-top: 4px;
     }
     
     .login-badge {
         display: inline-block;
-        background: rgba(56, 182, 255, 0.15);
-        color: #38b6ff;
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 10px;
+        background: rgba(37, 99, 235, 0.1);
+        color: #2563eb;
+        padding: 5px 14px;
+        border-radius: 14px;
+        font-size: 11px;
         font-weight: 600;
-        margin-top: 6px;
+        margin-top: 8px;
     }
     
     .stButton > button {
-        background: #1E1B5C;
+        background: #2563eb;
         color: white;
         border: none;
-        padding: 10px 22px;
+        padding: 12px 24px;
         font-weight: 600;
-        font-size: 12px;
-        letter-spacing: 0.8px;
+        font-size: 13px;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
-        border-radius: 6px;
+        border-radius: 10px;
         width: 100%;
         transition: all 0.2s ease;
         font-family: 'Poppins', sans-serif;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
     }
     
     .stButton > button:hover {
-        background: #2d2a6e;
+        background: #1d4ed8;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
     }
     
     .signout-btn button {
         background: transparent !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
-        color: #b5bcd9 !important;
-        padding: 6px 14px !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        color: white !important;
+        padding: 8px 16px !important;
         font-size: 11px !important;
         letter-spacing: 0.5px !important;
+        box-shadow: none !important;
     }
     
     .signout-btn button:hover {
-        background: rgba(255,255,255,0.1) !important;
+        background: rgba(255,255,255,0.15) !important;
     }
     
     .section-label {
-        color: #b5bcd9;
-        font-size: 11px;
+        color: #64748b;
+        font-size: 12px;
         text-transform: uppercase;
         letter-spacing: 0.8px;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
         font-weight: 600;
     }
     
     div[data-testid="stForm"] {
-        background: #1a1a2e;
-        padding: 14px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.85);
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+        border: 1px solid #e2e8f0;
     }
     
     div[data-testid="stForm"] [data-testid="stVerticalBlock"] {
@@ -720,102 +723,105 @@ CUSTOM_CSS = """
     }
     
     .stTextInput > div > div > input {
-        border-radius: 6px;
-        border: 1px solid rgba(255,255,255,0.15);
-        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 12px 14px;
         font-family: 'Poppins', sans-serif;
-        font-size: 13px;
-        background: #16213e;
-        color: #e6ebff;
+        font-size: 14px;
+        background: #f8fafc !important;
+        color: #0f172a !important;
     }
     
     .stTextInput label {
-        font-size: 12px !important;
-        margin-bottom: 4px !important;
-        color: #b5bcd9 !important;
+        font-size: 13px !important;
+        margin-bottom: 6px !important;
+        color: #475569 !important;
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #38b6ff;
-        box-shadow: 0 0 0 2px rgba(56, 182, 255, 0.15);
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
     
     .stSelectbox > div > div {
-        border-radius: 6px;
-        font-size: 13px;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
     }
     
     .stSelectbox label {
-        font-size: 12px !important;
-        color: #b5bcd9 !important;
+        font-size: 13px !important;
+        color: #475569 !important;
     }
     
     .stTextArea > div > div > textarea {
-        border-radius: 6px;
-        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
         font-family: 'Poppins', sans-serif;
-        font-size: 12px;
-        background: #16213e;
-        color: #e6ebff;
+        font-size: 14px;
+        background: #f8fafc !important;
+        color: #0f172a !important;
     }
     
     .stTextArea label {
-        font-size: 12px !important;
-        color: #b5bcd9 !important;
+        font-size: 13px !important;
+        color: #475569 !important;
     }
     
     .stTextArea > div > div > textarea:focus {
-        border-color: #38b6ff;
-        box-shadow: 0 0 0 2px rgba(56, 182, 255, 0.15);
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
     
     .stRadio > div {
-        gap: 6px;
+        gap: 8px;
     }
     
     .stRadio label {
-        padding: 10px 14px !important;
-        font-size: 13px !important;
-        border: 1px solid rgba(255,255,255,0.15) !important;
-        border-radius: 6px !important;
-        margin-bottom: 6px !important;
-        color: #e6ebff !important;
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        margin-bottom: 8px !important;
+        color: #0f172a !important;
+        background: #f8fafc !important;
     }
     
     .stCheckbox label {
-        font-size: 13px !important;
-        color: #e6ebff !important;
+        font-size: 14px !important;
+        color: #0f172a !important;
     }
     
     .stCheckbox label span {
-        color: #e6ebff !important;
+        color: #0f172a !important;
     }
     
     .expired-notice {
-        background: #1a1a2e;
-        border-radius: 10px;
-        padding: 32px 24px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 16px;
+        padding: 36px 28px;
         text-align: center;
-        max-width: 360px;
+        max-width: 380px;
         margin: 60px auto;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        border: 1px solid #e2e8f0;
     }
     
     .inline-error {
-        color: #f87171;
-        font-size: 11px;
-        margin-top: 3px;
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 4px;
     }
     
     .field-hint {
-        color: #888;
-        font-size: 11px;
-        margin-top: 3px;
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 4px;
     }
     
     p {
-        color: #b5bcd9 !important;
+        color: #475569 !important;
     }
 </style>
 """

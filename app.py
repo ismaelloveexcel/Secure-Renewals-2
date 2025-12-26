@@ -1065,9 +1065,12 @@ def render_login():
         .login-page-wrapper .stTextInput label {
             color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
-            font-weight: 500 !important;
+            font-weight: 600 !important;
             font-size: 13px !important;
             margin-bottom: 6px !important;
+        }
+        .login-page-wrapper .stTextInput label p {
+            color: #0f172a !important;
         }
         .login-page-wrapper .stTextInput > div > div > input {
             background: #f0f4f8 !important;

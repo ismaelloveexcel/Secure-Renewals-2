@@ -826,16 +826,19 @@ CUSTOM_CSS = """
     }
     
     .signout-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         text-align: center;
         margin-top: 30px;
         margin-bottom: 20px;
+        width: 100%;
     }
     
-    .signout-container {
+    .signout-container .stButton {
         display: flex;
         justify-content: center;
-        margin-top: 30px;
-        margin-bottom: 20px;
+        width: 100%;
     }
     
     .signout-container .stButton > button {

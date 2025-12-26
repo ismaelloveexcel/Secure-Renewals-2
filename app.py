@@ -1001,14 +1001,9 @@ def render_login():
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
     st.markdown("""
     <style>
-        @keyframes float-rotate {
-            0% { transform: perspective(1000px) rotateY(0deg) rotateX(5deg) translateY(0); }
-            50% { transform: perspective(1000px) rotateY(360deg) rotateX(-5deg) translateY(-10px); }
-            100% { transform: perspective(1000px) rotateY(0deg) rotateX(5deg) translateY(0); }
-        }
-        @keyframes pulse-scale {
-            0%, 100% { transform: perspective(1000px) scale(1) rotateY(0deg); }
-            50% { transform: perspective(1000px) scale(1.05) rotateY(180deg); }
+        @keyframes gentle-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
         }
         [data-testid="stAppViewBlockContainer"] {
             padding-top: 0 !important;
@@ -1198,7 +1193,7 @@ def render_login():
     </style>
     """, unsafe_allow_html=True)
     
-    logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" style="width:100px;height:100px;display:block;margin:0 auto 16px;border-radius:12px;animation:float-rotate 4s ease-in-out infinite;filter:drop-shadow(0 4px 12px rgba(56, 189, 248, 0.3));">' if LOGO_BASE64 else ''
+    logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" style="width:100px;height:100px;display:block;margin:0 auto 16px;border-radius:12px;animation:gentle-float 3s ease-in-out infinite;filter:drop-shadow(0 2px 8px rgba(56, 189, 248, 0.2));">' if LOGO_BASE64 else ''
     
     st.markdown('<div class="login-page-wrapper">', unsafe_allow_html=True)
     

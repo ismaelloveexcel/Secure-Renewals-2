@@ -1218,7 +1218,7 @@ def render_login():
         button[data-testid="stBaseButton-secondaryFormSubmit"] {
             font-size: 13px !important;
             color: #0f172a !important;
-            font-family: 'Aptos', 'Calibri', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            font-family: 'Aptos', 'Calibri', sans-serif !important;
             font-weight: 600 !important;
             cursor: pointer;
             position: relative;

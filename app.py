@@ -1014,6 +1014,72 @@ def render_login():
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-8px); }
         }
+        @keyframes gentle-pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(35, 196, 131, 0)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(35, 196, 131, 0.3)); }
+        }
+        .app-icon {
+            transition: all 0.3s ease;
+        }
+        .app-icon:hover {
+            animation: gentle-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(90deg) translate(3em) rotate(-90deg); }
+            100% { transform: translate(-50%, -50%) rotate(450deg) translate(3em) rotate(-450deg); }
+        }
+        .loader {
+            position: relative;
+            width: 6em;
+            height: 6em;
+            margin: 0 auto;
+        }
+        .loader .track, .loader .inner-track {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: inset -0.1em -0.1em 0.2em #d1d1d1, inset 0.1em 0.1em 0.2em #ffffff;
+        }
+        .loader .inner-track {
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            border: 1.2em solid #f0f0f0;
+        }
+        .loader .orb {
+            position: absolute;
+            width: 1em;
+            height: 1em;
+            top: 50%;
+            left: 50%;
+            background-color: #c0cfda;
+            border-radius: 50%;
+            animation: spin 1.5s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            background: radial-gradient(circle at 30% 30%, #ffffff, #23c483);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), inset 0 -2px 4px rgba(255, 255, 255, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .loading-text {
+            margin-top: 20px;
+            font-family: 'Aptos', 'Calibri', sans-serif;
+            font-size: 14px;
+            color: #64748b;
+            letter-spacing: 1px;
+        }
         .stApp, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"] {
             background: linear-gradient(145deg, #a8b5c4 0%, #9ca8b8 50%, #8e9bab 100%) !important;
         }
@@ -1061,12 +1127,11 @@ def render_login():
         }
         .login-card-title h1 {
             color: #0f172a;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             font-family: 'Aptos', 'Calibri', sans-serif;
-            margin: 0 0 4px 0;
-            line-height: 1.3;
-            text-shadow: 0 1px 2px rgba(255,255,255,0.2);
+            margin: 0 0 6px 0;
+            line-height: 1.2;
         }
         .login-card-title .subtitle {
             color: #0f172a;
@@ -1113,12 +1178,29 @@ def render_login():
         }
         [data-testid="stForm"] .stTextInput > div > div > input:focus {
             background-color: #ffffff !important;
-            transform: scale(1.02) !important;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15),
-                       inset 0 1px 2px rgba(0,0,0,0.05) !important;
+            transform: scale(1.01) !important;
+            box-shadow: 0 0 0 2px rgba(35, 196, 131, 0.2),
+                       0 4px 12px rgba(35, 196, 131, 0.1) !important;
         }
         [data-testid="stForm"] .stTextInput > div > div > input::placeholder {
-            color: #94a3b8 !important;
+            color: #6b7280 !important;
+        }
+        [data-testid="stForm"] [data-testid="stNotification"] {
+            background: rgba(239, 68, 68, 0.08) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important;
+            border-radius: 12px !important;
+            color: #dc2626 !important;
+            font-family: 'Aptos', 'Calibri', sans-serif !important;
+        }
+        [data-testid="stForm"] .stAlert {
+            background: rgba(239, 68, 68, 0.08) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important;
+            border-radius: 12px !important;
+        }
+        [data-testid="stForm"] .stAlert p {
+            color: #dc2626 !important;
+            font-family: 'Aptos', 'Calibri', sans-serif !important;
+            font-size: 13px !important;
         }
         [data-testid="stForm"] .stFormSubmitButton {
             display: block;
@@ -1261,8 +1343,8 @@ def render_login():
     </style>
     """, unsafe_allow_html=True)
     
-    logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" style="width:140px;height:auto;display:block;margin:0 auto 12px;">' if LOGO_BASE64 else ''
-    app_icon_html = f'<img src="data:image/gif;base64,{APP_ICON_BASE64}" alt="Insurance" style="width:60px;height:60px;display:block;margin:0 auto 10px;border-radius:10px;">' if APP_ICON_BASE64 else ''
+    logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" style="width:130px;height:auto;display:block;margin:0 auto 10px;">' if LOGO_BASE64 else ''
+    app_icon_html = f'<img src="data:image/gif;base64,{APP_ICON_BASE64}" alt="Insurance" class="app-icon" style="width:50px;height:50px;display:block;margin:0 auto 8px;border-radius:8px;cursor:pointer;">' if APP_ICON_BASE64 else ''
     
     st.markdown('<div class="login-page-wrapper">', unsafe_allow_html=True)
     
@@ -1292,10 +1374,10 @@ def render_login():
             submitted = st.form_submit_button("Sign In", use_container_width=True)
             
             st.markdown("""
-            <div style="text-align:center;margin-top:20px;font-family:'Aptos','Calibri',sans-serif;">
-                <div style="color:#64748b;font-size:12px;font-weight:500;margin-bottom:8px;">Need Help?</div>
-                <a href="https://wa.me/971564966546" target="_blank" style="display:inline-block;color:#23c483;text-decoration:none;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#23c483" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <div style="text-align:center;margin-top:18px;font-family:'Aptos','Calibri',sans-serif;">
+                <div style="color:#94a3b8;font-size:11px;font-weight:400;margin-bottom:6px;letter-spacing:0.5px;">Need Help?</div>
+                <a href="https://wa.me/971564966546" target="_blank" style="display:inline-block;color:#23c483;text-decoration:none;transition:transform 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#23c483" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                     </svg>
                 </a>
@@ -1308,8 +1390,22 @@ def render_login():
                 elif not dob_input:
                     st.error("Please enter your Date of Birth (DD/MM/YYYY).")
                 else:
+                    loading_placeholder = st.empty()
+                    loading_placeholder.markdown("""
+                    <div class="loading-overlay">
+                        <div class="loader">
+                            <div class="track"></div>
+                            <div class="inner-track"></div>
+                            <div class="orb"></div>
+                        </div>
+                        <div class="loading-text">Verifying...</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
                     df = load_data()
                     is_valid, error_msg = verify_credentials(df, staff_number.upper(), dob_input)
+                    
+                    loading_placeholder.empty()
                     
                     if is_valid:
                         st.session_state['authenticated'] = True

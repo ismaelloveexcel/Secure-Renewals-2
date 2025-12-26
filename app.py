@@ -1005,20 +1005,35 @@ def render_login():
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-8px); }
         }
-        [data-testid="stAppViewBlockContainer"] {
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"] {
             background: linear-gradient(145deg, #a8b5c4 0%, #9ca8b8 50%, #8e9bab 100%) !important;
-            min-height: 100vh;
+        }
+        [data-testid="stAppViewContainer"] > .main {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            min-height: 100vh !important;
+            padding: 0 !important;
+        }
+        [data-testid="stAppViewBlockContainer"] {
+            padding: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
         }
         [data-testid="stMainBlockContainer"] {
             background: transparent !important;
-        }
-        .stApp {
-            background: linear-gradient(145deg, #a8b5c4 0%, #9ca8b8 50%, #8e9bab 100%) !important;
+            padding: 0 !important;
         }
         [data-testid="stVerticalBlock"] {
             gap: 0.3rem !important;
+        }
+        [data-testid="column"] {
+            display: flex !important;
+            justify-content: center !important;
         }
         .login-glass-card {
             background: rgba(255,255,255,0.92);
@@ -1077,14 +1092,14 @@ def render_login():
             border: none !important;
             outline: none !important;
             border-radius: 12px !important;
-            padding: 14px 16px !important;
-            height: 48px !important;
+            padding: 12px 16px !important;
             background-color: #e8edf3 !important;
             box-shadow: inset 1px 2px 4px rgba(0,0,0,0.08) !important;
             transition: 300ms ease-in-out !important;
             color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
             font-size: 14px !important;
+            line-height: 20px !important;
         }
         [data-testid="stForm"] .stTextInput > div > div > input:focus {
             background-color: #ffffff !important;
@@ -1168,8 +1183,8 @@ def render_login():
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: calc(100vh - 60px);
-            padding: 10px 20px;
+            padding: 20px 16px;
+            width: 100%;
         }
         [data-testid="stForm"] {
             background: white !important;

@@ -1335,64 +1335,6 @@ CUSTOM_CSS = """
 </style>
 """
 
-SESSION_TIMEOUT_JS = f"""
-<script>
-    var sessionTimeout = {SESSION_TIMEOUT_MINUTES * 60 * 1000};
-    var warningTime = {(SESSION_TIMEOUT_MINUTES - 2) * 60 * 1000};
-    var redirectDelay = 2000; // Delay before redirecting to login after session expires
-    var sessionTimer;
-    var warningTimer;
-    
-    // Safely insert element at the top of document body
-    function insertAtBodyTop(element) {{
-        if (document.body.firstChild) {{
-            document.body.insertBefore(element, document.body.firstChild);
-        }} else {{
-            document.body.appendChild(element);
-        }}
-    }}
-    
-    // Create warning banner element
-    function createWarningBanner() {{
-        var banner = document.createElement('div');
-        banner.id = 'session-warning-banner';
-        banner.innerHTML = '⚠️ Your session will expire in 2 minutes due to inactivity. Please save your work.';
-        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff9800;color:#000;padding:12px 20px;text-align:center;font-weight:600;font-size:14px;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
-        return banner;
-    }}
-    
-    function removeWarningBanner() {{
-        var banner = document.getElementById('session-warning-banner');
-        if (banner) banner.remove();
-    }}
-    
-    function resetTimers() {{
-        clearTimeout(sessionTimer);
-        clearTimeout(warningTimer);
-        removeWarningBanner();
-        
-        warningTimer = setTimeout(function() {{
-            insertAtBodyTop(createWarningBanner());
-        }}, warningTime);
-        
-        sessionTimer = setTimeout(function() {{
-            removeWarningBanner();
-            var expiredBanner = document.createElement('div');
-            expiredBanner.innerHTML = '🔒 Session expired due to inactivity. Redirecting to login...';
-            expiredBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#f44336;color:#fff;padding:14px 20px;text-align:center;font-weight:600;font-size:14px;z-index:9999;';
-            insertAtBodyTop(expiredBanner);
-            setTimeout(function() {{ window.location.reload(); }}, redirectDelay);
-        }}, sessionTimeout);
-    }}
-    
-    document.addEventListener('click', resetTimers);
-    document.addEventListener('keypress', resetTimers);
-    document.addEventListener('scroll', resetTimers);
-    document.addEventListener('mousemove', resetTimers);
-    
-    resetTimers();
-</script>
-"""
 
 DATA_FILE = "attached_assets/Medical_Insurance_Data.csv"
 JOB_DATA_FILE = "attached_assets/job_data.csv"
@@ -2145,14 +2087,10 @@ def render_login():
                         st.error(error_msg)
         
         st.markdown("""
-        <div style="text-align:center;margin-top:16px;font-family:'Inter',sans-serif;">
-            <div style="color:#94a3b8;font-size:11px;font-weight:400;margin-bottom:10px;letter-spacing:0.5px;">— or login with —</div>
-            <script authed="location.reload()" src="https://auth.util.repl.co/script.js"></script>
-        </div>
         <div style="text-align:center;margin-top:18px;font-family:'Inter',sans-serif;">
             <div style="color:#94a3b8;font-size:11px;font-weight:400;margin-bottom:6px;letter-spacing:0.5px;">Need Help?</div>
             <a href="https://wa.me/971564966546" target="_blank" style="display:inline-block;color:#23c483;text-decoration:none;transition:transform 0.2s ease;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#23c483" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#23c483" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s ease;">
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                 </svg>
             </a>
@@ -2683,7 +2621,6 @@ def render_confirmation_section(employee_data, staff_number):
 
 def render_dashboard():
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
-    st.markdown(SESSION_TIMEOUT_JS, unsafe_allow_html=True)
     
     staff_number = st.session_state.get('staff_number', '')
     df = load_data()

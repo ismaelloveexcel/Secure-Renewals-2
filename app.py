@@ -1384,33 +1384,54 @@ def render_login():
             color: #94a3b8 !important;
         }
         [data-testid="stForm"] .stFormSubmitButton {
-            display: block;
-            margin-top: 12px !important;
+            display: none !important;
         }
-        [data-testid="stForm"] .stFormSubmitButton > button {
-            padding: 1.3em 3em !important;
-            font-size: 12px !important;
-            text-transform: uppercase !important;
-            letter-spacing: 2.5px !important;
-            font-weight: 500 !important;
-            font-family: 'Aptos', 'Calibri', sans-serif !important;
-            color: #fff !important;
-            background-color: #25D366 !important;
-            border: none !important;
-            border-radius: 45px !important;
-            box-shadow: 0px 8px 15px rgba(37, 211, 102, 0.3) !important;
-            transition: all 0.3s ease 0s !important;
+        .Btn {
+            padding: 1.3em 3em;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            font-weight: 500;
+            font-family: 'Aptos', 'Calibri', sans-serif;
+            color: #fff;
+            background-color: #25D366;
+            border: none;
+            border-radius: 45px;
+            box-shadow: 0px 8px 15px rgba(37, 211, 102, 0.3);
+            transition: all 0.3s ease 0s;
             cursor: pointer;
-            outline: none !important;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
         }
-        [data-testid="stForm"] .stFormSubmitButton > button:hover {
-            background-color: #1ea954 !important;
-            box-shadow: 0px 15px 20px rgba(37, 211, 102, 0.4) !important;
-            color: #fff !important;
-            transform: translateY(-7px) !important;
+        .Btn:hover {
+            background-color: #1ea954;
+            box-shadow: 0px 15px 20px rgba(37, 211, 102, 0.4);
+            transform: translateY(-7px);
         }
-        [data-testid="stForm"] .stFormSubmitButton > button:active {
-            transform: translateY(-1px) !important;
+        .Btn:active {
+            transform: translateY(-1px);
+        }
+        .Btn .sign {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .Btn .whatsappSvg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+        }
+        .Btn .text {
+            display: flex;
+            align-items: center;
+        }
+        .whatsapp-button-container {
+            display: block;
+            margin-top: 12px;
         }
         .login-help {
             font-family: 'Aptos', 'Calibri', sans-serif !important;
@@ -1584,7 +1605,20 @@ def render_login():
                 key="dob_input"
             )
             
-            submitted = st.form_submit_button("Sign In", use_container_width=True)
+            st.markdown("""
+            <div class="whatsapp-button-container">
+                <button class="Btn" type="submit">
+                    <div class="sign">
+                        <svg class="socialSvg whatsappSvg" viewBox="0 0 16 16">
+                            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"></path>
+                        </svg>
+                    </div>
+                    <div class="text">Sign In</div>
+                </button>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            submitted = st.form_submit_button("", use_container_width=False, label="")
             
             st.markdown("""
             <div class="login-help" style="text-align:center;margin-top:16px;font-size:13px;color:#0f172a;font-family:'Aptos','Calibri',sans-serif;">

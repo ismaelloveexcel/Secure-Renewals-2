@@ -25,7 +25,6 @@ if not os.environ.get('DATABASE_URL'):
 
 from models import init_db, get_db, AuditTrail, ChangeRequest
 
-@st.cache_resource
 def initialize_database():
     try:
         init_db()

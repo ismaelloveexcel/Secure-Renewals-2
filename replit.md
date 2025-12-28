@@ -1,11 +1,17 @@
-# Medical Insurance Renewal - Employee Verification Portal
+# HR Self-Service Portal
 
 ## Overview
-A secure employee self-service portal for medical insurance renewal verification. Employees authenticate with Staff Number + Date of Birth to review their insurance details and either confirm accuracy OR submit correction requests.
+A comprehensive HR self-service portal for employees. Currently features medical insurance renewal verification with plans for additional HR services.
+
+### Available Apps
+1. **Medical Insurance Verification** - Employees authenticate with Staff Number + Date of Birth to review their DAMAN insurance details and either confirm accuracy OR submit correction requests.
+2. **Leave Management** - Coming Soon
+3. **Documents** - Coming Soon  
+4. **Payslips** - Coming Soon
 
 ## Current State
 - **Status**: Complete and functional
-- **Last Updated**: December 26, 2025
+- **Last Updated**: December 28, 2025
 - **Policy Year**: 2026
 - **Verification Deadline**: January 31, 2026
 - **Insurance Provider**: DAMAN

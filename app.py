@@ -34,8 +34,8 @@ LOGO_BASE64 = get_logo_base64()
 APP_ICON_BASE64 = get_app_icon_base64()
 
 st.set_page_config(
-    page_title="Medical Insurance Verification | Baynunah",
-    page_icon="🏥",
+    page_title="Employee Self-Service Portal | Baynunah",
+    page_icon="🏢",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -261,6 +261,12 @@ CUSTOM_CSS = """
         margin-bottom: 14px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.1);
+        transform: translateY(-2px);
     }
     
     .card-title {
@@ -308,6 +314,13 @@ CUSTOM_CSS = """
         margin-bottom: 14px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .member-card:hover {
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.1);
+        border-color: #cbd5e1;
+        transform: translateX(4px);
     }
     
     .member-header {
@@ -531,8 +544,29 @@ CUSTOM_CSS = """
         text-align: center;
         margin: 14px 0;
         border: 1px solid rgba(16, 185, 129, 0.2);
+        animation: slideIn 0.4s ease-out;
     }
-    
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
     .success-icon {
         width: 48px;
         height: 48px;
@@ -544,6 +578,7 @@ CUSTOM_CSS = """
         margin: 0 auto 12px;
         font-size: 22px;
         color: #10b981;
+        animation: pulse 1s ease-in-out;
     }
     
     .success-title {
@@ -1163,6 +1198,33 @@ def render_login():
             padding: 20px 16px;
             width: 100%;
         }
+        .stButton[data-testid="stBaseButton-secondary"] > button {
+            background: rgba(255,255,255,0.2) !important;
+            border: 1px solid rgba(255,255,255,0.4) !important;
+            color: #0f172a !important;
+            font-weight: 600 !important;
+            backdrop-filter: blur(10px) !important;
+            transition: all 0.3s ease !important;
+        }
+        .stButton[data-testid="stBaseButton-secondary"] > button:hover {
+            background: rgba(255,255,255,0.35) !important;
+            border-color: rgba(255,255,255,0.6) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .login-glass-card {
+            animation: fadeIn 0.5s ease-out;
+        }
         [data-testid="stForm"] {
             background: white !important;
             border: none !important;
@@ -1264,7 +1326,12 @@ def render_login():
     app_icon_html = f'<img src="data:image/gif;base64,{APP_ICON_BASE64}" alt="Insurance" style="width:70px;height:70px;display:block;margin:0 auto 12px;border-radius:12px;">' if APP_ICON_BASE64 else ''
     
     st.markdown('<div class="login-page-wrapper">', unsafe_allow_html=True)
-    
+
+    # Back to home button
+    if st.button("← Back to Home", key="back_to_home"):
+        st.query_params.clear()
+        st.rerun()
+
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         with st.form("login_form"):
@@ -1338,10 +1405,16 @@ def render_header(principal_name, staff_number):
     </div>
     """, unsafe_allow_html=True)
     
-    header_cols = st.columns([5, 1])
+    header_cols = st.columns([4, 1, 1])
     with header_cols[1]:
+        if st.button("🏠 Home", key="header_home", type="secondary"):
+            st.session_state.clear()
+            st.query_params.clear()
+            st.rerun()
+    with header_cols[2]:
         if st.button("Sign Out", key="header_signout", type="secondary"):
             st.session_state.clear()
+            st.query_params.clear()
             st.rerun()
 
 def render_status_strip():
@@ -2066,34 +2139,336 @@ def render_admin_login():
             else:
                 st.error("Invalid credentials")
 
+def render_landing_page():
+    """Render the main landing page with navigation to Recruitment and Insurance portals"""
+    st.markdown("""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        .stApp {
+            font-family: 'Inter', 'Aptos', 'Calibri', sans-serif;
+        }
+
+        [data-testid="stAppViewContainer"] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            min-height: 100vh;
+        }
+
+        .landing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .landing-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 20px;
+        }
+
+        .landing-logo {
+            width: 120px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        .landing-title {
+            color: white;
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .landing-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            font-weight: 400;
+            margin-top: 12px;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .portal-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+        }
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .portal-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .portal-title {
+            color: #1a202c;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .portal-description {
+            color: #4a5568;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .portal-status {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+        }
+
+        .status-coming {
+            background: rgba(251, 191, 36, 0.15);
+            color: #d97706;
+        }
+
+        .insurance-submenu {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .submenu-title {
+            color: #1a202c;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .submenu-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            text-align: left;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .submenu-item:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateX(5px);
+        }
+
+        .submenu-item-title {
+            color: #1a202c;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .submenu-item-desc {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .footer-info {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            margin-top: 60px;
+            padding: 20px;
+        }
+
+        .footer-info a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+        }
+
+        .footer-info a:hover {
+            border-bottom-color: white;
+        }
+
+        /* Landing page button styling */
+        .landing-page-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 14px 28px !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            border-radius: 10px !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+        }
+
+        .landing-page-btn:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5) !important;
+        }
+
+        div[data-testid="stButton"] > button[kind="primary"] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+        }
+
+        /* Responsive design for mobile */
+        @media (max-width: 768px) {
+            .landing-title {
+                font-size: 32px;
+            }
+
+            .landing-subtitle {
+                font-size: 16px;
+            }
+
+            .portal-card {
+                padding: 30px 20px;
+            }
+
+            .portal-icon {
+                font-size: 48px;
+            }
+
+            .portal-title {
+                font-size: 20px;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" class="landing-logo">' if LOGO_BASE64 else ''
+
+    st.markdown(f"""
+    <div class="landing-container">
+        <div class="landing-header">
+            {logo_html}
+            <h1 class="landing-title">Employee Self-Service Portal</h1>
+            <p class="landing-subtitle">Access your HR services and manage your information</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2, gap="large")
+
+    with col1:
+        st.markdown("""
+        <div class="portal-card">
+            <span class="portal-icon">💼</span>
+            <h2 class="portal-title">Recruitment</h2>
+            <p class="portal-description">
+                Apply for open positions, track your application status, and manage your career opportunities.
+            </p>
+            <span class="portal-status status-coming">Coming Soon</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+        <div class="portal-card">
+            <span class="portal-icon">🏥</span>
+            <h2 class="portal-title">Insurance Services</h2>
+            <p class="portal-description">
+                Manage your insurance coverage, verify information, and access medical benefits.
+            </p>
+            <span class="portal-status status-active">Active</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="insurance-submenu">
+            <div class="submenu-title">📋 Available Services</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("🏥 Medical Insurance Verification", key="medical_insurance_btn", use_container_width=True):
+            st.query_params['page'] = 'medical_insurance'
+            st.rerun()
+
+    st.markdown("""
+    <div class="footer-info">
+        Need assistance? Contact HR via <a href="https://wa.me/971564966546" target="_blank">WhatsApp</a> or email
+    </div>
+    """, unsafe_allow_html=True)
+
+
 def main():
     query_params = st.query_params
     is_admin = query_params.get('admin') == 'true'
-    
+    page = query_params.get('page', 'home')
+
     if 'authenticated' not in st.session_state:
         st.session_state['authenticated'] = False
     if 'admin_authenticated' not in st.session_state:
         st.session_state['admin_authenticated'] = False
-    
+
     if st.session_state['authenticated'] or st.session_state['admin_authenticated']:
         if check_session_timeout():
             st.warning("Your session has expired due to inactivity. Please log in again.")
             st.stop()
-    
+
     if is_admin:
         if st.session_state['admin_authenticated']:
             render_admin_portal()
         else:
             render_admin_login()
-    else:
+    elif page == 'medical_insurance':
         if check_link_expired():
             render_expired_page()
             return
-        
+
         if st.session_state['authenticated']:
             render_dashboard()
         else:
             render_login()
+    else:
+        # Show landing page
+        render_landing_page()
 
 if __name__ == "__main__":
     main()

@@ -45,8 +45,15 @@ A secure HR portal landing page for Baynunah Group with admin-restricted access.
     - Life Insurance
     - Medical Insurance
 
+### Employee Portal
+- Login with Employee ID + Date of Birth
+- Validates credentials against Excel data (Renewal_Insurance_1767051010260.xlsx)
+- Pass template design with droplet watermark background
+- Displays insurance details: Staff Number, Principal Number, Member Number, Package, etc.
+- Sign out functionality
+
 ### Coming Soon Pages
-- Employees, Onboarding, External Users sections show placeholder
+- Onboarding, External Users sections show placeholder
 - Back to Home navigation
 
 ## Technical Details

@@ -44,12 +44,22 @@ A secure HR portal landing page for Baynunah Group with admin-restricted access.
   - **Insurance Renewal 2026**
     - Life Insurance
     - Medical Insurance
+  - **Employee Submissions** (Reports)
+    - View all employee data confirmations/updates
+    - Download CSV export for HR processing
 
 ### Employee Portal
 - Login with Employee ID + Date of Birth
 - Validates credentials against Excel data (Renewal_Insurance_1767051010260.xlsx)
 - Pass template design with droplet watermark background
 - Displays insurance details: Staff Number, Principal Number, Member Number, Package, etc.
+- **Data Confirmation Form**: After viewing data, employees can:
+  - Confirm displayed information is correct
+  - Update Passport Number (if renewed)
+  - Update Marital Status
+  - Update Visa File Number
+  - Add additional notes
+- Submissions saved to PostgreSQL database
 - Sign out functionality
 
 ### Coming Soon Pages

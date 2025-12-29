@@ -3,6 +3,9 @@ import streamlit.components.v1 as components
 import os
 import base64
 import pandas as pd
+from datetime import datetime
+from io import StringIO
+import psycopg2
 
 st.set_page_config(
     page_title="HR Portal | Baynunah",
@@ -30,6 +33,62 @@ def load_employee_data():
     if os.path.exists(excel_path):
         return pd.read_excel(excel_path)
     return None
+
+def get_db_connection():
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url:
+        return psycopg2.connect(database_url)
+    return None
+
+def save_submission(submission):
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute('''
+                INSERT INTO employee_submissions 
+                (staff_number, employee_name, data_confirmed, passport_number, 
+                 passport_changed, marital_status, marital_changed, visa_file_number, 
+                 visa_changed, additional_notes)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ''', (
+                submission['Staff Number'],
+                submission['Employee Name'],
+                submission['Data Confirmed'] == 'Yes',
+                submission['Passport Number'],
+                submission['Passport Changed'] == 'Yes',
+                submission['Marital Status'],
+                submission['Marital Changed'] == 'Yes',
+                submission['Visa File Number'],
+                submission['Visa Changed'] == 'Yes',
+                submission['Additional Notes']
+            ))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True
+        except Exception as e:
+            conn.close()
+            return False
+    return False
+
+def get_all_submissions():
+    conn = get_db_connection()
+    if conn:
+        try:
+            df = pd.read_sql_query('''
+                SELECT staff_number, employee_name, submitted_at, data_confirmed,
+                       passport_number, passport_changed, marital_status, marital_changed,
+                       visa_file_number, visa_changed, additional_notes
+                FROM employee_submissions
+                ORDER BY submitted_at DESC
+            ''', conn)
+            conn.close()
+            return df
+        except Exception as e:
+            conn.close()
+            return pd.DataFrame()
+    return pd.DataFrame()
 
 def validate_employee(employee_id, dob):
     df = load_employee_data()
@@ -443,13 +502,105 @@ def render_employees():
         '''
         st.markdown(pass_html, unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([1, 1, 1])
+        if 'employee_submissions' not in st.session_state:
+            st.session_state.employee_submissions = []
+        if 'employee_submitted' not in st.session_state:
+            st.session_state.employee_submitted = False
+        
+        current_passport = str(emp.get('Passport number', ''))
+        if current_passport.lower() == 'missing' or pd.isna(emp.get('Passport number')):
+            current_passport = ''
+        current_marital = str(emp.get('Marital Status', ''))
+        if current_marital.lower() == 'missing' or pd.isna(emp.get('Marital Status')):
+            current_marital = ''
+        current_visa = str(emp.get('Visa File Number', ''))
+        if current_visa.lower() == 'missing' or pd.isna(emp.get('Visa File Number')):
+            current_visa = ''
+        
+        st.markdown('''
+        <style>
+            .update-section {
+                background: white; border-radius: 16px; padding: 30px;
+                max-width: 420px; margin: 20px auto;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            }
+            .update-title {
+                font-size: 1.1em; font-weight: 600; color: #0a2351;
+                margin-bottom: 20px; text-align: center;
+            }
+            .current-value { font-size: 0.8em; color: #888; margin-top: 2px; }
+        </style>
+        ''', unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
+            if st.session_state.employee_submitted:
+                st.success("Your details have been submitted successfully!")
+                if st.button("Submit Another Update", use_container_width=True):
+                    st.session_state.employee_submitted = False
+                    st.rerun()
+            else:
+                st.markdown('<div class="update-title">Confirm & Update Details</div>', unsafe_allow_html=True)
+                
+                with st.form("update_form"):
+                    st.markdown("**Please review your details above and provide any updates:**")
+                    
+                    data_correct = st.checkbox("I confirm the displayed information is correct", value=False)
+                    
+                    st.markdown("---")
+                    st.markdown("**Update Missing/Changed Information:**")
+                    
+                    new_passport = st.text_input("Passport Number (if renewed)", 
+                        value=current_passport, 
+                        placeholder="Enter passport number",
+                        help=f"Current: {current_passport if current_passport else 'Not on file'}")
+                    
+                    marital_options = ['', 'Single', 'Married', 'Divorced', 'Widowed', 'Other']
+                    marital_index = 0
+                    if current_marital in marital_options:
+                        marital_index = marital_options.index(current_marital)
+                    new_marital = st.selectbox("Marital Status", 
+                        options=marital_options,
+                        index=marital_index,
+                        help=f"Current: {current_marital if current_marital else 'Not on file'}")
+                    
+                    new_visa = st.text_input("Visa File Number",
+                        value=current_visa,
+                        placeholder="Enter visa file number",
+                        help=f"Current: {current_visa if current_visa else 'Not on file'}")
+                    
+                    additional_notes = st.text_area("Additional Updates/Notes", 
+                        placeholder="Any other information to update...",
+                        height=80)
+                    
+                    submitted = st.form_submit_button("Submit Update", use_container_width=True)
+                    
+                    if submitted:
+                        submission = {
+                            'Staff Number': staff_num,
+                            'Employee Name': name,
+                            'Submitted At': datetime.now().strftime('%Y-%m-%d %H:%M'),
+                            'Data Confirmed': 'Yes' if data_correct else 'No',
+                            'Passport Number': new_passport,
+                            'Passport Changed': 'Yes' if new_passport != current_passport else 'No',
+                            'Marital Status': new_marital,
+                            'Marital Changed': 'Yes' if new_marital != current_marital else 'No',
+                            'Visa File Number': new_visa,
+                            'Visa Changed': 'Yes' if new_visa != current_visa else 'No',
+                            'Additional Notes': additional_notes
+                        }
+                        save_submission(submission)
+                        st.session_state.employee_submitted = True
+                        st.rerun()
+            
+            st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Sign Out", use_container_width=True):
                 st.session_state.employee_data = None
+                st.session_state.employee_submitted = False
                 st.rerun()
             if st.button("Back to Home", use_container_width=True):
                 st.session_state.employee_data = None
+                st.session_state.employee_submitted = False
                 st.query_params.clear()
                 st.rerun()
     else:
@@ -531,6 +682,10 @@ def render_admin():
                     <a href="?page=insurance_renewal" class="admin-menu-item">
                         <div class="section-title">FOLDER</div>
                         Insurance Renewal 2026
+                    </a>
+                    <a href="?page=employee_submissions" class="admin-menu-item">
+                        <div class="section-title">REPORTS</div>
+                        Employee Submissions
                     </a>
                 </div>
             </div>
@@ -647,6 +802,47 @@ def render_medical_insurance():
             st.query_params["page"] = "insurance_renewal"
             st.rerun()
 
+def render_employee_submissions():
+    st.markdown(CSS, unsafe_allow_html=True)
+    
+    if 'admin_authenticated' not in st.session_state or not st.session_state.admin_authenticated:
+        st.query_params["page"] = "admin"
+        st.rerun()
+        return
+    
+    st.markdown('''
+    <div class="page-container" style="min-height: auto; padding: 20px;">
+        <h1 class="page-title">Employee Submissions</h1>
+        <p class="page-message">View and export employee data confirmations and updates.</p>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    df = get_all_submissions()
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if not df.empty:
+            st.markdown(f"**Total Submissions:** {len(df)}")
+            
+            csv = df.to_csv(index=False)
+            st.download_button(
+                label="Download CSV Export",
+                data=csv,
+                file_name=f"employee_submissions_{datetime.now().strftime('%Y%m%d')}.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.dataframe(df, use_container_width=True, height=400)
+        else:
+            st.info("No employee submissions yet.")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("Back to Admin", use_container_width=True):
+            st.query_params["page"] = "admin"
+            st.rerun()
+
 def main():
     page = get_page()
     
@@ -666,6 +862,8 @@ def main():
         render_life_insurance()
     elif page == "medical_insurance":
         render_medical_insurance()
+    elif page == "employee_submissions":
+        render_employee_submissions()
     else:
         render_home()
 

@@ -53,29 +53,15 @@ def render_home():
 
             body {{
                 font-family: 'Poppins', sans-serif;
-                background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+                background: #ffffff;
                 min-height: 100vh;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                padding: 20px;
+                padding: 15px;
                 overflow: hidden;
                 position: relative;
-            }}
-
-            /* Dotted grid background */
-            body::before {{
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px);
-                background-size: 25px 25px;
-                pointer-events: none;
-                z-index: 0;
             }}
 
             .container {{
@@ -87,18 +73,18 @@ def render_home():
             /* Header styling */
             .portal-header {{
                 text-align: center;
-                margin-bottom: 40px;
+                margin-bottom: 25px;
             }}
 
             .portal-logo {{
-                width: 140px;
+                width: 110px;
                 height: auto;
-                margin-bottom: 25px;
+                margin-bottom: 15px;
                 filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));
             }}
 
             .brand-title {{
-                font-size: 2.8em;
+                font-size: 2.3em;
                 font-weight: 600;
                 color: #2c3e50;
                 letter-spacing: 0.5em;
@@ -110,16 +96,16 @@ def render_home():
             /* Menu container */
             .menu-container {{
                 display: grid;
-                grid-template-columns: repeat(2, 180px);
+                grid-template-columns: repeat(2, 160px);
                 gap: 12px;
                 margin: 0 auto;
             }}
 
             /* Menu items */
             .menu-item {{
-                width: 180px;
-                height: 180px;
-                background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.25) 100%);
+                width: 160px;
+                height: 160px;
+                background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,245,245,0.95) 100%);
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
                 display: flex;
@@ -134,32 +120,19 @@ def render_home():
                 position: relative;
                 transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
                 box-shadow:
-                    inset 0 2px 5px rgba(255,255,255,0.7),
-                    inset 0 -2px 5px rgba(0,0,0,0.08),
-                    0 10px 30px -6px rgba(0,0,0,0.15),
-                    0 0 0 1px rgba(255,255,255,0.6);
-            }}
-
-            .menu-item::before {{
-                content: "";
-                position: absolute;
-                inset: 0;
-                border-radius: inherit;
-                padding: 1.5px;
-                background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.2), rgba(0,0,0,0.08));
-                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-                -webkit-mask-composite: xor;
-                mask-composite: exclude;
-                pointer-events: none;
+                    0 8px 16px rgba(0,0,0,0.12),
+                    0 4px 8px rgba(0,0,0,0.08),
+                    0 2px 4px rgba(0,0,0,0.06),
+                    0 0 0 1px rgba(0,0,0,0.04);
             }}
 
             .menu-item:hover {{
-                transform: translateY(-6px) scale(1.02);
+                transform: translateY(-8px) scale(1.02);
                 box-shadow:
-                    inset 0 3px 8px rgba(255,255,255,0.8),
-                    inset 0 -3px 8px rgba(0,0,0,0.12),
-                    0 15px 40px -8px rgba(0,0,0,0.25),
-                    0 0 0 1.5px rgba(255,255,255,0.7);
+                    0 16px 32px rgba(0,0,0,0.18),
+                    0 8px 16px rgba(0,0,0,0.12),
+                    0 4px 8px rgba(0,0,0,0.08),
+                    0 0 0 1px rgba(0,0,0,0.06);
             }}
 
             .menu-item:active {{
@@ -224,8 +197,8 @@ def render_home():
 
             /* Footer */
             .portal-footer {{
-                margin-top: 35px;
-                font-size: 0.7em;
+                margin-top: 20px;
+                font-size: 0.65em;
                 color: #95a5a6;
                 letter-spacing: 0.2em;
                 text-transform: uppercase;
@@ -235,46 +208,15 @@ def render_home():
             /* Responsive design */
             @media (max-width: 768px) {{
                 .portal-logo {{
-                    width: 110px;
-                }}
-
-                .brand-title {{
-                    font-size: 2.2em;
-                }}
-
-                .menu-container {{
-                    grid-template-columns: repeat(2, 155px);
-                    gap: 10px;
-                }}
-
-                .menu-item {{
-                    width: 155px;
-                    height: 155px;
-                }}
-
-                .menu-icon {{
-                    width: 42px;
-                    height: 42px;
-                }}
-
-                .menu-label {{
-                    font-size: 0.85em;
-                }}
-            }}
-
-            @media (max-width: 500px) {{
-                .portal-logo {{
                     width: 90px;
-                    margin-bottom: 20px;
                 }}
 
                 .brand-title {{
-                    font-size: 1.8em;
-                    letter-spacing: 0.3em;
+                    font-size: 1.9em;
                 }}
 
                 .portal-header {{
-                    margin-bottom: 30px;
+                    margin-bottom: 20px;
                 }}
 
                 .menu-container {{
@@ -288,18 +230,53 @@ def render_home():
                 }}
 
                 .menu-icon {{
-                    width: 38px;
-                    height: 38px;
+                    width: 40px;
+                    height: 40px;
                 }}
 
                 .menu-label {{
-                    font-size: 0.75em;
+                    font-size: 0.82em;
+                }}
+            }}
+
+            @media (max-width: 500px) {{
+                .portal-logo {{
+                    width: 75px;
+                    margin-bottom: 12px;
+                }}
+
+                .brand-title {{
+                    font-size: 1.5em;
+                    letter-spacing: 0.3em;
+                }}
+
+                .portal-header {{
+                    margin-bottom: 18px;
+                }}
+
+                .menu-container {{
+                    grid-template-columns: repeat(2, 135px);
+                    gap: 10px;
+                }}
+
+                .menu-item {{
+                    width: 135px;
+                    height: 135px;
+                }}
+
+                .menu-icon {{
+                    width: 36px;
+                    height: 36px;
+                }}
+
+                .menu-label {{
+                    font-size: 0.72em;
                     letter-spacing: 0.12em;
                 }}
 
                 .portal-footer {{
-                    margin-top: 25px;
-                    font-size: 0.65em;
+                    margin-top: 18px;
+                    font-size: 0.6em;
                 }}
             }}
         </style>
@@ -348,7 +325,7 @@ def render_home():
     </body>
     </html>
     '''
-    components.html(html_content, height=650, scrolling=False)
+    components.html(html_content, height=550, scrolling=False)
 
 def render_coming_soon(title):
     st.markdown(f'''

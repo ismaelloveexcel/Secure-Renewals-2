@@ -605,49 +605,71 @@ def render_employees():
                 st.rerun()
     else:
         droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="login-watermark">' if droplet_b64 else ''
+        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="header-logo">' if logo_b64 else '<span class="header-text">baynunah</span>'
         
         st.markdown(f'''
         <style>
-            .login-wrapper {{
+            .glass-container {{
                 display: flex; justify-content: center; align-items: center;
                 min-height: 70vh; padding: 20px;
+                position: relative;
             }}
-            .login-card {{
-                background: white; border-radius: 4px; 
-                max-width: 380px; width: 100%; position: relative;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            .glass-container::before {{
+                content: "";
+                background-color: #7877754c;
+                position: absolute;
+                border-radius: 50%;
+                width: 6rem; height: 6rem;
+                top: 30%; right: 25%;
+            }}
+            .glass-card {{
+                width: 320px; min-height: 380px;
+                background-color: rgba(255, 255, 255, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                -webkit-backdrop-filter: blur(20px);
+                backdrop-filter: blur(20px);
+                border-radius: 12px;
                 overflow: hidden;
+                transition: all ease 0.3s;
+                display: flex; flex-direction: column;
             }}
-            .login-header {{
-                background: #0a2351; padding: 15px 20px; text-align: center;
+            .glass-card:hover {{
+                box-shadow: 0px 0px 20px 1px rgba(10, 35, 81, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.5);
             }}
-            .login-header-text {{
-                color: white; font-size: 1.3em; font-weight: 600;
-                letter-spacing: 0.05em; margin: 0;
+            .glass-header {{
+                background: #0a2351; padding: 20px; text-align: center;
             }}
-            .login-body {{
-                padding: 40px 30px 20px 30px; position: relative;
-                min-height: 280px;
+            .header-logo {{ height: 40px; }}
+            .header-text {{
+                color: white; font-size: 1.4em; font-weight: 600;
+                letter-spacing: 0.1em;
+            }}
+            .glass-body {{
+                flex: 1; padding: 30px; position: relative;
+                display: flex; flex-direction: column;
+                justify-content: center;
             }}
             .login-watermark {{
                 position: absolute; top: 50%; left: 50%;
                 transform: translate(-50%, -50%);
-                width: 150px; opacity: 0.08; pointer-events: none;
+                width: 120px; opacity: 0.1; pointer-events: none;
             }}
-            .login-footer {{
+            .glass-footer {{
                 text-align: center; padding: 15px;
-                border-top: 1px solid #eee;
                 font-size: 0.75em; color: #666;
+                border-top: 1px solid rgba(255,255,255,0.2);
             }}
         </style>
-        <div class="login-wrapper">
-            <div class="login-card">
-                <div class="login-header">
-                    <p class="login-header-text">baynunah</p>
+        <div class="glass-container">
+            <div class="glass-card">
+                <div class="glass-header">
+                    {logo_html}
                 </div>
-                <div class="login-body">
+                <div class="glass-body">
                     {droplet_html}
                 </div>
+                <div class="glass-footer">Conceptualised by Baynunah HR|IS</div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
@@ -713,45 +735,73 @@ def render_admin():
                 st.rerun()
     else:
         droplet_b64 = get_droplet_base64()
+        logo_b64 = get_logo_base64()
         droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="login-watermark">' if droplet_b64 else ''
+        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="header-logo">' if logo_b64 else '<span class="header-text">baynunah</span>'
         
         st.markdown(f'''
         <style>
-            .login-wrapper {{
+            .glass-container {{
                 display: flex; justify-content: center; align-items: center;
                 min-height: 70vh; padding: 20px;
+                position: relative;
             }}
-            .login-card {{
-                background: white; border-radius: 4px; 
-                max-width: 380px; width: 100%; position: relative;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            .glass-container::before {{
+                content: "";
+                background-color: #7877754c;
+                position: absolute;
+                border-radius: 50%;
+                width: 6rem; height: 6rem;
+                top: 30%; right: 25%;
+            }}
+            .glass-card {{
+                width: 320px; min-height: 320px;
+                background-color: rgba(255, 255, 255, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                -webkit-backdrop-filter: blur(20px);
+                backdrop-filter: blur(20px);
+                border-radius: 12px;
                 overflow: hidden;
+                transition: all ease 0.3s;
+                display: flex; flex-direction: column;
             }}
-            .login-header {{
-                background: #0a2351; padding: 15px 20px; text-align: center;
+            .glass-card:hover {{
+                box-shadow: 0px 0px 20px 1px rgba(10, 35, 81, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.5);
             }}
-            .login-header-text {{
-                color: white; font-size: 1.3em; font-weight: 600;
-                letter-spacing: 0.05em; margin: 0;
+            .glass-header {{
+                background: #0a2351; padding: 20px; text-align: center;
             }}
-            .login-body {{
-                padding: 40px 30px 20px 30px; position: relative;
-                min-height: 200px;
+            .header-logo {{ height: 40px; }}
+            .header-text {{
+                color: white; font-size: 1.4em; font-weight: 600;
+                letter-spacing: 0.1em;
+            }}
+            .glass-body {{
+                flex: 1; padding: 30px; position: relative;
+                display: flex; flex-direction: column;
+                justify-content: center;
             }}
             .login-watermark {{
                 position: absolute; top: 50%; left: 50%;
                 transform: translate(-50%, -50%);
-                width: 150px; opacity: 0.08; pointer-events: none;
+                width: 120px; opacity: 0.1; pointer-events: none;
+            }}
+            .glass-footer {{
+                text-align: center; padding: 15px;
+                font-size: 0.75em; color: #666;
+                border-top: 1px solid rgba(255,255,255,0.2);
             }}
         </style>
-        <div class="login-wrapper">
-            <div class="login-card">
-                <div class="login-header">
-                    <p class="login-header-text">baynunah</p>
+        <div class="glass-container">
+            <div class="glass-card">
+                <div class="glass-header">
+                    {logo_html}
                 </div>
-                <div class="login-body">
+                <div class="glass-body">
                     {droplet_html}
                 </div>
+                <div class="glass-footer">Conceptualised by Baynunah HR|IS</div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
@@ -765,8 +815,6 @@ def render_admin():
                     st.rerun()
                 else:
                     st.error("Invalid password")
-            
-            st.markdown('<p style="text-align:center; font-size:0.75em; color:#666; margin-top:20px;">Conceptualised by Baynunah HR|IS</p>', unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Back to Home", use_container_width=True, key="back_home"):

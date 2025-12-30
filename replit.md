@@ -1,43 +1,92 @@
-# FINAL-HR-PORTAL
+# Baynunah HR Portal - Landing Page
 
 ## Overview
+A secure HR portal landing page for Baynunah Group with admin-restricted access. Features 4 category sections with neumorphism-styled buttons.
 
-This is an HR Portal project that is in its initial stages of development. The repository currently contains only a README file, indicating this is a new project that needs to be built from scratch. The project will likely involve typical HR management features such as employee management, leave tracking, payroll, and related HR functions.
+## Current State
+- **Status**: Production-ready
+- **Last Updated**: December 29, 2025
+- **Custom Domain**: hr.baynunah.ae (configured separately)
 
-## User Preferences
+## Features
 
-Preferred communication style: Simple, everyday language.
+### Landing Page
+- **Header**: Baynunah logo with portal title
+- **4 Category Buttons**: 
+  - Employees (Staff services & resources)
+  - Onboarding (New hire orientation)
+  - External Users (Partners & contractors)
+  - Admin (HR administration - password protected)
 
-## System Architecture
+### Menu Design
+- 2x2 quadrant grid with rounded corners forming circular shape
+- Each quadrant has unique corner radius (top-left, top-right, bottom-left, bottom-right)
+- SVG outline icons in fluorescent green (#39FF14)
+- Hover animations: letter-spacing expansion, translateY lift, color inversion
 
-As this is a new project with no existing code, architectural decisions will need to be made as development progresses. Recommended approach for an HR Portal:
+### Button Styling (Neumorphism)
+- Light gray background (#e8e8e8) with soft shadows
+- Inset shadows: `inset 2px 5px 10px rgba(0,0,0,0.2)`
+- Hover animations:
+  - Letter-spacing expansion (0.2em → 0.5em)
+  - TranslateY lift (-0.8em)
+  - Background change to dark (#171717)
+  - Text color change to white
 
-### Frontend Architecture
-- **Recommendation**: React-based single-page application with a component-based structure
-- **Rationale**: Provides a responsive, interactive user interface suitable for data-heavy HR applications
-- **Structure**: Organize components by feature (employees, leave, payroll, etc.)
+### Footer
+- "Conceptualised by Baynunah|HR|IS"
 
-### Backend Architecture
-- **Recommendation**: Node.js/Express API server with RESTful endpoints
-- **Rationale**: JavaScript full-stack allows code sharing and easier maintenance
-- **Pattern**: MVC or service-based architecture for separation of concerns
+### Admin Portal
+- Password protected access
+- Environment variable: `ADMIN_PASSWORD` (default: admin2026)
+- Sign out functionality
+- Subfolder structure:
+  - **Insurance Renewal 2026**
+    - Life Insurance
+    - Medical Insurance
+  - **Employee Submissions** (Reports)
+    - View all employee data confirmations/updates
+    - Download CSV export for HR processing
 
-### Data Storage
-- **Recommendation**: PostgreSQL with Drizzle ORM
-- **Rationale**: Relational data works well for HR data (employees, departments, leave records) and Drizzle provides type-safe database operations
-- **Schema Considerations**: Core tables will likely include users, employees, departments, leave_requests, and related entities
+### Employee Portal
+- Login with Employee ID + Date of Birth
+- Validates credentials against Excel data (Renewal_Insurance_1767051010260.xlsx)
+- Pass template design with droplet watermark background
+- Displays insurance details: Staff Number, Principal Number, Member Number, Package, etc.
+- **Data Confirmation Form**: After viewing data, employees can:
+  - Confirm displayed information is correct
+  - Update Passport Number (if renewed)
+  - Update Marital Status
+  - Update Visa File Number
+  - Add additional notes
+- Submissions saved to PostgreSQL database
+- Sign out functionality
 
-### Authentication
-- **Recommendation**: Session-based or JWT authentication with role-based access control
-- **Rationale**: HR data is sensitive and requires proper access controls for different user roles (admin, manager, employee)
+### Coming Soon Pages
+- Onboarding, External Users sections show placeholder
+- Back to Home navigation
 
-## External Dependencies
+## Technical Details
+- **Framework**: Streamlit
+- **Port**: 5000
+- **Design**: White neumorphism theme (#e8e8e8 background)
+- **Font**: Poppins (Google Fonts)
 
-Currently no external dependencies are configured. As the project develops, anticipated dependencies may include:
+## Project Structure
+```
+/
+├── app.py                 # Main Streamlit application
+├── attached_assets/
+│   └── logo_*.png         # Baynunah logo
+├── .streamlit/
+│   └── config.toml        # Streamlit server configuration
+└── replit.md              # This documentation
+```
 
-- **Database**: PostgreSQL for persistent data storage
-- **Authentication**: Passport.js or similar authentication middleware
-- **Email Service**: For notifications (leave approvals, announcements)
-- **File Storage**: For employee documents and attachments
+## Running the Application
+```bash
+streamlit run app.py --server.port 5000
+```
 
-No third-party APIs or external services are currently integrated.
+## Environment Variables
+- `ADMIN_PASSWORD` - Admin portal password (default: admin2026)

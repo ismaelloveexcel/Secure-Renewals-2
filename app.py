@@ -59,7 +59,8 @@ def render_home():
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                padding: 15px;
+                padding: 0;
+                margin: 0;
                 overflow: hidden;
                 position: relative;
             }}
@@ -149,8 +150,8 @@ def render_home():
             }}
 
             .menu-icon {{
-                width: 48px;
-                height: 48px;
+                width: 40px;
+                height: 40px;
                 filter: drop-shadow(0 1px 3px rgba(46, 204, 113, 0.4));
                 transition: transform 0.3s ease;
             }}
@@ -197,7 +198,7 @@ def render_home():
 
             /* Footer */
             .portal-footer {{
-                margin-top: 20px;
+                margin-top: 40px;
                 font-size: 0.65em;
                 color: #95a5a6;
                 letter-spacing: 0.2em;
@@ -230,12 +231,16 @@ def render_home():
                 }}
 
                 .menu-icon {{
-                    width: 40px;
-                    height: 40px;
+                    width: 35px;
+                    height: 35px;
                 }}
 
                 .menu-label {{
                     font-size: 0.82em;
+                }}
+
+                .portal-footer {{
+                    margin-top: 30px;
                 }}
             }}
 
@@ -265,8 +270,8 @@ def render_home():
                 }}
 
                 .menu-icon {{
-                    width: 36px;
-                    height: 36px;
+                    width: 32px;
+                    height: 32px;
                 }}
 
                 .menu-label {{
@@ -275,7 +280,7 @@ def render_home():
                 }}
 
                 .portal-footer {{
-                    margin-top: 18px;
+                    margin-top: 25px;
                     font-size: 0.6em;
                 }}
             }}

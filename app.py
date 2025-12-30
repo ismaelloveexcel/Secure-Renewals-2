@@ -380,28 +380,28 @@ def render_home():
             .menu-item img {{ width: 48px; height: 48px; margin-bottom: 15px; transition: all 0.25s ease; }}
             
             .item-tl {{ 
-                border-radius: 180px 8px 8px 8px; 
+                border-radius: 200px 5px 5px 5px; 
                 transform-origin: 100% 100%;
             }}
             .item-tl:hover {{ transform: translate(-8px, -8px); background: #171717; color: white; }}
             .item-tl:hover img {{ filter: brightness(0) invert(1); }}
             
             .item-tr {{ 
-                border-radius: 8px 180px 8px 8px;
+                border-radius: 5px 200px 5px 5px;
                 transform-origin: 0% 100%;
             }}
             .item-tr:hover {{ transform: translate(8px, -8px); background: #171717; color: white; }}
             .item-tr:hover img {{ filter: brightness(0) invert(1); }}
             
             .item-bl {{ 
-                border-radius: 8px 8px 8px 180px;
+                border-radius: 5px 5px 5px 200px;
                 transform-origin: 100% 0%;
             }}
             .item-bl:hover {{ transform: translate(-8px, 8px); background: #171717; color: white; }}
             .item-bl:hover img {{ filter: brightness(0) invert(1); }}
             
             .item-br {{ 
-                border-radius: 8px 8px 180px 8px;
+                border-radius: 5px 5px 200px 5px;
                 transform-origin: 0% 0%;
             }}
             .item-br:hover {{ transform: translate(8px, 8px); background: #171717; color: white; }}

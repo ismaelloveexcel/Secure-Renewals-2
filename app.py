@@ -623,7 +623,7 @@ def render_employees():
                 top: 30%; right: 25%;
             }}
             .glass-card {{
-                width: 320px; min-height: 380px;
+                width: 400px; min-height: 450px;
                 background-color: rgba(255, 255, 255, 0.15);
                 border: 1px solid rgba(255, 255, 255, 0.3);
                 -webkit-backdrop-filter: blur(20px);
@@ -755,7 +755,7 @@ def render_admin():
                 top: 30%; right: 25%;
             }}
             .glass-card {{
-                width: 320px; min-height: 320px;
+                width: 400px; min-height: 380px;
                 background-color: rgba(255, 255, 255, 0.15);
                 border: 1px solid rgba(255, 255, 255, 0.3);
                 -webkit-backdrop-filter: blur(20px);

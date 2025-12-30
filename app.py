@@ -664,36 +664,27 @@ def render_admin():
     
     if st.session_state.admin_authenticated:
         st.markdown('''
-        <style>
-            .admin-menu { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-            .admin-menu-item {
-                background: #e8e8e8; padding: 20px 30px; border-radius: 12px;
-                text-decoration: none; color: #333; font-weight: 500; text-align: center;
-                box-shadow: 4px 4px 8px rgba(0,0,0,0.15), -4px -4px 8px rgba(255,255,255,0.8);
-                transition: all 0.3s ease;
-            }
-            .admin-menu-item:hover { background: #171717; color: white; transform: translateY(-3px); }
-            .section-title { color: #39FF14; font-size: 0.85em; letter-spacing: 0.1em; margin-bottom: 5px; }
-        </style>
         <div class="page-container">
             <div class="admin-card" style="max-width: 450px;">
                 <h2 class="admin-title">HR Administration</h2>
-                <div class="admin-menu">
-                    <a href="?page=insurance_renewal" class="admin-menu-item">
-                        <div class="section-title">FOLDER</div>
-                        Insurance Renewal 2026
-                    </a>
-                    <a href="?page=employee_submissions" class="admin-menu-item">
-                        <div class="section-title">REPORTS</div>
-                        Employee Submissions
-                    </a>
-                </div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
+            st.markdown('<p style="color:#39FF14; font-size:0.85em; letter-spacing:0.1em; text-align:center; margin-bottom:5px;">FOLDER</p>', unsafe_allow_html=True)
+            if st.button("Insurance Renewal 2026", use_container_width=True, key="btn_insurance"):
+                st.query_params["page"] = "insurance_renewal"
+                st.rerun()
+            
+            st.markdown('<br>', unsafe_allow_html=True)
+            st.markdown('<p style="color:#39FF14; font-size:0.85em; letter-spacing:0.1em; text-align:center; margin-bottom:5px;">REPORTS</p>', unsafe_allow_html=True)
+            if st.button("Employee Submissions", use_container_width=True, key="btn_submissions"):
+                st.query_params["page"] = "employee_submissions"
+                st.rerun()
+            
+            st.markdown('<br>', unsafe_allow_html=True)
             if st.button("Sign Out", use_container_width=True):
                 st.session_state.admin_authenticated = False
                 st.rerun()
@@ -733,29 +724,22 @@ def render_insurance_renewal():
         return
     
     st.markdown('''
-    <style>
-        .admin-menu { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        .admin-menu-item {
-            background: #e8e8e8; padding: 20px 30px; border-radius: 12px;
-            text-decoration: none; color: #333; font-weight: 500; text-align: center;
-            box-shadow: 4px 4px 8px rgba(0,0,0,0.15), -4px -4px 8px rgba(255,255,255,0.8);
-            transition: all 0.3s ease;
-        }
-        .admin-menu-item:hover { background: #171717; color: white; transform: translateY(-3px); }
-    </style>
     <div class="page-container">
         <div class="admin-card" style="max-width: 450px;">
             <h2 class="admin-title">Insurance Renewal 2026</h2>
-            <div class="admin-menu">
-                <a href="?page=life_insurance" class="admin-menu-item">Life Insurance</a>
-                <a href="?page=medical_insurance" class="admin-menu-item">Medical Insurance</a>
-            </div>
         </div>
     </div>
     ''', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
+        if st.button("Life Insurance", use_container_width=True, key="btn_life"):
+            st.query_params["page"] = "life_insurance"
+            st.rerun()
+        if st.button("Medical Insurance", use_container_width=True, key="btn_medical"):
+            st.query_params["page"] = "medical_insurance"
+            st.rerun()
+        st.markdown('<br>', unsafe_allow_html=True)
         if st.button("Back to Admin", use_container_width=True):
             st.query_params["page"] = "admin"
             st.rerun()

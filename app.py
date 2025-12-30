@@ -141,7 +141,7 @@ def render_home():
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                gap: 15px;
+                gap: 10px;
             }}
 
             .menu-icon {{
@@ -193,7 +193,8 @@ def render_home():
 
             /* Footer */
             .portal-footer {{
-                margin-top: 40px;
+                margin-top: 35px;
+                margin-bottom: 0;
                 font-size: 0.65em;
                 color: #95a5a6;
                 letter-spacing: 0.2em;
@@ -325,7 +326,7 @@ def render_home():
     </body>
     </html>
     '''
-    components.html(html_content, height=550, scrolling=False)
+    components.html(html_content, height=480, scrolling=False)
 
 def render_coming_soon(title):
     st.markdown(f'''

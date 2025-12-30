@@ -382,7 +382,32 @@ def render_home():
                     inset -4px -4px 10px rgba(255, 255, 255, 0.9);
             }}
             .menu-item img {{ width: 36px; height: 36px; margin-bottom: 8px; transition: all 0.25s ease; }}
-            .menu-item span {{ display: block; line-height: 1.3; }}
+            .menu-item span {{ 
+                display: block; 
+                line-height: 1.3;
+                position: relative;
+                padding: 0.4em 0.8em;
+                border-radius: 999px;
+                background: linear-gradient(-75deg, rgba(255,255,255,0.05), rgba(255,255,255,0.25), rgba(255,255,255,0.05));
+                box-shadow: 
+                    inset 0 0.08em 0.08em rgba(0,0,0,0.05),
+                    inset 0 -0.08em 0.08em rgba(255,255,255,0.5),
+                    0 0.15em 0.08em -0.08em rgba(0,0,0,0.15),
+                    inset 0 0 0.06em 0.15em rgba(255,255,255,0.2);
+                backdrop-filter: blur(2px);
+                -webkit-backdrop-filter: blur(2px);
+                text-shadow: 0 0.15em 0.04em rgba(0,0,0,0.08);
+                transition: all 0.3s ease;
+            }}
+            .menu-item:hover span {{
+                background: linear-gradient(-75deg, rgba(255,255,255,0.1), rgba(255,255,255,0.35), rgba(255,255,255,0.1));
+                box-shadow: 
+                    inset 0 0.08em 0.08em rgba(0,0,0,0.05),
+                    inset 0 -0.08em 0.08em rgba(255,255,255,0.6),
+                    0 0.1em 0.04em -0.06em rgba(0,0,0,0.2),
+                    inset 0 0 0.04em 0.1em rgba(255,255,255,0.4);
+                text-shadow: 0.02em 0.02em 0.02em rgba(0,0,0,0.1);
+            }}
             .menu-item .content {{ 
                 display: flex; flex-direction: column; 
                 align-items: center; justify-content: center;
@@ -429,11 +454,19 @@ def render_home():
         </style>
     </head>
     <body>
-        <div class="portal-header">
+        <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:100%;height:100%;top:0;left:0;z-index:0;pointer-events:none;">
+            <defs>
+                <pattern patternUnits="userSpaceOnUse" height="25" width="25" id="dottedGrid">
+                    <circle fill="rgba(0,0,0,0.08)" r="1" cy="2" cx="2"></circle>
+                </pattern>
+            </defs>
+            <rect fill="url(#dottedGrid)" height="100%" width="100%"></rect>
+        </svg>
+        <div class="portal-header" style="position:relative;z-index:1;">
             {logo_html}
             <h1 class="portal-title">HR PORTAL</h1>
         </div>
-        <div class="menu-container">
+        <div class="menu-container" style="position:relative;z-index:1;">
             <div class="menu-row">
                 <a href="?page=employees" class="menu-item item-tl">
                     <div class="content">
@@ -463,7 +496,7 @@ def render_home():
                 </a>
             </div>
         </div>
-        <div class="portal-footer">Conceptualised by Baynunah|HR|IS</div>
+        <div class="portal-footer" style="position:relative;z-index:1;">Conceptualised by Baynunah|HR|IS</div>
     </body>
     </html>
     '''

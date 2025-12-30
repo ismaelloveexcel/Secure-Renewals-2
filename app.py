@@ -2,10 +2,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 import os
 import base64
-import pandas as pd
-from datetime import datetime
-from io import StringIO
-import psycopg2
 
 st.set_page_config(
     page_title="HR Portal | Baynunah",
@@ -19,91 +15,6 @@ def get_logo_base64():
     if os.path.exists(logo_path):
         with open(logo_path, "rb") as f:
             return base64.b64encode(f.read()).decode()
-    return None
-
-def get_droplet_base64():
-    droplet_path = "attached_assets/Screenshot_2025-12-29_164918_1767051331486.png"
-    if os.path.exists(droplet_path):
-        with open(droplet_path, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    return None
-
-def load_employee_data():
-    excel_path = "attached_assets/Renewal_Insurance_1767051010260.xlsx"
-    if os.path.exists(excel_path):
-        return pd.read_excel(excel_path)
-    return None
-
-def get_db_connection():
-    database_url = os.environ.get("DATABASE_URL")
-    if database_url:
-        return psycopg2.connect(database_url)
-    return None
-
-def save_submission(submission):
-    conn = get_db_connection()
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute('''
-                INSERT INTO employee_submissions 
-                (staff_number, employee_name, data_confirmed, passport_number, 
-                 passport_changed, marital_status, marital_changed, visa_file_number, 
-                 visa_changed, additional_notes)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ''', (
-                submission['Staff Number'],
-                submission['Employee Name'],
-                submission['Data Confirmed'] == 'Yes',
-                submission['Passport Number'],
-                submission['Passport Changed'] == 'Yes',
-                submission['Marital Status'],
-                submission['Marital Changed'] == 'Yes',
-                submission['Visa File Number'],
-                submission['Visa Changed'] == 'Yes',
-                submission['Additional Notes']
-            ))
-            conn.commit()
-            cur.close()
-            conn.close()
-            return True
-        except Exception as e:
-            conn.close()
-            return False
-    return False
-
-def get_all_submissions():
-    conn = get_db_connection()
-    if conn:
-        try:
-            df = pd.read_sql_query('''
-                SELECT staff_number, employee_name, submitted_at, data_confirmed,
-                       passport_number, passport_changed, marital_status, marital_changed,
-                       visa_file_number, visa_changed, additional_notes
-                FROM employee_submissions
-                ORDER BY submitted_at DESC
-            ''', conn)
-            conn.close()
-            return df
-        except Exception as e:
-            conn.close()
-            return pd.DataFrame()
-    return pd.DataFrame()
-
-def validate_employee(employee_id, dob):
-    df = load_employee_data()
-    if df is None:
-        return None
-    employee_id = employee_id.strip().upper()
-    df['Staff Number'] = df['Staff Number'].astype(str).str.strip().str.upper()
-    df['Date Of Birth'] = pd.to_datetime(df['Date Of Birth'], dayfirst=True, errors='coerce')
-    try:
-        input_dob = pd.to_datetime(dob, dayfirst=True)
-    except:
-        return None
-    match = df[(df['Staff Number'] == employee_id) & (df['Date Of Birth'].dt.date == input_dob.date())]
-    if not match.empty:
-        return match.iloc[0].to_dict()
     return None
 
 def get_page():
@@ -531,292 +442,13 @@ def render_onboarding():
 
 def render_employees():
     st.markdown(CSS, unsafe_allow_html=True)
-    
-    if 'employee_data' not in st.session_state:
-        st.session_state.employee_data = None
-    
-    droplet_b64 = get_droplet_base64()
-    logo_b64 = get_logo_base64()
-    
-    if st.session_state.employee_data:
-        emp = st.session_state.employee_data
-        name = str(emp.get('Member Full Name', 'Employee'))
-        relation = str(emp.get('Relation', ''))
-        dept = "HR" if "HR" in str(emp.get('Package Description', '')) else "Staff"
-        location = str(emp.get('Place of visa issuance', 'Head Office'))
-        phone = str(emp.get('Column1', ''))
-        staff_num = str(emp.get('Staff Number', ''))
-        package = str(emp.get('Package Description', ''))
-        principal_num = str(emp.get('Principal Number', ''))
-        member_num = str(emp.get('Member Number', ''))
-        nationality = str(emp.get('Nationality', ''))
-        gender = str(emp.get('Gender', ''))
-        dob = str(emp.get('Date Of Birth', ''))
-        if hasattr(emp.get('Date Of Birth'), 'strftime'):
-            dob = emp.get('Date Of Birth').strftime('%d/%m/%Y')
-        
-        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="droplet-watermark">' if droplet_b64 else ''
-        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="pass-logo">' if logo_b64 else '<div class="pass-logo-text">baynunah</div>'
-        
-        pass_html = f'''
-        <style>
-            .pass-container {{
-                display: flex; justify-content: center; align-items: center;
-                min-height: 80vh; padding: 20px;
-            }}
-            .pass-card {{
-                background: white; border-radius: 16px; padding: 40px;
-                max-width: 420px; width: 100%; position: relative;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-                overflow: hidden;
-            }}
-            .pass-header {{
-                background: #0a2351; color: white; padding: 12px 20px;
-                margin: -40px -40px 30px -40px; text-align: center;
-            }}
-            .pass-logo {{ height: 30px; }}
-            .pass-logo-text {{ font-size: 1.5em; font-weight: 600; letter-spacing: 0.1em; }}
-            .droplet-watermark {{
-                position: absolute; top: 50%; left: 50%;
-                transform: translate(-50%, -50%);
-                width: 280px; opacity: 0.08; pointer-events: none;
-            }}
-            .pass-content {{ position: relative; z-index: 1; text-align: center; }}
-            .emp-name {{ font-size: 1.4em; font-weight: 700; color: #0a2351; margin-bottom: 5px; }}
-            .emp-title {{ font-size: 1.1em; font-weight: 600; color: #333; margin-bottom: 15px; }}
-            .emp-dept {{ font-size: 0.95em; color: #666; margin-bottom: 5px; }}
-            .emp-location {{ font-size: 0.9em; color: #888; margin-bottom: 25px; }}
-            .insurance-section {{
-                background: #f8f9fa; border-radius: 12px; padding: 20px;
-                margin: 20px 0; text-align: left;
-            }}
-            .section-label {{
-                font-size: 0.75em; color: #39FF14; font-weight: 600;
-                letter-spacing: 0.1em; margin-bottom: 10px;
-            }}
-            .info-row {{ display: flex; justify-content: space-between; margin: 8px 0; font-size: 0.85em; }}
-            .info-label {{ color: #666; }}
-            .info-value {{ color: #333; font-weight: 500; }}
-            .emp-contact {{ font-size: 0.8em; color: #666; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }}
-        </style>
-        <div class="pass-container">
-            <div class="pass-card">
-                <div class="pass-header">{logo_html}</div>
-                {droplet_html}
-                <div class="pass-content">
-                    <div class="emp-name">{name}</div>
-                    <div class="emp-title">{relation}</div>
-                    <div class="emp-dept">{dept}</div>
-                    <div class="emp-location">{location}</div>
-                    
-                    <div class="insurance-section">
-                        <div class="section-label">INSURANCE DETAILS</div>
-                        <div class="info-row"><span class="info-label">Staff Number</span><span class="info-value">{staff_num}</span></div>
-                        <div class="info-row"><span class="info-label">Principal Number</span><span class="info-value">{principal_num}</span></div>
-                        <div class="info-row"><span class="info-label">Member Number</span><span class="info-value">{member_num}</span></div>
-                        <div class="info-row"><span class="info-label">Nationality</span><span class="info-value">{nationality}</span></div>
-                        <div class="info-row"><span class="info-label">Gender</span><span class="info-value">{gender}</span></div>
-                        <div class="info-row"><span class="info-label">Date of Birth</span><span class="info-value">{dob}</span></div>
-                    </div>
-                    
-                    <div class="insurance-section">
-                        <div class="section-label">PACKAGE</div>
-                        <div style="font-size: 0.85em; color: #333;">{package}</div>
-                    </div>
-                    
-                    <div class="emp-contact">M: {phone}</div>
-                </div>
-            </div>
-        </div>
-        '''
-        st.markdown(pass_html, unsafe_allow_html=True)
-        
-        if 'employee_submissions' not in st.session_state:
-            st.session_state.employee_submissions = []
-        if 'employee_submitted' not in st.session_state:
-            st.session_state.employee_submitted = False
-        
-        current_passport = str(emp.get('Passport number', ''))
-        if current_passport.lower() == 'missing' or pd.isna(emp.get('Passport number')):
-            current_passport = ''
-        current_marital = str(emp.get('Marital Status', ''))
-        if current_marital.lower() == 'missing' or pd.isna(emp.get('Marital Status')):
-            current_marital = ''
-        current_visa = str(emp.get('Visa File Number', ''))
-        if current_visa.lower() == 'missing' or pd.isna(emp.get('Visa File Number')):
-            current_visa = ''
-        
-        st.markdown('''
-        <style>
-            .update-section {
-                background: white; border-radius: 16px; padding: 30px;
-                max-width: 420px; margin: 20px auto;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            }
-            .update-title {
-                font-size: 1.1em; font-weight: 600; color: #0a2351;
-                margin-bottom: 20px; text-align: center;
-            }
-            .current-value { font-size: 0.8em; color: #888; margin-top: 2px; }
-        </style>
-        ''', unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.session_state.employee_submitted:
-                st.success("Your details have been submitted successfully!")
-                if st.button("Submit Another Update", use_container_width=True):
-                    st.session_state.employee_submitted = False
-                    st.rerun()
-            else:
-                st.markdown('<div class="update-title">Confirm & Update Details</div>', unsafe_allow_html=True)
-                
-                with st.form("update_form"):
-                    st.markdown("**Please review your details above and provide any updates:**")
-                    
-                    data_correct = st.checkbox("I confirm the displayed information is correct", value=False)
-                    
-                    st.markdown("---")
-                    st.markdown("**Update Missing/Changed Information:**")
-                    
-                    new_passport = st.text_input("Passport Number (if renewed)", 
-                        value=current_passport, 
-                        placeholder="Enter passport number",
-                        help=f"Current: {current_passport if current_passport else 'Not on file'}")
-                    
-                    marital_options = ['', 'Single', 'Married', 'Divorced', 'Widowed', 'Other']
-                    marital_index = 0
-                    if current_marital in marital_options:
-                        marital_index = marital_options.index(current_marital)
-                    new_marital = st.selectbox("Marital Status", 
-                        options=marital_options,
-                        index=marital_index,
-                        help=f"Current: {current_marital if current_marital else 'Not on file'}")
-                    
-                    new_visa = st.text_input("Visa File Number",
-                        value=current_visa,
-                        placeholder="Enter visa file number",
-                        help=f"Current: {current_visa if current_visa else 'Not on file'}")
-                    
-                    additional_notes = st.text_area("Additional Updates/Notes", 
-                        placeholder="Any other information to update...",
-                        height=80)
-                    
-                    submitted = st.form_submit_button("Submit Update", use_container_width=True)
-                    
-                    if submitted:
-                        submission = {
-                            'Staff Number': staff_num,
-                            'Employee Name': name,
-                            'Submitted At': datetime.now().strftime('%Y-%m-%d %H:%M'),
-                            'Data Confirmed': 'Yes' if data_correct else 'No',
-                            'Passport Number': new_passport,
-                            'Passport Changed': 'Yes' if new_passport != current_passport else 'No',
-                            'Marital Status': new_marital,
-                            'Marital Changed': 'Yes' if new_marital != current_marital else 'No',
-                            'Visa File Number': new_visa,
-                            'Visa Changed': 'Yes' if new_visa != current_visa else 'No',
-                            'Additional Notes': additional_notes
-                        }
-                        save_submission(submission)
-                        st.session_state.employee_submitted = True
-                        st.rerun()
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Sign Out", use_container_width=True):
-                st.session_state.employee_data = None
-                st.session_state.employee_submitted = False
-                st.rerun()
-            if st.button("Back to Home", use_container_width=True):
-                st.session_state.employee_data = None
-                st.session_state.employee_submitted = False
-                st.query_params.clear()
-                st.rerun()
-    else:
-        st.markdown('''
-        <style>
-            .login-wrapper {
-                display: flex; justify-content: center; align-items: center;
-                min-height: 70vh; padding: 20px;
-            }
-            .login-card {
-                width: 320px;
-                padding: 2.5rem 2rem;
-                text-align: center;
-                background: #00065f;
-                border-radius: 16px;
-                border: 1px solid #9c9a9a;
-            }
-            .login-title {
-                margin-bottom: 1.5rem;
-                font-size: 1.6em;
-                font-weight: 500;
-                color: #9c9a9a;
-                text-shadow: 1px 1px 20px #9c9a9a;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-            }
-            [data-testid="stVerticalBlock"] > div:has(.login-wrapper) + div {
-                position: relative;
-                margin-top: -280px;
-                z-index: 100;
-                display: flex;
-                justify-content: center;
-            }
-            [data-testid="stVerticalBlock"] > div:has(.login-wrapper) + div > div {
-                max-width: 280px;
-            }
-            .stTextInput input, .stDateInput input {
-                border: none !important;
-                border-radius: 6px !important;
-                padding: 14px 16px !important;
-                background: #fbfcff !important;
-                color: #333 !important;
-            }
-            .stTextInput input::placeholder {
-                color: #999 !important;
-            }
-            .stButton button {
-                background: #9c9a9a !important;
-                color: #00065f !important;
-                border-radius: 6px !important;
-                padding: 14px !important;
-                font-weight: 600 !important;
-                text-transform: uppercase !important;
-                margin-top: 0.5rem !important;
-            }
-            .stButton button:hover {
-                background: #fbfcff !important;
-                color: #9c9a9a !important;
-            }
-        </style>
-        <div class="login-wrapper">
-            <div class="login-card">
-                <h4 class="login-title">Log In</h4>
-            </div>
-        </div>
-        ''', unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
-        with col2:
-            emp_id = st.text_input("Employee ID", placeholder="Employee ID", key="emp_id", label_visibility="collapsed")
-            dob = st.date_input("Date of Birth", value=pd.to_datetime("1980-01-01"), min_value=pd.to_datetime("1940-01-01"), max_value=pd.to_datetime("2010-01-01"), key="emp_dob", format="DD/MM/YYYY", label_visibility="collapsed")
-            
-            if st.button("Login", use_container_width=True):
-                if emp_id and dob:
-                    dob_str = dob.strftime("%d/%m/%Y")
-                    result = validate_employee(emp_id, dob_str)
-                    if result:
-                        st.session_state.employee_data = result
-                        st.rerun()
-                    else:
-                        st.error("Invalid Employee ID or Date of Birth")
-                else:
-                    st.warning("Please enter Employee ID and Date of Birth")
-            
-            if st.button("Back to Home", use_container_width=True, key="emp_back"):
-                st.query_params.clear()
-                st.rerun()
+    st.markdown('''
+    <div class="page-container">
+        <h1 class="page-title">Employees</h1>
+        <p class="page-message">This section is coming soon.</p>
+        <a href="?" class="back-btn">Back to Home</a>
+    </div>
+    ''', unsafe_allow_html=True)
 
 def render_admin():
     st.markdown(CSS, unsafe_allow_html=True)
@@ -838,12 +470,6 @@ def render_admin():
             st.markdown('<p style="color:#39FF14; font-size:0.85em; letter-spacing:0.1em; text-align:center; margin-bottom:5px;">FOLDER</p>', unsafe_allow_html=True)
             if st.button("Insurance Renewal 2026", use_container_width=True, key="btn_insurance"):
                 st.query_params["page"] = "insurance_renewal"
-                st.rerun()
-            
-            st.markdown('<br>', unsafe_allow_html=True)
-            st.markdown('<p style="color:#39FF14; font-size:0.85em; letter-spacing:0.1em; text-align:center; margin-bottom:5px;">REPORTS</p>', unsafe_allow_html=True)
-            if st.button("Employee Submissions", use_container_width=True, key="btn_submissions"):
-                st.query_params["page"] = "employee_submissions"
                 st.rerun()
             
             st.markdown('<br>', unsafe_allow_html=True)
@@ -1003,47 +629,6 @@ def render_medical_insurance():
             st.query_params["page"] = "insurance_renewal"
             st.rerun()
 
-def render_employee_submissions():
-    st.markdown(CSS, unsafe_allow_html=True)
-    
-    if 'admin_authenticated' not in st.session_state or not st.session_state.admin_authenticated:
-        st.query_params["page"] = "admin"
-        st.rerun()
-        return
-    
-    st.markdown('''
-    <div class="page-container" style="min-height: auto; padding: 20px;">
-        <h1 class="page-title">Employee Submissions</h1>
-        <p class="page-message">View and export employee data confirmations and updates.</p>
-    </div>
-    ''', unsafe_allow_html=True)
-    
-    df = get_all_submissions()
-    
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if not df.empty:
-            st.markdown(f"**Total Submissions:** {len(df)}")
-            
-            csv = df.to_csv(index=False)
-            st.download_button(
-                label="Download CSV Export",
-                data=csv,
-                file_name=f"employee_submissions_{datetime.now().strftime('%Y%m%d')}.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.dataframe(df, use_container_width=True, height=400)
-        else:
-            st.info("No employee submissions yet.")
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Back to Admin", use_container_width=True):
-            st.query_params["page"] = "admin"
-            st.rerun()
-
 def main():
     page = get_page()
     
@@ -1063,8 +648,6 @@ def main():
         render_life_insurance()
     elif page == "medical_insurance":
         render_medical_insurance()
-    elif page == "employee_submissions":
-        render_employee_submissions()
     else:
         render_home()
 

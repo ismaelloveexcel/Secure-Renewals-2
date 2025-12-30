@@ -604,80 +604,74 @@ def render_employees():
                 st.query_params.clear()
                 st.rerun()
     else:
-        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="login-watermark">' if droplet_b64 else ''
-        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="header-logo">' if logo_b64 else '<span class="header-text">baynunah</span>'
+        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="pass-watermark">' if droplet_b64 else ''
+        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="pass-logo">' if logo_b64 else '<span class="pass-logo-text">baynunah</span>'
         
         st.markdown(f'''
         <style>
-            .glass-container {{
+            .pass-container {{
                 display: flex; justify-content: center; align-items: center;
-                min-height: 70vh; padding: 20px;
-                position: relative;
+                min-height: 75vh; padding: 20px;
             }}
-            .glass-container::before {{
-                content: "";
-                background-color: #7877754c;
-                position: absolute;
-                border-radius: 50%;
-                width: 6rem; height: 6rem;
-                top: 30%; right: 25%;
-            }}
-            .glass-card {{
-                width: 400px; min-height: 450px;
-                background-color: rgba(255, 255, 255, 0.85);
-                border: 1px solid rgba(255, 255, 255, 0.9);
+            .pass-card {{
+                width: 380px; min-height: 480px;
+                background-color: rgba(255, 255, 255, 0.074);
+                border: 1px solid rgba(255, 255, 255, 0.222);
                 -webkit-backdrop-filter: blur(20px);
                 backdrop-filter: blur(20px);
                 border-radius: 12px;
                 overflow: hidden;
                 transition: all ease 0.3s;
                 display: flex; flex-direction: column;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
             }}
-            .glass-card:hover {{
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
-                border: 1px solid rgba(255, 255, 255, 1);
+            .pass-card:hover {{
+                box-shadow: 0px 0px 20px 1px #0a23511f;
+                border: 1px solid rgba(255, 255, 255, 0.454);
             }}
-            .glass-header {{
-                background: #0a2351; padding: 20px; text-align: center;
+            .pass-header {{
+                background: #0a2351; padding: 15px 20px;
+                display: flex; justify-content: flex-end; align-items: center;
             }}
-            .header-logo {{ height: 40px; }}
-            .header-text {{
-                color: white; font-size: 1.4em; font-weight: 600;
-                letter-spacing: 0.1em;
+            .pass-logo {{
+                height: 28px;
+                filter: brightness(0) invert(1);
             }}
-            .glass-body {{
-                flex: 1; padding: 30px; position: relative;
+            .pass-logo-text {{
+                color: white; font-size: 1.2em; font-weight: 600;
+                letter-spacing: 0.08em;
+            }}
+            .pass-body {{
+                flex: 1; padding: 40px 30px; position: relative;
                 display: flex; flex-direction: column;
-                justify-content: center;
+                justify-content: flex-end;
             }}
-            .login-watermark {{
+            .pass-watermark {{
                 position: absolute; top: 50%; left: 50%;
                 transform: translate(-50%, -50%);
-                width: 120px; opacity: 0.1; pointer-events: none;
+                width: 180px; opacity: 0.12; pointer-events: none;
             }}
-            .glass-footer {{
-                text-align: center; padding: 15px;
-                font-size: 0.75em; color: #666;
-                border-top: 1px solid rgba(255,255,255,0.2);
+            .pass-footer {{
+                text-align: center; padding: 12px;
+                font-size: 0.72em; color: #666;
+                border-top: 1px solid rgba(0,0,0,0.05);
             }}
         </style>
-        <div class="glass-container">
-            <div class="glass-card">
-                <div class="glass-header">
+        <div class="pass-container">
+            <div class="pass-card">
+                <div class="pass-header">
                     {logo_html}
                 </div>
-                <div class="glass-body">
+                <div class="pass-body">
                     {droplet_html}
                 </div>
-                <div class="glass-footer">Conceptualised by Baynunah HR|IS</div>
+                <div class="pass-footer">Conceptualised by Baynunah HR|IS</div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([1, 1, 1])
+        col1, col2, col3 = st.columns([1, 1.5, 1])
         with col2:
-            emp_id = st.text_input("Employee ID", placeholder="e.g. BAYN00046", key="emp_id", label_visibility="collapsed")
+            emp_id = st.text_input("Employee ID", placeholder="Employee ID", key="emp_id", label_visibility="collapsed")
             dob = st.date_input("Date of Birth", value=pd.to_datetime("1980-01-01"), min_value=pd.to_datetime("1940-01-01"), max_value=pd.to_datetime("2010-01-01"), key="emp_dob", format="DD/MM/YYYY", label_visibility="collapsed")
             
             if st.button("Login", use_container_width=True):
@@ -691,8 +685,6 @@ def render_employees():
                         st.error("Invalid Employee ID or Date of Birth")
                 else:
                     st.warning("Please enter Employee ID and Date of Birth")
-            
-            st.markdown('<p style="text-align:center; font-size:0.75em; color:#666; margin-top:20px;">Conceptualised by Baynunah HR|IS</p>', unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Back to Home", use_container_width=True, key="emp_back"):
@@ -737,78 +729,72 @@ def render_admin():
     else:
         droplet_b64 = get_droplet_base64()
         logo_b64 = get_logo_base64()
-        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="login-watermark">' if droplet_b64 else ''
-        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="header-logo">' if logo_b64 else '<span class="header-text">baynunah</span>'
+        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="pass-watermark">' if droplet_b64 else ''
+        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="pass-logo">' if logo_b64 else '<span class="pass-logo-text">baynunah</span>'
         
         st.markdown(f'''
         <style>
-            .glass-container {{
+            .pass-container {{
                 display: flex; justify-content: center; align-items: center;
-                min-height: 70vh; padding: 20px;
-                position: relative;
+                min-height: 75vh; padding: 20px;
             }}
-            .glass-container::before {{
-                content: "";
-                background-color: #7877754c;
-                position: absolute;
-                border-radius: 50%;
-                width: 6rem; height: 6rem;
-                top: 30%; right: 25%;
-            }}
-            .glass-card {{
-                width: 400px; min-height: 380px;
-                background-color: rgba(255, 255, 255, 0.85);
-                border: 1px solid rgba(255, 255, 255, 0.9);
+            .pass-card {{
+                width: 380px; min-height: 400px;
+                background-color: rgba(255, 255, 255, 0.074);
+                border: 1px solid rgba(255, 255, 255, 0.222);
                 -webkit-backdrop-filter: blur(20px);
                 backdrop-filter: blur(20px);
                 border-radius: 12px;
                 overflow: hidden;
                 transition: all ease 0.3s;
                 display: flex; flex-direction: column;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
             }}
-            .glass-card:hover {{
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
-                border: 1px solid rgba(255, 255, 255, 1);
+            .pass-card:hover {{
+                box-shadow: 0px 0px 20px 1px #0a23511f;
+                border: 1px solid rgba(255, 255, 255, 0.454);
             }}
-            .glass-header {{
-                background: #0a2351; padding: 20px; text-align: center;
+            .pass-header {{
+                background: #0a2351; padding: 15px 20px;
+                display: flex; justify-content: flex-end; align-items: center;
             }}
-            .header-logo {{ height: 40px; }}
-            .header-text {{
-                color: white; font-size: 1.4em; font-weight: 600;
-                letter-spacing: 0.1em;
+            .pass-logo {{
+                height: 28px;
+                filter: brightness(0) invert(1);
             }}
-            .glass-body {{
-                flex: 1; padding: 30px; position: relative;
+            .pass-logo-text {{
+                color: white; font-size: 1.2em; font-weight: 600;
+                letter-spacing: 0.08em;
+            }}
+            .pass-body {{
+                flex: 1; padding: 40px 30px; position: relative;
                 display: flex; flex-direction: column;
-                justify-content: center;
+                justify-content: flex-end;
             }}
-            .login-watermark {{
+            .pass-watermark {{
                 position: absolute; top: 50%; left: 50%;
                 transform: translate(-50%, -50%);
-                width: 120px; opacity: 0.1; pointer-events: none;
+                width: 180px; opacity: 0.12; pointer-events: none;
             }}
-            .glass-footer {{
-                text-align: center; padding: 15px;
-                font-size: 0.75em; color: #666;
-                border-top: 1px solid rgba(255,255,255,0.2);
+            .pass-footer {{
+                text-align: center; padding: 12px;
+                font-size: 0.72em; color: #666;
+                border-top: 1px solid rgba(0,0,0,0.05);
             }}
         </style>
-        <div class="glass-container">
-            <div class="glass-card">
-                <div class="glass-header">
+        <div class="pass-container">
+            <div class="pass-card">
+                <div class="pass-header">
                     {logo_html}
                 </div>
-                <div class="glass-body">
+                <div class="pass-body">
                     {droplet_html}
                 </div>
-                <div class="glass-footer">Conceptualised by Baynunah HR|IS</div>
+                <div class="pass-footer">Conceptualised by Baynunah HR|IS</div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([1, 1, 1])
+        col1, col2, col3 = st.columns([1, 1.5, 1])
         with col2:
             password = st.text_input("Password", type="password", key="admin_pwd", label_visibility="collapsed", placeholder="Enter Password")
             if st.button("Login", use_container_width=True):

@@ -381,36 +381,41 @@ def render_home():
             }}
             .menu-item img {{ width: 44px; height: 44px; margin-bottom: 10px; transition: all 0.25s ease; }}
             .menu-item span {{ display: block; line-height: 1.3; }}
+            .menu-item .content {{ 
+                display: flex; flex-direction: column; 
+                align-items: center; justify-content: center;
+                transition: transform 0.25s ease;
+            }}
             
             .item-tl {{ 
                 border-radius: 200px 5px 5px 5px; 
                 transform-origin: 100% 100%;
-                padding: 30px 30px 40px 40px;
             }}
+            .item-tl .content {{ transform: translate(-18px, -18px); }}
             .item-tl:hover {{ transform: translate(-8px, -8px); background: #171717; color: white; }}
             .item-tl:hover img {{ filter: brightness(0) invert(1); }}
             
             .item-tr {{ 
                 border-radius: 5px 200px 5px 5px;
                 transform-origin: 0% 100%;
-                padding: 30px 40px 40px 30px;
             }}
+            .item-tr .content {{ transform: translate(18px, -18px); }}
             .item-tr:hover {{ transform: translate(8px, -8px); background: #171717; color: white; }}
             .item-tr:hover img {{ filter: brightness(0) invert(1); }}
             
             .item-bl {{ 
                 border-radius: 5px 5px 5px 200px;
                 transform-origin: 100% 0%;
-                padding: 40px 30px 30px 40px;
             }}
+            .item-bl .content {{ transform: translate(-18px, 18px); }}
             .item-bl:hover {{ transform: translate(-8px, 8px); background: #171717; color: white; }}
             .item-bl:hover img {{ filter: brightness(0) invert(1); }}
             
             .item-br {{ 
                 border-radius: 5px 5px 200px 5px;
                 transform-origin: 0% 0%;
-                padding: 40px 40px 30px 30px;
             }}
+            .item-br .content {{ transform: translate(18px, 18px); }}
             .item-br:hover {{ transform: translate(8px, 8px); background: #171717; color: white; }}
             .item-br:hover img {{ filter: brightness(0) invert(1); }}
             
@@ -432,22 +437,30 @@ def render_home():
         <div class="menu-container">
             <div class="menu-row">
                 <a href="?page=employees" class="menu-item item-tl">
-                    <img src="{SVG_USERS}" alt="Employees">
-                    <span>Employees</span>
+                    <div class="content">
+                        <img src="{SVG_USERS}" alt="Employees">
+                        <span>Employees</span>
+                    </div>
                 </a>
                 <a href="?page=onboarding" class="menu-item item-tr">
-                    <img src="{SVG_CHECK}" alt="Onboarding">
-                    <span>Onboarding</span>
+                    <div class="content">
+                        <img src="{SVG_CHECK}" alt="Onboarding">
+                        <span>Onboarding</span>
+                    </div>
                 </a>
             </div>
             <div class="menu-row">
                 <a href="?page=external" class="menu-item item-bl">
-                    <img src="{SVG_GLOBE}" alt="External">
-                    <span>External</span>
+                    <div class="content">
+                        <img src="{SVG_GLOBE}" alt="External">
+                        <span>External</span>
+                    </div>
                 </a>
                 <a href="?page=admin" class="menu-item item-br">
-                    <img src="{SVG_LOCK}" alt="Admin">
-                    <span>Admin</span>
+                    <div class="content">
+                        <img src="{SVG_LOCK}" alt="Admin">
+                        <span>Admin</span>
+                    </div>
                 </a>
             </div>
         </div>

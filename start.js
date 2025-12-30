@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 
 const vite = spawn('npx', ['vite', '--host', '0.0.0.0', '--port', '5000'], {
   stdio: 'inherit',
-  shell: true
+  shell: false
 });
 
 vite.on('error', (err) => {

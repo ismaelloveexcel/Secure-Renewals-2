@@ -70,12 +70,7 @@ function MenuButton({ title, icon, position, href }: MenuButtonProps) {
     br: '8px 8px 160px 8px',
   }[position];
 
-  const contentPosition = {
-    tl: 'items-end justify-end pr-4 pb-4',
-    tr: 'items-end justify-start pl-4 pb-4',
-    bl: 'items-start justify-end pr-4 pt-4',
-    br: 'items-start justify-start pl-4 pt-4',
-  }[position];
+  const contentPosition = 'items-center justify-center';
 
   const baseStyle: React.CSSProperties = {
     width: '160px',

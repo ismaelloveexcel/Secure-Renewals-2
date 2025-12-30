@@ -280,4 +280,102 @@ Principal Accountabilities:
   }
 });
 
+// ============================================
+// CANDIDATE POOL - PUBLIC FORM SUBMISSION
+// ============================================
+router.post('/candidate-pool/submit', async (req, res) => {
+  try {
+    const data = JSON.parse(req.body.data);
+
+    // Generate candidate ID
+    const date = new Date();
+    const year = date.getFullYear();
+
+    const countResult = await pool.query(`
+      SELECT COUNT(*) as count
+      FROM candidate_pool
+      WHERE EXTRACT(YEAR FROM submitted_at) = $1
+    `, [year]);
+
+    const sequential = String(parseInt(countResult.rows[0].count) + 1).padStart(4, '0');
+    const candidateId = `CAND-${year}-${sequential}`;
+
+    // Insert into candidate_pool
+    const result = await pool.query(`
+      INSERT INTO candidate_pool (
+        candidate_id,
+        full_name,
+        email,
+        phone,
+        nationality,
+        current_location,
+        linkedin_profile,
+        preferred_functions,
+        years_experience,
+        expected_salary,
+        notice_period,
+        visa_status,
+        status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'Active')
+      RETURNING *
+    `, [
+      candidateId,
+      data.fullName,
+      data.email,
+      data.phone,
+      data.nationality || null,
+      data.currentLocation || null,
+      data.linkedinProfile || null,
+      data.preferredFunctions || [],
+      data.yearsExperience || null,
+      data.expectedSalary || null,
+      data.noticePeriod || null,
+      data.visaStatus || null
+    ]);
+
+    // TODO: Upload CV file to storage and parse it
+    // TODO: Send confirmation email using email_templates
+
+    res.json({
+      success: true,
+      candidateId: candidateId,
+      message: 'Application submitted successfully'
+    });
+  } catch (error) {
+    console.error('Error submitting to candidate pool:', error);
+    res.status(500).json({ error: 'Failed to submit application' });
+  }
+});
+
+// ============================================
+// GET CANDIDATE POOL
+// ============================================
+router.get('/candidate-pool/list', async (req, res) => {
+  try {
+    const { search, functions } = req.query;
+
+    let query = 'SELECT * FROM candidate_pool WHERE status = $1';
+    const params = ['Active'];
+
+    if (search) {
+      query += ' AND (full_name ILIKE $2 OR email ILIKE $2 OR cv_text ILIKE $2)';
+      params.push(`%${search}%`);
+    }
+
+    if (functions) {
+      const functionsArray = functions.split(',');
+      query += ` AND preferred_functions && $${params.length + 1}`;
+      params.push(functionsArray);
+    }
+
+    query += ' ORDER BY submitted_at DESC LIMIT 100';
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching candidate pool:', error);
+    res.status(500).json({ error: 'Failed to fetch candidate pool' });
+  }
+});
+
 module.exports = router;

@@ -22,8 +22,8 @@ wheels/
 
 # Virtual environments
 .env
+.env.*
 .venv
-env/
 venv/
 ENV/
 
@@ -43,3 +43,18 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+# Node
+node_modules/
+.npm/
+pnpm-lock.yaml
+package-lock.json
+npm-debug.log*
+
+# Frontend build
+frontend/dist/
+frontend/.vite/
+
+# Backend
+backend/.env
+__pypackages__/

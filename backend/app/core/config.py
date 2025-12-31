@@ -13,7 +13,7 @@ class Settings(BaseSettings):
         description="PostgreSQL connection string using asyncpg driver",
     )
     allowed_origins: List[AnyHttpUrl] = Field(
-        default_factory=lambda: ["http://localhost:5173"],
+        default_factory=lambda: ["http://localhost:5000", "http://0.0.0.0:5000"],
         description="List of allowed CORS origins",
     )
     auth_issuer: str = Field(

@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development", description="Current runtime environment")
     api_prefix: str = Field(default="/api", description="API prefix for routing")
     log_level: str = Field(default="INFO", description="Logging level")
+    database_url: str = Field(
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/secure_renewals",
+        description="PostgreSQL connection string using asyncpg driver",
+    )
     allowed_origins: List[AnyHttpUrl] = Field(
         default_factory=lambda: ["http://localhost:5173"],
         description="List of allowed CORS origins",

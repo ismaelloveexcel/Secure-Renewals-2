@@ -1,3 +1,4 @@
+import type React from 'react';
 import { useState } from 'react';
 
 /**
@@ -8,74 +9,122 @@ import { useState } from 'react';
 function App() {
   const [logoLoaded, setLogoLoaded] = useState(true);
 
+  const menuItems = [
+    {
+      title: 'Employees',
+      description: 'People directory, profiles, and org visibility',
+      icon: <UsersIcon />,
+      position: 'tl' as const,
+      href: '?page=employees',
+      tooltip: 'View and manage employee records',
+    },
+    {
+      title: 'Onboarding',
+      description: 'Guided journeys for new joiners and managers',
+      icon: <ClipboardIcon />,
+      position: 'tr' as const,
+      href: '?page=onboarding',
+      tooltip: 'Track new hire onboarding progress',
+    },
+    {
+      title: 'External Users',
+      description: 'Secure access for recruiters and contractors',
+      icon: <GlobeIcon />,
+      position: 'bl' as const,
+      href: '?page=external',
+      tooltip: 'Manage external recruiters and contractors',
+    },
+    {
+      title: 'Admin',
+      description: 'Controls, approvals, and escalation visibility',
+      icon: <ShieldIcon />,
+      position: 'br' as const,
+      href: '?page=admin',
+      tooltip: 'Access administrative functions',
+    },
+  ];
+
   return (
-    <div className="dotted-grid min-h-screen flex flex-col items-center justify-center p-5 page-transition">
-      <div className="text-center mb-8">
-        <img 
-          src="/attached_assets/logo_1765648544636_1766742634201.png" 
-          alt="Baynunah" 
-          className="h-16 mx-auto mb-4"
-          onError={() => setLogoLoaded(false)}
-          style={{ display: logoLoaded ? 'block' : 'none' }}
-        />
-        {!logoLoaded && (
-          <h1 className="text-3xl font-semibold text-gray-800 tracking-wider">baynunah</h1>
-        )}
-        <h2 className="text-xl font-medium text-gray-700 tracking-widest uppercase mt-2">HR Portal</h2>
-      </div>
+    <div className="page-shell min-h-screen overflow-hidden">
+      <div className="background-aurora" aria-hidden />
+      <div className="background-grid" aria-hidden />
 
-      <div className="grid grid-cols-2 gap-1 max-w-xs">
-        <MenuButton 
-          title="Employees" 
-          icon={<UsersIcon />} 
-          position="tl"
-          href="?page=employees"
-          tooltip="View and manage employee records"
-        />
-        <MenuButton 
-          title="Onboarding" 
-          icon={<ClipboardIcon />} 
-          position="tr"
-          href="?page=onboarding"
-          tooltip="Track new hire onboarding progress"
-        />
-        <MenuButton 
-          title="External Users" 
-          icon={<GlobeIcon />} 
-          position="bl"
-          href="?page=external"
-          tooltip="Manage external recruiters and contractors"
-        />
-        <MenuButton 
-          title="Admin" 
-          icon={<ShieldIcon />} 
-          position="br"
-          href="?page=admin"
-          tooltip="Access administrative functions"
-        />
-      </div>
+      <main className="relative max-w-6xl mx-auto px-6 py-10 lg:py-14 page-transition">
+        <header className="text-center mb-12 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-chip text-sm text-indigo-900">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+            </span>
+            Systems live & secured
+          </div>
 
-      <footer className="mt-12 text-sm text-gray-500 tracking-wider">
-        Conceptualised by Baynunah|HR|IS
-      </footer>
-      
-      {/* Quick access hint */}
-      <div className="fixed bottom-4 right-4 text-xs text-gray-400">
-        Press <kbd className="px-1 py-0.5 bg-gray-100 rounded text-gray-600">?</kbd> for help
-      </div>
+          <div className="space-y-2">
+            {logoLoaded ? (
+              <img
+                src="/attached_assets/logo_1765648544636_1766742634201.png"
+                alt="Baynunah"
+                className="h-14 mx-auto"
+                onError={() => setLogoLoaded(false)}
+              />
+            ) : (
+              <h1 className="text-3xl font-semibold text-gray-900 tracking-wider">baynunah</h1>
+            )}
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">HR Experience Hub</h2>
+              <p className="text-gray-600 mt-2 max-w-2xl mx-auto leading-relaxed">
+                Navigate core HR journeys with a crisp, glassmorphic palette designed for clarity and focus.
+                Each tile is keyboard-friendly and provides instant context before you click through.
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <section className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10 items-start">
+          <div className="glass-panel p-6 rounded-2xl shadow-lg space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-indigo-600 uppercase tracking-[0.2em]">Orientation</p>
+                <h3 className="text-xl font-semibold text-gray-900 mt-1">Your daily HR console</h3>
+              </div>
+              <div className="pill-accent">V3 Visual Refresh</div>
+            </div>
+            <p className="text-gray-600 leading-relaxed">
+              Quick-launch the spaces you need most, with hover states that hint at movement and reliable focus rings for
+              accessibility. The layout breathes with soft gradients and improved contrast.
+            </p>
+            <div className="flex flex-col gap-2 text-sm text-gray-700">
+              <div className="hint-tile">Use <kbd>Tab</kbd> + <kbd>Enter</kbd> to jump between quadrants.</div>
+              <div className="hint-tile">Hover to preview intent and accent colors before committing.</div>
+              <div className="hint-tile">All links open within the secure HR perimeter.</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-items-center">
+            {menuItems.map((item) => (
+              <MenuButton key={item.title} {...item} />
+            ))}
+          </div>
+        </section>
+
+        <footer className="mt-12 text-center text-sm text-gray-500 tracking-wider">
+          Conceptualised by Baynunah | HR | IS
+        </footer>
+      </main>
     </div>
   );
 }
 
 interface MenuButtonProps {
   title: string;
+  description: string;
   icon: React.ReactNode;
   position: 'tl' | 'tr' | 'bl' | 'br';
   href: string;
   tooltip?: string;
 }
 
-function MenuButton({ title, icon, position, href, tooltip }: MenuButtonProps) {
+function MenuButton({ title, description, icon, position, href, tooltip }: MenuButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const radiusStyles = {
@@ -85,37 +134,44 @@ function MenuButton({ title, icon, position, href, tooltip }: MenuButtonProps) {
     br: '8px 8px 160px 8px',
   }[position];
 
-  const contentPosition = 'items-center justify-center';
-
   const baseStyle: React.CSSProperties = {
-    width: '160px',
-    height: '160px',
     borderRadius: radiusStyles,
-    background: isHovered ? '#171717' : '#e8e8e8',
-    color: isHovered ? 'white' : '#374151',
-    transform: isHovered ? 'translateY(-0.8em)' : 'translateY(0)',
-    letterSpacing: isHovered ? '0.5em' : '0.2em',
-    transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
-    boxShadow: isHovered 
-      ? '0 12px 32px rgba(0,0,0,0.25), 0 6px 16px rgba(0,0,0,0.15)'
-      : 'inset 2px 5px 10px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.3), 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.8)',
     textDecoration: 'none',
   };
 
   return (
     <a
       href={href}
-      className={`flex flex-col ${contentPosition} cursor-pointer text-xs font-medium uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500`}
+      className={`menu-card flex flex-col justify-between cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500`}
       style={baseStyle}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       title={tooltip}
       aria-label={`Navigate to ${title}`}
     >
-      <div className="mb-2" style={{ color: isHovered ? 'white' : '#39FF14' }}>
-        {icon}
+      <div className="menu-card__top">
+        <div className="icon-ring" aria-hidden>
+          <span className={`icon-ring__glow ${isHovered ? 'icon-ring__glow--active' : ''}`} />
+          <div className="icon-ring__inner" style={{ color: isHovered ? '#fff' : '#0f172a' }}>
+            {icon}
+          </div>
+        </div>
+        <span className="menu-card__badge">{position.toUpperCase()} access</span>
       </div>
-      <span className="text-center">{title}</span>
+      <div className="space-y-1">
+        <span className="menu-card__title">{title}</span>
+        <p className="menu-card__description">{description}</p>
+      </div>
+      <div className="menu-card__cta">
+        <span>Open</span>
+        <span className="menu-card__chevron" aria-hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14" />
+            <path d="M13 5l7 7-7 7" />
+          </svg>
+        </span>
+      </div>
+      <div className={`menu-card__accent menu-card__accent--${position} ${isHovered ? 'menu-card__accent--active' : ''}`} aria-hidden />
     </a>
   );
 }

@@ -267,7 +267,7 @@ function EmployeesSection({ token }: { token: string }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Renewal Period (months)</label>
                 <select
                   value={formData.renewal_period_months}
-                  onChange={(e) => setFormData({ ...formData, renewal_period_months: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, renewal_period_months: parseInt(e.target.value, 10) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 >
                   <option value={6}>6 months</option>
@@ -499,7 +499,7 @@ function AdminSection({ token }: { token: string }) {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">API Base URL</span>
-              <span className="text-gray-800 font-medium text-xs">{import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}</span>
+              <span className="text-gray-800 font-medium text-xs">Configured</span>
             </div>
           </div>
         </div>
@@ -580,13 +580,13 @@ function App() {
             </h2>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <label htmlFor="token" className="text-sm text-gray-500">Bearer Token:</label>
+                <label htmlFor="token" className="text-sm text-gray-500">Auth Token:</label>
                 <input
                   id="token"
                   type="password"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  placeholder="Paste your JWT token here"
+                  placeholder="Enter authentication token"
                   className="w-64 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>

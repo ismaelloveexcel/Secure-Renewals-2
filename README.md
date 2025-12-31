@@ -13,9 +13,10 @@ Internal application for securely managing employee contract renewals and onboar
 
 ## Backend Setup
 1. Navigate to `backend/`.
-2. Create an `.env` file (see `.env.example`).
+2. Create an `.env` file (see `.env.example`). Ensure `DATABASE_URL` points to your PostgreSQL instance (asyncpg driver).
 3. Install dependencies with `uv sync` (or `pip install -r` from a generated requirements list if preferred).
-4. Run the API: `uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`
+4. Apply migrations: `uv run alembic upgrade head` (from the `backend` directory).
+5. Run the API: `uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`
 
 The API serves OpenAPI docs at `http://localhost:8000/docs` and enforces simple role headers (`X-Role`: admin | hr | viewer).
 
@@ -28,5 +29,6 @@ The API serves OpenAPI docs at `http://localhost:8000/docs` and enforces simple 
 ## Deployment Notes
 - Configure HTTPS termination at your ingress or proxy layer.
 - Set `ALLOWED_ORIGINS` in the backend `.env` to the deployed frontend URL (comma-separated for multiples).
+- Run `uv run alembic upgrade head` after configuring your database credentials before starting the API in new environments.
 - Run backend and frontend as separate services or containers; no Replit-specific files remain.
 - Update `backend/uv.lock` via `uv lock` in a networked environment before production deployment.

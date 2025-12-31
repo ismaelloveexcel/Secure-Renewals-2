@@ -248,7 +248,67 @@ Create `.github/ISSUE_TEMPLATE/` with:
 
 ---
 
-## 5. Third-Party SaaS Integrations
+## 5. Replit Deployment (Primary Platform)
+
+> **The app will be published on Replit under your company domain.**
+
+### Replit Benefits for HR Portal
+
+| Feature | Benefit |
+|---------|---------|
+| **Always-on** | App runs 24/7, no manual restarts |
+| **Custom domain** | Use your company domain (e.g., `hr.yourcompany.com`) |
+| **Auto-HTTPS** | SSL certificates auto-managed |
+| **Secrets management** | Secure environment variables |
+| **One-click deploy** | Just click Run |
+| **Built-in database** | PostgreSQL via Nix packages |
+
+### Replit Configuration (Already Configured)
+
+The `.replit` file is pre-configured:
+
+```toml
+modules = ["nodejs-20", "python-3.11"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80  # Frontend
+
+[[ports]]
+localPort = 5001
+externalPort = 3000  # Backend API
+
+[nix]
+packages = ["postgresql"]
+
+[workflows]
+runButton = "Project"  # One-click to start everything
+```
+
+### Deployment Steps
+
+1. **Import to Replit** - Fork/import this repository
+2. **Configure Secrets** - Add these in Replit Secrets tab:
+   - `DATABASE_URL` - PostgreSQL connection string
+   - `AUTH_ISSUER` - Azure AD issuer URL
+   - `AUTH_AUDIENCE` - Your app ID URI
+   - `AUTH_JWKS_URL` - Azure AD keys URL
+   - `ALLOWED_ORIGINS` - Your Replit custom domain
+3. **Set Custom Domain** - Replit Settings → Custom Domains
+4. **Run Migrations** - `cd backend && uv run alembic upgrade head`
+5. **Click Run** - Frontend and backend start automatically
+
+### No Manual Intervention After Setup
+
+Once deployed on Replit:
+- ✅ App runs continuously (Always-on)
+- ✅ Auto-restarts on crash
+- ✅ HTTPS auto-renewed
+- ✅ Updates via GitHub sync
+
+---
+
+## 6. Alternative Hosting (If Not Using Replit)
 
 ### Recommended Services (Free Tiers Available)
 
@@ -263,13 +323,14 @@ Create `.github/ISSUE_TEMPLATE/` with:
 
 ---
 
-## 6. Phased Implementation Plan (Automation-First)
+## 7. Phased Implementation Plan (Automation-First)
 
 ### Phase 1: Zero-Touch Setup (Week 1-2)
 
 | Task | Automation Benefit | Manual Work Eliminated |
 |------|-------------------|----------------------|
-| ✅ GitHub Actions CI/CD | Auto-deploy on merge | No manual deployments |
+| ✅ Replit deployment | One-click run, custom domain | No server management |
+| ✅ GitHub Actions CI/CD | Auto-lint on push | No manual code checks |
 | ✅ Dependabot with auto-merge | Auto-update dependencies | No manual updates |
 | SSO login | One-click authentication | No token management |
 | Scheduled email reminders | Auto-notify on expiry | No manual tracking |

@@ -32,16 +32,17 @@ Before using the portal, make sure you have:
 
 - ✅ A web browser (Chrome, Firefox, Edge, or Safari)
 - ✅ Your company login credentials (Microsoft/Azure AD account)
-- ✅ An authentication token (provided by IT or your admin)
+- ✅ Access to the portal URL (your company domain on Replit)
 
-### Logging In
+### Accessing the Portal
 
 1. Open your web browser
-2. Go to the HR Portal URL (provided by your IT department)
-3. Enter your **Auth Token** in the field at the top right of the screen
-4. You'll see a green indicator when you're connected
+2. Go to your company's HR Portal URL (e.g., `https://hr-portal.yourcompany.com`)
+3. The portal is hosted on Replit under your company domain - it's always available
+4. Enter your **Auth Token** in the field at the top right of the screen
+5. You'll see a green indicator when you're connected
 
-> 💡 **Tip:** Your IT admin can provide your authentication token. This is like a special password that allows you to access the system securely.
+> 💡 **Tip:** The portal runs 24/7 on Replit - no need to wait for anyone to start it. Just open the URL and you're ready to go!
 
 ---
 

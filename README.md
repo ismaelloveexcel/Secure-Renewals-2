@@ -182,30 +182,60 @@ DEV_STATIC_TOKEN=<your-test-jwt>
 
 ## 🚀 Deployment
 
+### Replit Deployment (Recommended)
+
+The app is configured for **Replit** deployment under your company domain.
+
+**Auto-configured features:**
+- ✅ Frontend runs on port 5000 (external port 80)
+- ✅ Backend runs on port 5001 (external port 3000)
+- ✅ PostgreSQL available via Nix packages
+- ✅ One-click run via Replit workflows
+
+**Setup Steps:**
+
+1. **Import to Replit**: Fork or import this repo to your Replit workspace
+2. **Configure Secrets** (in Replit Secrets tab):
+   ```
+   DATABASE_URL=postgresql+asyncpg://...
+   AUTH_ISSUER=https://login.microsoftonline.com/<tenant-id>/v2.0
+   AUTH_AUDIENCE=api://secure-renewals
+   AUTH_JWKS_URL=https://login.microsoftonline.com/<tenant-id>/discovery/v2.0/keys
+   ALLOWED_ORIGINS=https://your-replit-app.your-company.com
+   ```
+3. **Set Custom Domain**: In Replit → Settings → Custom Domains, add your company domain
+4. **Run**: Click the Run button - frontend and backend start automatically
+
+**Replit-specific URLs:**
+- Frontend: `https://your-app-name.your-company.com`
+- Backend API: `https://your-app-name.your-company.com:3000/api`
+- API Docs: `https://your-app-name.your-company.com:3000/docs`
+
 ### Environment Variables
 
-**Backend (`.env`):**
+**Backend Secrets (Replit Secrets or `.env`):**
 ```env
 DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname
-ALLOWED_ORIGINS=https://your-frontend-domain.com
+ALLOWED_ORIGINS=https://your-app.your-company.com
 AUTH_ISSUER=https://login.microsoftonline.com/<tenant>/v2.0
 AUTH_AUDIENCE=api://secure-renewals
 AUTH_JWKS_URL=https://login.microsoftonline.com/<tenant>/discovery/v2.0/keys
 ```
 
-**Frontend (`.env`):**
+**Frontend (auto-configured in Replit):**
 ```env
-VITE_API_BASE_URL=https://your-api-domain.com/api
+VITE_API_BASE_URL=https://your-app.your-company.com:3000/api
 ```
 
 ### Deployment Checklist
 
-- [ ] Configure HTTPS at ingress/proxy layer
-- [ ] Set production database URL
-- [ ] Configure CORS origins
-- [ ] Run database migrations
-- [ ] Set up Azure AD app registration
-- [ ] Test authentication flow
+- [ ] Import repo to Replit workspace
+- [ ] Configure Replit Secrets with database and auth settings
+- [ ] Set custom company domain in Replit settings
+- [ ] Run database migrations (`cd backend && uv run alembic upgrade head`)
+- [ ] Click Run to start the application
+- [ ] Test authentication flow with Azure AD
+- [ ] Share portal URL with HR team
 
 ---
 

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./theme.css";
 
 * {
   margin: 0;
@@ -7,8 +8,8 @@
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
-  background: #e8e8e8;
+  font-family: var(--font-family, 'Poppins', sans-serif);
+  background: var(--color-background, #e8e8e8);
   min-height: 100vh;
 }
 
@@ -21,11 +22,8 @@ body {
   background: linear-gradient(145deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 
-    inset 2px 5px 10px rgba(0,0,0,0.2),
-    inset -2px -2px 5px rgba(255,255,255,0.3),
-    5px 5px 15px rgba(0,0,0,0.1),
-    -5px -5px 15px rgba(255,255,255,0.8);
+  box-shadow: var(--shadow-inset, inset 2px 5px 10px rgba(0,0,0,0.2)), 
+              var(--shadow-neumorphic, 5px 5px 15px rgba(0,0,0,0.1));
 }
 
 .glassmorphism:hover {
@@ -36,13 +34,13 @@ body {
 }
 
 .menu-btn {
-  transition: all 0.4s ease !important;
-  letter-spacing: 0.2em;
-  background: #e8e8e8 !important;
+  transition: all var(--transition-slow, 0.4s ease) !important;
+  letter-spacing: var(--tracking-wider, 0.2em);
+  background: var(--color-background, #e8e8e8) !important;
 }
 
 .menu-btn:hover {
-  letter-spacing: 0.5em !important;
+  letter-spacing: var(--tracking-widest, 0.5em) !important;
   transform: translateY(-0.8em) !important;
   background: #171717 !important;
   color: white !important;
@@ -57,17 +55,39 @@ body {
 }
 
 .quarter-tl {
-  border-radius: 160px 8px 8px 8px;
+  border-radius: var(--radius-quadrant-tl, 160px 8px 8px 8px);
 }
 
 .quarter-tr {
-  border-radius: 8px 160px 8px 8px;
+  border-radius: var(--radius-quadrant-tr, 8px 160px 8px 8px);
 }
 
 .quarter-bl {
-  border-radius: 8px 8px 8px 160px;
+  border-radius: var(--radius-quadrant-bl, 8px 8px 8px 160px);
 }
 
 .quarter-br {
-  border-radius: 8px 8px 160px 8px;
+  border-radius: var(--radius-quadrant-br, 8px 8px 160px 8px);
+}
+
+/* Improved focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-primary, #667eea);
+  outline-offset: 2px;
+}
+
+/* Smooth page transitions */
+.page-transition {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

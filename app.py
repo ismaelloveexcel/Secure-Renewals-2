@@ -2,17 +2,20 @@
 """
 HR Portal - React Application
 Serves the pre-built React app through Streamlit.
+
+Enhanced with improved navigation and efficiency features for solo HR.
 """
 import streamlit as st
 import streamlit.components.v1 as components
 import os
 import base64
+from datetime import datetime, timedelta
 
 st.set_page_config(
     page_title="HR Portal | Baynunah",
     page_icon="🏢",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 def get_logo_base64():
@@ -532,8 +535,257 @@ def render_active_rrfs():
             st.query_params["page"] = "recruitment_dashboard"
             st.rerun()
 
+def render_sidebar():
+    """
+    Render sidebar navigation for quick access.
+    Improves efficiency for solo HR by reducing clicks.
+    """
+    with st.sidebar:
+        # Logo and title
+        logo_b64 = get_logo_base64()
+        if logo_b64:
+            st.markdown(f'''
+            <div style="text-align: center; padding: 10px 0 20px 0;">
+                <img src="data:image/png;base64,{logo_b64}" style="width: 60px; height: auto;" alt="Baynunah">
+            </div>
+            ''', unsafe_allow_html=True)
+        
+        st.markdown("### ⚡ Quick Navigation")
+        
+        # Main navigation buttons with icons
+        if st.button("🏠 Home", use_container_width=True, key="nav_home"):
+            st.query_params.clear()
+            st.rerun()
+        
+        if st.button("🎯 Recruitment", use_container_width=True, key="nav_recruitment"):
+            if st.session_state.get('admin_authenticated'):
+                st.query_params["page"] = "recruitment_dashboard"
+            else:
+                st.query_params["page"] = "admin"
+            st.rerun()
+        
+        if st.button("📋 Active RRFs", use_container_width=True, key="nav_rrfs"):
+            if st.session_state.get('admin_authenticated'):
+                st.query_params["page"] = "recruitment_active_rrfs"
+            else:
+                st.query_params["page"] = "admin"
+            st.rerun()
+        
+        if st.button("🎫 Pass Generation", use_container_width=True, key="nav_passes"):
+            if st.session_state.get('admin_authenticated'):
+                st.query_params["page"] = "pass_generation"
+            else:
+                st.query_params["page"] = "admin"
+            st.rerun()
+        
+        st.divider()
+        
+        # Quick Stats Section
+        st.markdown("### 📊 Quick Stats")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Open RRFs", "2", help="Active recruitment requests")
+        with col2:
+            st.metric("Pending", "0", help="Submissions awaiting review")
+        
+        st.divider()
+        
+        # Quick Actions
+        st.markdown("### 🚀 Quick Actions")
+        
+        if st.button("➕ Create RRF", use_container_width=True, key="quick_create_rrf", type="primary"):
+            if st.session_state.get('admin_authenticated'):
+                st.query_params["page"] = "create_rrf"
+            else:
+                st.query_params["page"] = "admin"
+            st.rerun()
+        
+        if st.button("🎫 New Pass", use_container_width=True, key="quick_new_pass"):
+            if st.session_state.get('admin_authenticated'):
+                st.query_params["page"] = "pass_generation"
+            else:
+                st.query_params["page"] = "admin"
+            st.rerun()
+        
+        st.divider()
+        
+        # Help Section
+        with st.expander("❓ Need Help?"):
+            st.markdown("""
+            **Keyboard Shortcuts:**
+            - `Home` → Go to home page
+            - `R` → Open Recruitment
+            
+            **Documentation:**
+            - [Quick Start Guide](QUICK_START.md)
+            - [System Guide](RECRUITMENT_SYSTEM_README.md)
+            
+            **Support:**
+            Contact IT Support for technical issues.
+            """)
+        
+        # Footer with version
+        st.markdown('''
+        <div style="position: fixed; bottom: 10px; left: 10px; font-size: 0.7em; color: #95a5a6;">
+            HR Portal v1.0.0
+        </div>
+        ''', unsafe_allow_html=True)
+
+def render_pass_generation():
+    """Render pass generation page with improved UX."""
+    if 'admin_authenticated' not in st.session_state or not st.session_state.admin_authenticated:
+        st.query_params["page"] = "admin"
+        st.rerun()
+        return
+    
+    st.markdown('''
+    <div style="padding: 20px 0;">
+        <h2 style="color: #2c3e50; margin-bottom: 10px;">🎫 Pass Generation</h2>
+        <p style="color: #7f8c8d;">Generate secure access passes for managers, candidates, and employees.</p>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # Pass type selection
+    pass_type = st.selectbox(
+        "Select Pass Type",
+        ["Hiring Manager Pass", "Candidate Pass", "Employee Pass", "Manager Pass (3-in-1)"],
+        help="Choose the type of pass to generate"
+    )
+    
+    st.markdown("---")
+    
+    if pass_type == "Hiring Manager Pass":
+        st.markdown("### 👔 Hiring Manager Pass")
+        st.info("This pass allows hiring managers to review candidates and conduct interviews for specific positions.")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            manager_name = st.text_input("Manager Name *", placeholder="Enter full name")
+            manager_email = st.text_input("Manager Email *", placeholder="name@company.com")
+        with col2:
+            manager_phone = st.text_input("Phone Number", placeholder="+971 XX XXX XXXX")
+            department = st.text_input("Department", placeholder="e.g., Engineering")
+        
+        rrf_select = st.selectbox(
+            "Select RRF / Position *",
+            ["RRF-BWT-12-001 - Electronics Engineer", "RRF-BWT-12-002 - Thermodynamics Engineer"],
+            help="Select the recruitment request this pass is for"
+        )
+        
+        if st.button("Generate Hiring Manager Pass", type="primary", use_container_width=True):
+            if manager_name and manager_email:
+                st.success("✅ Pass generated successfully!")
+                st.markdown(f"""
+                **Pass ID:** HM-{datetime.now().year}-001
+                
+                **Access URL:** `https://hr.baynunah.ae/pass/HM-{datetime.now().year}-001`
+                
+                **Expires:** {(datetime.now() + timedelta(days=90)).strftime('%B %d, %Y')}
+                """)
+                st.balloons()
+            else:
+                st.error("Please fill in all required fields")
+    
+    elif pass_type == "Candidate Pass":
+        st.markdown("### 👤 Candidate Pass")
+        st.info("This pass allows candidates to track their application status and upload documents.")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            candidate_name = st.text_input("Candidate Name *", placeholder="Enter full name")
+            candidate_email = st.text_input("Candidate Email *", placeholder="name@email.com")
+        with col2:
+            candidate_phone = st.text_input("Phone Number", placeholder="+971 XX XXX XXXX")
+            position = st.selectbox("Position Applied For *", 
+                ["Electronics Engineer", "Thermodynamics Engineer"])
+        
+        if st.button("Generate Candidate Pass", type="primary", use_container_width=True):
+            if candidate_name and candidate_email:
+                st.success("✅ Candidate pass generated!")
+                st.markdown(f"""
+                **Pass ID:** CAND-{datetime.now().year}-0001
+                
+                **Access URL:** `https://hr.baynunah.ae/pass/CAND-{datetime.now().year}-0001`
+                
+                **Expires:** {(datetime.now() + timedelta(days=60)).strftime('%B %d, %Y')}
+                """)
+            else:
+                st.error("Please fill in all required fields")
+    
+    elif pass_type == "Employee Pass":
+        st.markdown("### 🏢 Employee Pass")
+        st.info("Standard employee self-service pass for attendance, leave, and payslip access.")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            emp_id = st.text_input("Employee ID *", placeholder="e.g., EMP-2025-001")
+            emp_name = st.text_input("Full Name *", placeholder="Enter full name")
+            emp_email = st.text_input("Email *", placeholder="name@baynunah.ae")
+        with col2:
+            emp_phone = st.text_input("Phone", placeholder="+971 XX XXX XXXX")
+            emp_dept = st.text_input("Department", placeholder="e.g., Engineering")
+            emp_title = st.text_input("Job Title", placeholder="e.g., Senior Engineer")
+        
+        line_manager = st.text_input("Line Manager", placeholder="Manager name")
+        
+        if st.button("Generate Employee Pass", type="primary", use_container_width=True):
+            if emp_id and emp_name and emp_email:
+                st.success("✅ Employee pass generated!")
+                st.markdown(f"""
+                **Pass ID:** {emp_id}
+                
+                **Access URL:** `https://hr.baynunah.ae/pass/{emp_id}`
+                
+                **Expires:** Never (Employee passes are permanent)
+                """)
+            else:
+                st.error("Please fill in all required fields")
+    
+    else:  # Manager Pass (3-in-1)
+        st.markdown("### 👑 Manager Pass (3-in-1)")
+        st.info("Combined pass with Personal + Team Management + Recruitment capabilities.")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            mgr_id = st.text_input("Employee ID *", placeholder="e.g., EMP-2025-001")
+            mgr_name = st.text_input("Full Name *", placeholder="Enter full name")
+            mgr_email = st.text_input("Email *", placeholder="name@baynunah.ae")
+        with col2:
+            mgr_phone = st.text_input("Phone", placeholder="+971 XX XXX XXXX")
+            mgr_dept = st.text_input("Department", placeholder="e.g., Engineering")
+            mgr_title = st.text_input("Job Title", placeholder="e.g., Engineering Manager")
+        
+        team_size = st.number_input("Team Size", min_value=0, max_value=100, value=5)
+        
+        if st.button("Generate Manager Pass", type="primary", use_container_width=True):
+            if mgr_id and mgr_name and mgr_email:
+                st.success("✅ Manager 3-in-1 pass generated!")
+                st.markdown(f"""
+                **Pass ID:** MGR-{mgr_id}
+                
+                **Access URL:** `https://hr.baynunah.ae/pass/MGR-{mgr_id}`
+                
+                **Expires:** Never (Manager passes are permanent)
+                
+                **Enabled Modules:**
+                - ✅ Personal: Attendance, Leave, Payslip
+                - ✅ Team: Approve Leave, View Attendance, Performance
+                - ✅ Recruitment: Review Candidates, Interviews, Decisions
+                """)
+            else:
+                st.error("Please fill in all required fields")
+    
+    st.markdown('<br>', unsafe_allow_html=True)
+    if st.button("← Back to Dashboard", use_container_width=False):
+        st.query_params["page"] = "recruitment_dashboard"
+        st.rerun()
+
 def main():
     page = get_page()
+    
+    # Render sidebar for authenticated users or on admin pages
+    if page not in ["home"] or st.session_state.get('admin_authenticated'):
+        render_sidebar()
 
     if page == "home":
         render_home()
@@ -549,6 +801,8 @@ def main():
         render_recruitment_dashboard()
     elif page == "recruitment_active_rrfs":
         render_active_rrfs()
+    elif page == "pass_generation":
+        render_pass_generation()
     elif page == "insurance_renewal":
         render_insurance_renewal()
     elif page == "life_insurance":

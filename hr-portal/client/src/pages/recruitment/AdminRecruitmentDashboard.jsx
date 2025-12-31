@@ -14,7 +14,8 @@ import {
   CardActions,
   IconButton,
   Badge,
-  Alert
+  Alert,
+  Tooltip
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -23,7 +24,8 @@ import {
   CloudUpload as CloudUploadIcon,
   Badge as BadgeIcon,
   Search as SearchIcon,
-  FilterList as FilterIcon
+  FilterList as FilterIcon,
+  HelpOutline as HelpOutlineIcon
 } from '@mui/icons-material';
 
 // Import sub-components
@@ -32,6 +34,15 @@ import CandidatePoolTab from '../../components/recruitment/CandidatePoolTab';
 import ExternalSubmissionsTab from '../../components/recruitment/ExternalSubmissionsTab';
 import CreateRRFDialog from '../../components/recruitment/CreateRRFDialog';
 import GeneratePassDialog from '../../components/recruitment/GeneratePassDialog';
+
+// Helper tooltip component for inline documentation
+const HelpTooltip = ({ title }) => (
+  <Tooltip title={title} placement="top" arrow>
+    <IconButton size="small" sx={{ ml: 0.5, opacity: 0.6, '&:hover': { opacity: 1 } }}>
+      <HelpOutlineIcon fontSize="small" />
+    </IconButton>
+  </Tooltip>
+);
 
 const AdminRecruitmentDashboard = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -66,14 +77,33 @@ const AdminRecruitmentDashboard = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: '#2c3e50' }}>
-          Recruitment Dashboard
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Manage recruitment requests, candidate pool, and hiring pipeline
-        </Typography>
+      {/* Header with Help */}
+      <Box sx={{ mb: 4, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="h4" sx={{ fontWeight: 600, color: '#2c3e50' }}>
+              Recruitment Dashboard
+            </Typography>
+            <HelpTooltip title="This dashboard shows all active recruitment requests, candidates in the talent pool, and pending submissions. Use the quick action buttons to create new RRFs or generate passes." />
+          </Box>
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+            Manage recruitment requests, candidate pool, and hiring pipeline
+          </Typography>
+        </Box>
+        
+        {/* Quick Stats Summary */}
+        <Box sx={{ 
+          display: { xs: 'none', md: 'flex' }, 
+          alignItems: 'center', 
+          gap: 2,
+          p: 2,
+          backgroundColor: '#f8f9fa',
+          borderRadius: 2
+        }}>
+          <Typography variant="body2" color="text.secondary">
+            Last updated: {new Date().toLocaleTimeString()}
+          </Typography>
+        </Box>
       </Box>
 
       {/* Quick Stats */}
@@ -82,7 +112,13 @@ const AdminRecruitmentDashboard = () => {
           <Card elevation={0} sx={{
             border: '1px solid #e0e0e0',
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white'
+            color: 'white',
+            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+            cursor: 'pointer',
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              boxShadow: '0 8px 24px rgba(102, 126, 234, 0.4)'
+            }
           }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

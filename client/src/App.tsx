@@ -1,10 +1,15 @@
 import { useState } from 'react';
 
+/**
+ * HR Portal Home Page
+ * Features an elegant 2x2 quadrant menu with glassmorphism effects
+ * and improved accessibility for solo HR maintenance.
+ */
 function App() {
   const [logoLoaded, setLogoLoaded] = useState(true);
 
   return (
-    <div className="dotted-grid min-h-screen flex flex-col items-center justify-center p-5">
+    <div className="dotted-grid min-h-screen flex flex-col items-center justify-center p-5 page-transition">
       <div className="text-center mb-8">
         <img 
           src="/attached_assets/logo_1765648544636_1766742634201.png" 
@@ -25,30 +30,39 @@ function App() {
           icon={<UsersIcon />} 
           position="tl"
           href="?page=employees"
+          tooltip="View and manage employee records"
         />
         <MenuButton 
           title="Onboarding" 
           icon={<ClipboardIcon />} 
           position="tr"
           href="?page=onboarding"
+          tooltip="Track new hire onboarding progress"
         />
         <MenuButton 
           title="External Users" 
           icon={<GlobeIcon />} 
           position="bl"
           href="?page=external"
+          tooltip="Manage external recruiters and contractors"
         />
         <MenuButton 
           title="Admin" 
           icon={<ShieldIcon />} 
           position="br"
           href="?page=admin"
+          tooltip="Access administrative functions"
         />
       </div>
 
       <footer className="mt-12 text-sm text-gray-500 tracking-wider">
         Conceptualised by Baynunah|HR|IS
       </footer>
+      
+      {/* Quick access hint */}
+      <div className="fixed bottom-4 right-4 text-xs text-gray-400">
+        Press <kbd className="px-1 py-0.5 bg-gray-100 rounded text-gray-600">?</kbd> for help
+      </div>
     </div>
   );
 }
@@ -58,9 +72,10 @@ interface MenuButtonProps {
   icon: React.ReactNode;
   position: 'tl' | 'tr' | 'bl' | 'br';
   href: string;
+  tooltip?: string;
 }
 
-function MenuButton({ title, icon, position, href }: MenuButtonProps) {
+function MenuButton({ title, icon, position, href, tooltip }: MenuButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const radiusStyles = {
@@ -80,18 +95,22 @@ function MenuButton({ title, icon, position, href }: MenuButtonProps) {
     color: isHovered ? 'white' : '#374151',
     transform: isHovered ? 'translateY(-0.8em)' : 'translateY(0)',
     letterSpacing: isHovered ? '0.5em' : '0.2em',
-    transition: 'all 0.4s ease',
-    boxShadow: 'inset 2px 5px 10px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.3), 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.8)',
+    transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+    boxShadow: isHovered 
+      ? '0 12px 32px rgba(0,0,0,0.25), 0 6px 16px rgba(0,0,0,0.15)'
+      : 'inset 2px 5px 10px rgba(0,0,0,0.2), inset -2px -2px 5px rgba(255,255,255,0.3), 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.8)',
     textDecoration: 'none',
   };
 
   return (
     <a
       href={href}
-      className={`flex flex-col ${contentPosition} cursor-pointer text-xs font-medium uppercase`}
+      className={`flex flex-col ${contentPosition} cursor-pointer text-xs font-medium uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500`}
       style={baseStyle}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      title={tooltip}
+      aria-label={`Navigate to ${title}`}
     >
       <div className="mb-2" style={{ color: isHovered ? 'white' : '#39FF14' }}>
         {icon}

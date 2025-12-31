@@ -84,12 +84,10 @@ def get_db_session():
         db.close()
 
 def get_db():
-    """Legacy function for backward compatibility. Consider using get_db_session() context manager instead."""
+    """Legacy function for backward compatibility. Consider using get_db_session() context manager instead.
+
+    Note: Caller is responsible for closing the returned session.
+    """
     if SessionLocal:
-        db = SessionLocal()
-        try:
-            return db
-        except Exception as e:
-            db.close()
-            raise
+        return SessionLocal()
     return None

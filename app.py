@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+"""
+HR Portal - React Application
+Serves the pre-built React app through Streamlit.
+"""
 import streamlit as st
 import streamlit.components.v1 as components
 import os

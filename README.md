@@ -51,7 +51,7 @@
 - ✅ **Contract Renewals** - Create, list, and track renewal requests
 - ✅ **Role-Based Access** - Admin, HR, and Viewer roles
 - ✅ **Audit Trail** - All actions logged for compliance
-- ✅ **Secure Authentication** - Azure AD / Entra ID integration
+- ✅ **Simple Login** - Employee ID + password (DOB for first-time login)
 
 ### Coming Soon
 - 🔜 **Onboarding Module** - New employee checklists
@@ -91,7 +91,7 @@ Secure-Renewals-2/
 | **Backend** | Python 3.11+, FastAPI, SQLAlchemy, Alembic |
 | **Frontend** | React 18, TypeScript, Vite, TailwindCSS |
 | **Database** | PostgreSQL (with asyncpg driver) |
-| **Auth** | Azure AD / Entra ID (JWT) |
+| **Auth** | Employee ID + Password (JWT) |
 
 ---
 
@@ -102,7 +102,6 @@ Secure-Renewals-2/
 - Python 3.11+
 - Node.js 18+
 - PostgreSQL database
-- Azure AD tenant (for authentication)
 
 ### Backend Setup
 
@@ -152,30 +151,48 @@ npm run dev
 
 | Role | Permissions |
 |------|-------------|
-| **Admin** | Full access, auto-approve renewals |
-| **HR** | Create renewals (need approval), view all |
+| **Admin** | Full access, auto-approve renewals, manage users |
+| **HR** | Create renewals (need approval), view all employees |
 | **Viewer** | Read-only access |
 
-### Azure AD Setup
+### Employee Login System
 
-1. Register an app in Azure AD / Entra ID
-2. Configure Application ID URI (e.g., `api://secure-renewals`)
-3. Create app roles: `admin`, `hr`, `viewer`
-4. Set environment variables:
+Employees log in using their **Employee ID** and a password:
+
+1. **First-time Login:**
+   - Enter your **Employee ID**
+   - Enter your **Date of Birth** (DOB) as initial password
+   - System prompts you to **create a new password**
+   - Password must meet security requirements (min 8 characters, mixed case, number)
+
+2. **Subsequent Logins:**
+   - Enter your **Employee ID**
+   - Enter your **password**
+
+### Password Reset
+
+If you forget your password:
+1. Click "Forgot Password" on the login page
+2. Enter your Employee ID
+3. System sends a reset link (or HR can reset manually)
+
+### Environment Variables
 
 ```env
-AUTH_ISSUER=https://login.microsoftonline.com/<tenant-id>/v2.0
-AUTH_AUDIENCE=api://secure-renewals
-AUTH_JWKS_URL=https://login.microsoftonline.com/<tenant-id>/discovery/v2.0/keys
+# Authentication settings
+AUTH_SECRET_KEY=<your-secret-key-for-jwt>
+PASSWORD_MIN_LENGTH=8
+SESSION_TIMEOUT_MINUTES=480
 ```
 
 ### Development Mode
 
-For local testing without Azure AD:
+For local testing:
 
 ```env
 DEV_AUTH_BYPASS=true
-DEV_STATIC_TOKEN=<your-test-jwt>
+DEV_USER_ID=EMP001
+DEV_USER_ROLE=admin
 ```
 
 ---
@@ -234,7 +251,7 @@ VITE_API_BASE_URL=https://your-app.your-company.com:3000/api
 - [ ] Set custom company domain in Replit settings
 - [ ] Run database migrations (`cd backend && uv run alembic upgrade head`)
 - [ ] Click Run to start the application
-- [ ] Test authentication flow with Azure AD
+- [ ] Add admin user (first user with admin role)
 - [ ] Share portal URL with HR team
 
 ---

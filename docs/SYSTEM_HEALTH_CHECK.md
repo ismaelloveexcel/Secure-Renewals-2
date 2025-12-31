@@ -21,7 +21,7 @@ The Secure Renewals application is a well-structured internal HR portal for mana
 | Backend Framework | ✅ Healthy | FastAPI provides modern async support, auto-documentation |
 | Database | ✅ Healthy | PostgreSQL with proper async driver (asyncpg) |
 | Frontend | ✅ Healthy | React + TypeScript with TailwindCSS for responsive UI |
-| Security | ✅ Good | JWT authentication with Azure AD/Entra ID integration |
+| Security | ✅ Good | JWT authentication with Employee ID + password login |
 | Audit Trail | ✅ Implemented | All renewal actions logged with snapshots |
 | Code Structure | ✅ Clean | Layered architecture (Routers → Services → Repositories) |
 
@@ -48,7 +48,8 @@ The Secure Renewals application is a well-structured internal HR portal for mana
    - ✅ Audit logging for compliance
 
 2. **Authentication & Authorization**
-   - ✅ Azure AD/Entra ID JWT integration
+   - ✅ Employee ID + password login
+   - ✅ DOB as initial password for first-time login
    - ✅ Three role levels: admin, hr, viewer
    - ✅ Development bypass mode for testing
 
@@ -115,11 +116,12 @@ The Secure Renewals application is a well-structured internal HR portal for mana
 
 ### Authentication Simplification
 
-| Current | Automated Solution |
+| Current | Simplified Solution |
 |---------|-------------------|
-| Bearer token entry | **SSO with Azure AD - one-click login** |
-| Manual token refresh | **Auto-refresh tokens silently** |
-| Role assignment | **Auto-sync roles from Azure AD groups** |
+| Complex token entry | **Employee ID + Password login** |
+| First-time access | **DOB as initial password, then set own password** |
+| Password reset | **HR can reset, or self-service via email** |
+| Session management | **Auto-logout after 8 hours of inactivity** |
 
 ### System Maintenance (Zero-Touch)
 
@@ -136,9 +138,9 @@ The Secure Renewals application is a well-structured internal HR portal for mana
 
 | Task | Automation |
 |------|-----------|
-| Employee import | **Sync from HRIS/Azure AD automatically** |
+| Employee import | **CSV bulk import with auto-validation** |
 | Bulk renewals | **CSV upload with auto-validation** |
-| Reporting | **Scheduled exports to email/SharePoint** |
+| Reporting | **Scheduled exports to email** |
 
 ---
 
@@ -155,7 +157,7 @@ The Secure Renewals application is a well-structured internal HR portal for mana
 1. **Scheduled email notifications** - Contract expiry reminders (30/60/90 days)
 2. **Auto-assign onboarding checklists** - Triggered when employee added
 3. **CSV bulk import** - Upload once, auto-validate and process
-4. **Auto-sync Azure AD** - Employee data syncs automatically
+4. **Password reset flow** - Self-service or HR-assisted reset
 
 ### Medium-term (Month 2-3) - Self-Service Everything
 1. **Self-service dashboard** - HR sees everything without manual queries
@@ -204,9 +206,9 @@ The Secure Renewals application has a solid foundation with:
 - Room for growth
 
 **Priority Focus Areas (Minimal Manual Intervention):**
-1. **Automate authentication** - SSO, no token entry
+1. **Simple login** - Employee ID + DOB for first login, then password
 2. **Automate notifications** - Scheduled reminders, no manual tracking
-3. **Automate data sync** - Azure AD integration, no manual employee entry
+3. **CSV bulk import** - No row-by-row data entry
 4. **Automate deployments** - CI/CD, no manual server updates
 5. **Automate reports** - Scheduled exports, no manual generation
 

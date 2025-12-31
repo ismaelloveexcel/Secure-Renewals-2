@@ -168,24 +168,29 @@ async def create_employee(employee: EmployeeCreate):
     return new_employee
 ```
 
-### Priority 3: Automated Data Sync (Month 1)
+### Priority 3: CSV Employee Import (Month 1)
 
 **Problem:** Manual data entry for employees
 
-**Automated Solution:** Sync with Azure AD / Microsoft 365
+**Automated Solution:** CSV bulk import with validation
 
 ```python
-# Scheduled sync - runs every hour
-@scheduler.scheduled_job('interval', hours=1)
-async def sync_azure_ad_users():
-    """Auto-sync employees from Azure AD - no manual import"""
-    azure_users = await azure_ad_client.get_all_users()
+# CSV import endpoint
+@router.post("/employees/import")
+async def import_employees_csv(file: UploadFile):
+    """Bulk import employees from CSV - auto-validates and creates accounts"""
+    employees = parse_csv(file)
     
-    for user in azure_users:
-        await employee_service.upsert_from_azure(user)
+    for emp in employees:
+        # Auto-create account with DOB as initial password
+        await employee_service.create_with_dob_password(
+            employee_id=emp.id,
+            name=emp.name,
+            dob=emp.dob,  # Used as initial password
+            department=emp.department
+        )
     
-    # Auto-deactivate removed users
-    await employee_service.deactivate_missing(azure_users)
+    return {"imported": len(employees)}
 ```
 
 ### Priority 4: Automated Reports (Month 2)
@@ -290,9 +295,7 @@ runButton = "Project"  # One-click to start everything
 1. **Import to Replit** - Fork/import this repository
 2. **Configure Secrets** - Add these in Replit Secrets tab:
    - `DATABASE_URL` - PostgreSQL connection string
-   - `AUTH_ISSUER` - Azure AD issuer URL
-   - `AUTH_AUDIENCE` - Your app ID URI
-   - `AUTH_JWKS_URL` - Azure AD keys URL
+   - `AUTH_SECRET_KEY` - Secret key for JWT tokens
    - `ALLOWED_ORIGINS` - Your Replit custom domain
 3. **Set Custom Domain** - Replit Settings → Custom Domains
 4. **Run Migrations** - `cd backend && uv run alembic upgrade head`
@@ -332,14 +335,14 @@ Once deployed on Replit:
 | ✅ Replit deployment | One-click run, custom domain | No server management |
 | ✅ GitHub Actions CI/CD | Auto-lint on push | No manual code checks |
 | ✅ Dependabot with auto-merge | Auto-update dependencies | No manual updates |
-| SSO login | One-click authentication | No token management |
+| Employee ID login | Simple login, no SSO setup | No token management |
 | Scheduled email reminders | Auto-notify on expiry | No manual tracking |
 
 ### Phase 2: Automated Workflows (Month 1)
 
 | Task | Automation Benefit | Manual Work Eliminated |
 |------|-------------------|----------------------|
-| Azure AD sync | Auto-import employees | No manual data entry |
+| CSV employee import | Bulk add employees | No row-by-row entry |
 | Auto-onboarding | Tasks auto-assigned | No manual checklist creation |
 | Scheduled reports | Weekly/monthly auto-email | No manual report generation |
 | Auto-reminders | Daily task nudges | No manual follow-up |
@@ -426,7 +429,7 @@ jobs:
       - name: Backup database
         run: |
           pg_dump $DATABASE_URL > backup.sql
-          # Upload to S3/Azure Blob
+          # Upload to cloud storage
 ```
 
 ### 4. Auto-Assign Issues
@@ -490,7 +493,7 @@ When selecting new tools, evaluate them against:
 
 **Next Priority Automations:**
 1. 🔜 Scheduled email reminders - auto-notify on contract expiry
-2. 🔜 Azure AD sync - auto-import employees
+2. 🔜 CSV employee import - bulk add employees
 3. 🔜 Auto-onboarding - auto-assign tasks on new hire
 4. 🔜 Auto-deploy - deploy on merge, no manual server work
 5. 🔜 Auto-reports - weekly/monthly reports auto-emailed
@@ -498,10 +501,10 @@ When selecting new tools, evaluate them against:
 **Manual Tasks Eliminated:**
 - ✅ No manual deployments - auto-deploy on merge
 - ✅ No manual dependency updates - Dependabot handles it
-- ✅ No manual data entry - sync from Azure AD
+- ✅ No manual data entry - CSV bulk import
 - ✅ No manual reminders - scheduled notifications
 - ✅ No manual report generation - auto-export
-- ✅ No manual token management - SSO
+- ✅ Simple login - Employee ID + password (DOB for first login)
 
 **For Non-Technical HR:**
 The system handles everything in the background. HR only interacts through the web UI - no command line, no technical knowledge, no manual intervention needed.

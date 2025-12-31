@@ -31,18 +31,33 @@ This guide will help you use the Secure Renewals HR Portal effectively. No techn
 Before using the portal, make sure you have:
 
 - ✅ A web browser (Chrome, Firefox, Edge, or Safari)
-- ✅ Your company login credentials (Microsoft/Azure AD account)
-- ✅ Access to the portal URL (your company domain on Replit)
+- ✅ Your **Employee ID** (provided by HR)
+- ✅ Your **Date of Birth** (for first-time login)
 
-### Accessing the Portal
+### First-Time Login
 
 1. Open your web browser
 2. Go to your company's HR Portal URL (e.g., `https://hr-portal.yourcompany.com`)
-3. The portal is hosted on Replit under your company domain - it's always available
-4. Enter your **Auth Token** in the field at the top right of the screen
-5. You'll see a green indicator when you're connected
+3. Enter your **Employee ID**
+4. Enter your **Date of Birth** as the temporary password (format: DDMMYYYY)
+5. You'll be prompted to **create a new password**
+6. Choose a strong password (at least 8 characters, with uppercase, lowercase, and a number)
+7. You're now logged in!
+
+### Regular Login
+
+1. Go to the HR Portal URL
+2. Enter your **Employee ID**
+3. Enter your **password**
+4. Click **Login**
 
 > 💡 **Tip:** The portal runs 24/7 on Replit - no need to wait for anyone to start it. Just open the URL and you're ready to go!
+
+### Forgot Password?
+
+1. Click "**Forgot Password**" on the login page
+2. Enter your Employee ID
+3. Contact HR to reset your password, or check your email for reset instructions
 
 ---
 

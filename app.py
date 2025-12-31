@@ -9,6 +9,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 import os
 import base64
+import random
+import string
 from datetime import datetime, timedelta
 
 st.set_page_config(
@@ -17,6 +19,16 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Configuration from environment variables
+APP_BASE_URL = os.environ.get("APP_URL", "http://localhost:5000")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin2026")
+
+def generate_pass_sequence():
+    """Generate a unique sequence number for passes."""
+    # In production, this should query the database for the next sequence
+    # For demo purposes, we generate a random suffix to ensure uniqueness
+    return f"{random.randint(100, 999)}"
 
 def get_logo_base64():
     logo_path = "attached_assets/logo_1765648544636_1766742634201.png"
@@ -28,8 +40,6 @@ def get_logo_base64():
 def get_page():
     params = st.query_params
     return params.get("page", "home")
-
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin2026")
 
 def svg_to_data_uri(svg_content):
     import urllib.parse
@@ -616,12 +626,10 @@ def render_sidebar():
             - `Home` → Go to home page
             - `R` → Open Recruitment
             
-            **Documentation:**
-            - [Quick Start Guide](QUICK_START.md)
-            - [System Guide](RECRUITMENT_SYSTEM_README.md)
-            
             **Support:**
             Contact IT Support for technical issues.
+            
+            View QUICK_START.md and RECRUITMENT_SYSTEM_README.md files in the repository for detailed documentation.
             """)
         
         # Footer with version
@@ -674,11 +682,13 @@ def render_pass_generation():
         
         if st.button("Generate Hiring Manager Pass", type="primary", use_container_width=True):
             if manager_name and manager_email:
+                pass_seq = generate_pass_sequence()
+                pass_id = f"HM-{datetime.now().year}-{pass_seq}"
                 st.success("✅ Pass generated successfully!")
                 st.markdown(f"""
-                **Pass ID:** HM-{datetime.now().year}-001
+                **Pass ID:** {pass_id}
                 
-                **Access URL:** `https://hr.baynunah.ae/pass/HM-{datetime.now().year}-001`
+                **Access URL:** `{APP_BASE_URL}/pass/{pass_id}`
                 
                 **Expires:** {(datetime.now() + timedelta(days=90)).strftime('%B %d, %Y')}
                 """)
@@ -701,11 +711,13 @@ def render_pass_generation():
         
         if st.button("Generate Candidate Pass", type="primary", use_container_width=True):
             if candidate_name and candidate_email:
+                pass_seq = generate_pass_sequence()
+                pass_id = f"CAND-{datetime.now().year}-{pass_seq}"
                 st.success("✅ Candidate pass generated!")
                 st.markdown(f"""
-                **Pass ID:** CAND-{datetime.now().year}-0001
+                **Pass ID:** {pass_id}
                 
-                **Access URL:** `https://hr.baynunah.ae/pass/CAND-{datetime.now().year}-0001`
+                **Access URL:** `{APP_BASE_URL}/pass/{pass_id}`
                 
                 **Expires:** {(datetime.now() + timedelta(days=60)).strftime('%B %d, %Y')}
                 """)
@@ -734,7 +746,7 @@ def render_pass_generation():
                 st.markdown(f"""
                 **Pass ID:** {emp_id}
                 
-                **Access URL:** `https://hr.baynunah.ae/pass/{emp_id}`
+                **Access URL:** `{APP_BASE_URL}/pass/{emp_id}`
                 
                 **Expires:** Never (Employee passes are permanent)
                 """)
@@ -759,11 +771,12 @@ def render_pass_generation():
         
         if st.button("Generate Manager Pass", type="primary", use_container_width=True):
             if mgr_id and mgr_name and mgr_email:
+                pass_id = f"MGR-{mgr_id}"
                 st.success("✅ Manager 3-in-1 pass generated!")
                 st.markdown(f"""
-                **Pass ID:** MGR-{mgr_id}
+                **Pass ID:** {pass_id}
                 
-                **Access URL:** `https://hr.baynunah.ae/pass/MGR-{mgr_id}`
+                **Access URL:** `{APP_BASE_URL}/pass/{pass_id}`
                 
                 **Expires:** Never (Manager passes are permanent)
                 

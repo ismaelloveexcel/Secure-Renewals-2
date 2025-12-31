@@ -36,10 +36,11 @@ import CreateRRFDialog from '../../components/recruitment/CreateRRFDialog';
 import GeneratePassDialog from '../../components/recruitment/GeneratePassDialog';
 
 // Helper tooltip component for inline documentation
-const HelpTooltip = ({ title }) => (
-  <Tooltip title={title} placement="top" arrow>
-    <IconButton size="small" sx={{ ml: 0.5, opacity: 0.6, '&:hover': { opacity: 1 } }}>
-      <HelpOutlineIcon fontSize="small" />
+// Accepts additional props for flexibility
+const HelpTooltip = ({ title, placement = "top", size = "small", ...rest }) => (
+  <Tooltip title={title} placement={placement} arrow {...rest}>
+    <IconButton size={size} sx={{ ml: 0.5, opacity: 0.6, '&:hover': { opacity: 1 } }}>
+      <HelpOutlineIcon fontSize={size} />
     </IconButton>
   </Tooltip>
 );

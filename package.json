@@ -4,6 +4,7 @@
   "description": "Internal application for securely managing employee contract renewals and onboarding checks. The project is split into a FastAPI backend and a Vite + TypeScript + Tailwind frontend to keep responsibilities isolated and deployment-ready.",
   "main": "index.js",
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",

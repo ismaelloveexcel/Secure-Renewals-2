@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "secure-renewals-backend"
 version = "0.1.0"
@@ -18,6 +22,7 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+exclude = ["alembic*"]
 
 [tool.uv]
 package = true

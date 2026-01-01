@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
-from app.routers import health, renewals
+from app.routers import auth, employees, health, renewals
 
 
 configure_logging()
@@ -22,8 +22,13 @@ def create_app() -> FastAPI:
         allow_headers=["*"]
     )
 
+    # Auth routes (no prefix for login)
+    app.include_router(auth.router, prefix=settings.api_prefix)
+    
+    # API routes
     app.include_router(health.router, prefix=settings.api_prefix)
     app.include_router(renewals.router, prefix=settings.api_prefix)
+    app.include_router(employees.router, prefix=settings.api_prefix)
 
     @app.on_event("startup")
     async def on_startup():

@@ -158,13 +158,14 @@ Currently, you need to create one renewal at a time:
 
 ## Troubleshooting
 
-### "Please enter a bearer token to access the API"
+### "Login failed" or "Invalid credentials"
 
-**Problem:** You haven't entered your authentication token  
+**Problem:** Your Employee ID or password is incorrect  
 **Solution:** 
-1. Look at the top right of the screen
-2. Find the "Auth Token" field
-3. Paste your token (contact IT if you don't have one)
+1. Check that you entered the correct Employee ID
+2. For first-time login, use your date of birth in DDMMYYYY format
+3. Make sure Caps Lock is not on
+4. If you forgot your password, ask HR admin to reset it
 
 ### "Request failed" or Red Error Message
 
@@ -172,7 +173,7 @@ Currently, you need to create one renewal at a time:
 **Solution:**
 1. Check your internet connection
 2. Try clicking **Refresh**
-3. Re-enter your token
+3. Try logging out and logging back in
 4. If it persists, contact IT support
 
 ### "Insufficient role" Error
@@ -217,7 +218,7 @@ Currently, you need to create one renewal at a time:
 2. **Use clear names** - Type employee names exactly as in official records
 3. **Verify dates** - Double-check contract end dates before submitting
 4. **Refresh regularly** - Click Refresh to see the latest updates
-5. **Save your token** - Store it securely (password manager recommended)
+5. **Use a strong password** - Minimum 8 characters with uppercase, lowercase, and a number
 
 ---
 

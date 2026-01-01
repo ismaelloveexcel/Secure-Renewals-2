@@ -1,8 +1,18 @@
 import { useState, useEffect } from 'react'
 import type { RenewalRequest, RenewalResponse } from './types/renewal'
-import { listRenewals, createRenewal, getHealth } from './services/api'
+import { listRenewals, createRenewal, getHealth, login, changePassword } from './services/api'
+import type { LoginResponse } from './services/api'
 
 type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin'
+
+// User session type
+interface UserSession {
+  token: string
+  employeeId: string
+  name: string
+  role: string
+  requiresPasswordChange: boolean
+}
 
 // Navigation Item component
 function NavItem({ 
@@ -152,10 +162,6 @@ function EmployeesSection({ token }: { token: string }) {
   const [submitting, setSubmitting] = useState(false)
 
   const fetchRenewals = async () => {
-    if (!token) {
-      setError('Please enter a bearer token to access the API')
-      return
-    }
     setLoading(true)
     setError(null)
     try {
@@ -170,10 +176,6 @@ function EmployeesSection({ token }: { token: string }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!token) {
-      setError('Please enter a bearer token')
-      return
-    }
     setSubmitting(true)
     setError(null)
     try {
@@ -189,10 +191,8 @@ function EmployeesSection({ token }: { token: string }) {
   }
 
   useEffect(() => {
-    if (token) {
-      fetchRenewals()
-    }
-  }, [token])
+    fetchRenewals()
+  }, [])
 
   return (
     <div className="p-8">
@@ -204,7 +204,7 @@ function EmployeesSection({ token }: { token: string }) {
         <div className="flex gap-3">
           <button
             onClick={fetchRenewals}
-            disabled={!token || loading}
+            disabled={loading}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,8 +214,7 @@ function EmployeesSection({ token }: { token: string }) {
           </button>
           <button
             onClick={() => setShowForm(true)}
-            disabled={!token}
-            className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -228,12 +227,6 @@ function EmployeesSection({ token }: { token: string }) {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
           {error}
-        </div>
-      )}
-
-      {!token && (
-        <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg mb-6">
-          Enter a bearer token in the header above to access the API
         </div>
       )}
 
@@ -426,6 +419,189 @@ function ExternalUsersSection() {
   )
 }
 
+// Login Section
+function LoginSection({ onLogin }: { onLogin: (session: UserSession) => void }) {
+  const [employeeId, setEmployeeId] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await login({ employee_id: employeeId, password })
+      onLogin({
+        token: response.access_token,
+        employeeId: response.employee_id,
+        name: response.name,
+        role: response.role,
+        requiresPasswordChange: response.requires_password_change,
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <p className="text-gray-600 text-lg tracking-wide mb-2">baynunah<span className="text-emerald-500">.</span></p>
+          <h1 className="text-3xl font-light tracking-widest text-gray-800">HR PORTAL</h1>
+          <p className="text-gray-500 mt-4">Sign in with your Employee ID</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+            <input
+              type="text"
+              value={employeeId}
+              onChange={(e) => setEmployeeId(e.target.value)}
+              placeholder="e.g., EMP001"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+            <p className="text-xs text-gray-400 mt-1">First-time login? Use your date of birth (DDMMYYYY)</p>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50 font-medium"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+
+        <p className="text-center text-xs text-gray-400 mt-8">Secure Renewals v1.0</p>
+      </div>
+    </div>
+  )
+}
+
+// Password Change Modal
+function PasswordChangeModal({ token, onComplete, onLogout }: { 
+  token: string
+  onComplete: () => void
+  onLogout: () => void 
+}) {
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      await changePassword(token, { current_password: currentPassword, new_password: newPassword })
+      onComplete()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Password change failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">Change Your Password</h2>
+        <p className="text-gray-500 mb-6">You must set a new password before continuing.</p>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="Your current password (DOB)"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Minimum 8 characters"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+              minLength={8}
+            />
+            <p className="text-xs text-gray-400 mt-1">Must include uppercase, lowercase, and a number</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter new password"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              required
+            />
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onLogout}
+              className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Logout
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50 font-medium"
+            >
+              {loading ? 'Saving...' : 'Set Password'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 // Admin section
 function AdminSection({ token }: { token: string }) {
   const [health, setHealth] = useState<{ status: string; role: string } | null>(null)
@@ -433,10 +609,6 @@ function AdminSection({ token }: { token: string }) {
   const [error, setError] = useState<string | null>(null)
 
   const checkHealth = async () => {
-    if (!token) {
-      setError('Please enter a bearer token')
-      return
-    }
     setLoading(true)
     setError(null)
     try {
@@ -462,7 +634,7 @@ function AdminSection({ token }: { token: string }) {
           <h3 className="text-lg font-medium text-gray-800 mb-4">API Health Check</h3>
           <button
             onClick={checkHealth}
-            disabled={loading || !token}
+            disabled={loading}
             className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50 mb-4"
           >
             {loading ? 'Checking...' : 'Check API Health'}
@@ -476,11 +648,6 @@ function AdminSection({ token }: { token: string }) {
             <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg">
               <p><strong>Status:</strong> {health.status}</p>
               <p><strong>Role:</strong> {health.role}</p>
-            </div>
-          )}
-          {!token && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-700 px-3 py-2 rounded-lg text-sm">
-              Enter a bearer token to check API health
             </div>
           )}
         </div>
@@ -548,20 +715,54 @@ function AdminSection({ token }: { token: string }) {
 // Main App component
 function App() {
   const [activeSection, setActiveSection] = useState<Section>('home')
-  const [token, setToken] = useState('')
+  const [session, setSession] = useState<UserSession | null>(null)
+
+  const handleLogin = (newSession: UserSession) => {
+    setSession(newSession)
+  }
+
+  const handleLogout = () => {
+    setSession(null)
+    setActiveSection('home')
+  }
+
+  const handlePasswordChanged = () => {
+    if (session) {
+      setSession({ ...session, requiresPasswordChange: false })
+    }
+  }
+
+  // Show login screen if not authenticated
+  if (!session) {
+    return <LoginSection onLogin={handleLogin} />
+  }
+
+  // Show password change modal if required
+  if (session.requiresPasswordChange) {
+    return (
+      <>
+        <LoginSection onLogin={handleLogin} />
+        <PasswordChangeModal 
+          token={session.token} 
+          onComplete={handlePasswordChanged}
+          onLogout={handleLogout}
+        />
+      </>
+    )
+  }
 
   const renderSection = () => {
     switch (activeSection) {
       case 'home':
         return <HomeSection setActiveSection={setActiveSection} />
       case 'employees':
-        return <EmployeesSection token={token} />
+        return <EmployeesSection token={session.token} />
       case 'onboarding':
         return <OnboardingSection />
       case 'external':
         return <ExternalUsersSection />
       case 'admin':
-        return <AdminSection token={token} />
+        return <AdminSection token={session.token} />
       default:
         return <HomeSection setActiveSection={setActiveSection} />
     }
@@ -572,25 +773,28 @@ function App() {
       <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
       
       <div className="flex-1 flex flex-col">
-        {/* Header with token input */}
+        {/* Header with user info */}
         <header className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium text-gray-800 capitalize">
               {activeSection === 'external' ? 'External Users' : activeSection}
             </h2>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <label htmlFor="token" className="text-sm text-gray-500">Auth Token:</label>
-                <input
-                  id="token"
-                  type="password"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                  placeholder="Enter authentication token"
-                  className="w-64 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                />
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-800">{session.name}</p>
+                  <p className="text-xs text-gray-500">{session.role.toUpperCase()} • {session.employeeId}</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-medium">
+                  {session.name.charAt(0).toUpperCase()}
+                </div>
               </div>
-              <div className={`w-2 h-2 rounded-full ${token ? 'bg-green-500' : 'bg-gray-300'}`} title={token ? 'Token provided' : 'No token'}></div>
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </header>

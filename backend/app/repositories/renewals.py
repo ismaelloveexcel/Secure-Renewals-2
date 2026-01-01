@@ -12,6 +12,15 @@ class RenewalRepository:
         result = await session.execute(select(Renewal).order_by(Renewal.id))
         return result.scalars().all()
 
+    async def list_pending(self, session: AsyncSession) -> Sequence[Renewal]:
+        """List renewals with pending status."""
+        result = await session.execute(
+            select(Renewal)
+            .where(Renewal.status == "pending")
+            .order_by(Renewal.contract_end_date)
+        )
+        return result.scalars().all()
+
     async def create(
         self,
         session: AsyncSession,

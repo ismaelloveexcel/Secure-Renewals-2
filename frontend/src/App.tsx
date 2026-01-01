@@ -192,7 +192,8 @@ function EmployeesSection({ token }: { token: string }) {
 
   useEffect(() => {
     fetchRenewals()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
 
   return (
     <div className="p-8">

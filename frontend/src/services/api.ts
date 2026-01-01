@@ -1,6 +1,6 @@
 import type { RenewalRequest, RenewalResponse } from '../types/renewal'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api'
 
 // Authentication types
 export interface LoginRequest {

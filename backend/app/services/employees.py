@@ -41,8 +41,16 @@ def verify_password(password: str, hashed: str) -> bool:
         key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), iterations)
         return key.hex() == stored_key
     except ValueError:
-        # Legacy format - simple sha256 (for migration)
-        return hashlib.sha256(password.encode()).hexdigest() == hashed
+        # Legacy format - simple sha256 (for migration only)
+        # This is insecure and kept only for backwards compatibility during migration
+        import logging
+        logger = logging.getLogger(__name__)
+        if hashlib.sha256(password.encode()).hexdigest() == hashed:
+            logger.warning(
+                "Legacy unsalted password detected. User should change password."
+            )
+            return True
+        return False
 
 
 def dob_to_password(dob: date) -> str:
@@ -63,8 +71,11 @@ def create_access_token(employee: Employee) -> str:
     }
     secret = settings.auth_secret_key
     if secret == "dev-secret-key-change-in-production":
-        import warnings
-        warnings.warn("Using default auth secret key. Set AUTH_SECRET_KEY in production!")
+        import logging
+        logging.getLogger(__name__).error(
+            "SECURITY WARNING: Using default auth secret key. "
+            "Set AUTH_SECRET_KEY environment variable in production!"
+        )
     return jwt.encode(payload, secret, algorithm="HS256")
 
 

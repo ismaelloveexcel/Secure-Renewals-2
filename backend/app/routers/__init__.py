@@ -1,3 +1,3 @@
-from app.routers import auth, employees, health, renewals
+from app.routers import admin, auth, employees, health, renewals
 
-__all__ = ["auth", "employees", "health", "renewals"]
+__all__ = ["admin", "auth", "employees", "health", "renewals"]

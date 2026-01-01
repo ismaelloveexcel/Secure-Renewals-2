@@ -46,6 +46,7 @@ The Secure Renewals application is a well-structured internal HR portal for mana
    - ✅ Create new renewal requests
    - ✅ Role-based auto-approval (admin creates → auto-approved)
    - ✅ Audit logging for compliance
+   - ✅ CSV import validates required fields, roles, and date formats
 
 2. **Authentication & Authorization**
    - ✅ Employee ID + password login

@@ -19,8 +19,9 @@ This guide will help you use the Secure Renewals HR Portal effectively. No techn
 3. [Managing Contract Renewals](#managing-contract-renewals)
 4. [Understanding Your Role](#understanding-your-role)
 5. [Common Tasks](#common-tasks)
-6. [Troubleshooting](#troubleshooting)
-7. [Getting Help](#getting-help)
+6. [Bulk Employee Imports](#bulk-employee-imports)
+7. [Troubleshooting](#troubleshooting)
+8. [Getting Help](#getting-help)
 
 ---
 
@@ -146,13 +147,28 @@ Currently, you need to create one renewal at a time:
 2. After it saves, create the next one
 3. Repeat as needed
 
-> 💡 **Coming Soon:** Bulk import from spreadsheet
+> 💡 **Tip:** Use the CSV import flow below to add many employees quickly.
 
 ### Task 3: Check System Status
 
 1. Go to **Admin**
 2. Click **Check API Health**
 3. If you see "Status: ok" in green, everything is working!
+
+---
+
+## Bulk Employee Imports
+
+Use this when onboarding many employees at once.
+
+1. Prepare a CSV file with the header row: `employee_id,name,email,department,date_of_birth,role`
+2. Fill in each row. Date of birth must be `DDMMYYYY` or ISO format (YYYY-MM-DD). Roles must be `admin`, `hr`, or `viewer`.
+3. In the portal, go to **Admin → Employee Import** and upload the CSV.
+4. Review the import summary:
+   - **Created**: employees added successfully
+   - **Skipped**: employees already existed
+   - **Errors**: rows missing required fields or using unsupported roles
+5. Download the error report, fix the flagged rows, and re-upload the corrected file.
 
 ---
 

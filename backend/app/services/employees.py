@@ -50,6 +50,22 @@ def dob_to_password(dob: date) -> str:
     return dob.strftime("%d%m%Y")
 
 
+def parse_dob(raw_dob: str) -> date:
+    """Parse a date of birth from DDMMYYYY or ISO formats."""
+    raw_dob = raw_dob.strip()
+    if not raw_dob:
+        raise ValueError("Date of birth is required")
+
+    if len(raw_dob) == 8 and raw_dob.isdigit():
+        return date(
+            year=int(raw_dob[4:8]),
+            month=int(raw_dob[2:4]),
+            day=int(raw_dob[0:2]),
+        )
+
+    return date.fromisoformat(raw_dob)
+
+
 def create_access_token(employee: Employee) -> str:
     """Create JWT access token for employee."""
     settings = get_settings()
@@ -198,47 +214,49 @@ class EmployeeService:
         content = await file.read()
         text = content.decode("utf-8")
         reader = csv.DictReader(StringIO(text))
-        
+
         created = 0
         skipped = 0
         errors = []
-        
+        allowed_roles = {"admin", "hr", "viewer"}
+
         for row_num, row in enumerate(reader, start=2):
             try:
-                # Parse date from DDMMYYYY format
-                dob_str = row.get("date_of_birth", "").strip()
-                if len(dob_str) == 8:
-                    dob = date(
-                        year=int(dob_str[4:8]),
-                        month=int(dob_str[2:4]),
-                        day=int(dob_str[0:2]),
+                employee_id = row.get("employee_id", "").strip()
+                name = row.get("name", "").strip()
+
+                if not employee_id or not name:
+                    raise ValueError("Employee ID and name are required")
+
+                dob = parse_dob(row.get("date_of_birth", ""))
+                role = (row.get("role", "viewer") or "viewer").strip().lower()
+
+                if role not in allowed_roles:
+                    raise ValueError(
+                        "Invalid role. Allowed values: admin, hr, viewer"
                     )
-                else:
-                    # Try ISO format
-                    dob = date.fromisoformat(dob_str)
-                
+
                 employee_data = EmployeeCreate(
-                    employee_id=row.get("employee_id", "").strip(),
-                    name=row.get("name", "").strip(),
+                    employee_id=employee_id,
+                    name=name,
                     email=row.get("email", "").strip() or None,
                     department=row.get("department", "").strip() or None,
                     date_of_birth=dob,
-                    role=row.get("role", "viewer").strip().lower(),
+                    role=role,
                 )
-                
-                # Skip if exists
+
                 if await self._repo.exists(session, employee_data.employee_id):
                     skipped += 1
                     continue
-                
+
                 await self.create_employee(session, employee_data)
                 created += 1
-                
+
             except Exception as e:
                 errors.append(f"Row {row_num}: {str(e)}")
-        
+
         await session.commit()
-        
+
         return {
             "created": created,
             "skipped": skipped,

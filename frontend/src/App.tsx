@@ -492,7 +492,7 @@ function App() {
       )}
 
       <div className="text-center mb-12">
-        <img src="/assets/logo.png" alt="Baynunah" className="h-12 mx-auto mb-4" />
+        <img src="/assets/logo.png" alt="Baynunah" className="h-6 mx-auto mb-4" />
         <h1 className="text-4xl font-light tracking-widest text-gray-800">HR PORTAL</h1>
       </div>
 

@@ -209,7 +209,7 @@ function App() {
         </button>
         
         <div className="text-center mb-6">
-          <img src="/attached_assets/logo_1765648544636_1767350743785.png" alt="Baynunah" className="h-8 mx-auto mb-2" />
+          <img src="/assets/logo.png" alt="Baynunah" className="h-8 mx-auto mb-2" />
           <h2 className="text-xl font-semibold text-gray-800">
             {isAdminLogin ? 'Admin Sign In' : 'Sign In'}
           </h2>
@@ -280,7 +280,7 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <img src="/attached_assets/logo_1765648544636_1767350743785.png" alt="Baynunah" className="h-6 mb-1" />
+              <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
               <h1 className="text-2xl font-semibold text-gray-800">Employees</h1>
             </div>
             <div className="flex items-center gap-4">
@@ -377,7 +377,7 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <img src="/attached_assets/logo_1765648544636_1767350743785.png" alt="Baynunah" className="h-6 mb-1" />
+              <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
               <h1 className="text-2xl font-semibold text-gray-800">Admin Panel</h1>
             </div>
             <div className="flex items-center gap-4">
@@ -492,7 +492,7 @@ function App() {
       )}
 
       <div className="text-center mb-12">
-        <img src="/attached_assets/logo_1765648544636_1767350743785.png" alt="Baynunah" className="h-12 mx-auto mb-4" />
+        <img src="/assets/logo.png" alt="Baynunah" className="h-12 mx-auto mb-4" />
         <h1 className="text-4xl font-light tracking-widest text-gray-800">HR PORTAL</h1>
       </div>
 

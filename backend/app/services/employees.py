@@ -41,8 +41,6 @@ def verify_password(password: str, hashed: str) -> bool:
         key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), iterations)
         return key.hex() == stored_key
     except ValueError:
-        # Legacy format - simple sha256 (for migration only)
-        # This is insecure and kept only for backwards compatibility during migration
         import logging
         logger = logging.getLogger(__name__)
         if hashlib.sha256(password.encode()).hexdigest() == hashed:
@@ -58,8 +56,6 @@ def dob_to_password(dob: date) -> str:
     return dob.strftime("%d%m%Y")
 
 
-<<<<<<< HEAD
-=======
 def parse_dob(raw_dob: str) -> date:
     """Parse a date of birth from DDMMYYYY or ISO formats."""
     raw_dob = raw_dob.strip()
@@ -76,7 +72,6 @@ def parse_dob(raw_dob: str) -> date:
     return date.fromisoformat(raw_dob)
 
 
->>>>>>> origin/codex/provide-assistance-with-coding-issue
 def create_access_token(employee: Employee) -> str:
     """Create JWT access token for employee."""
     settings = get_settings()
@@ -90,16 +85,11 @@ def create_access_token(employee: Employee) -> str:
     }
     secret = settings.auth_secret_key
     if secret == "dev-secret-key-change-in-production":
-<<<<<<< HEAD
         import logging
-        logging.getLogger(__name__).error(
+        logging.getLogger(__name__).warning(
             "SECURITY WARNING: Using default auth secret key. "
             "Set AUTH_SECRET_KEY environment variable in production!"
         )
-=======
-        import warnings
-        warnings.warn("Using default auth secret key. Set AUTH_SECRET_KEY in production!")
->>>>>>> origin/codex/provide-assistance-with-coding-issue
     return jwt.encode(payload, secret, algorithm="HS256")
 
 
@@ -133,11 +123,9 @@ class EmployeeService:
                 detail="Invalid employee ID or password",
             )
         
-        # Update last login
         await self._repo.update_last_login(session, employee.employee_id)
         await session.commit()
         
-        # Create token
         token = create_access_token(employee)
         
         return LoginResponse(
@@ -194,14 +182,12 @@ class EmployeeService:
         self, session: AsyncSession, data: EmployeeCreate
     ) -> EmployeeResponse:
         """Create a new employee."""
-        # Check if employee already exists
         if await self._repo.exists(session, data.employee_id):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Employee ID {data.employee_id} already exists",
             )
         
-        # Create password from DOB
         initial_password = dob_to_password(data.date_of_birth)
         password_hash = hash_password(initial_password)
         
@@ -233,49 +219,6 @@ class EmployeeService:
         content = await file.read()
         text = content.decode("utf-8")
         reader = csv.DictReader(StringIO(text))
-<<<<<<< HEAD
-        
-        created = 0
-        skipped = 0
-        errors = []
-        
-        for row_num, row in enumerate(reader, start=2):
-            try:
-                # Parse date from DDMMYYYY format
-                dob_str = row.get("date_of_birth", "").strip()
-                if len(dob_str) == 8:
-                    dob = date(
-                        year=int(dob_str[4:8]),
-                        month=int(dob_str[2:4]),
-                        day=int(dob_str[0:2]),
-                    )
-                else:
-                    # Try ISO format
-                    dob = date.fromisoformat(dob_str)
-                
-                employee_data = EmployeeCreate(
-                    employee_id=row.get("employee_id", "").strip(),
-                    name=row.get("name", "").strip(),
-                    email=row.get("email", "").strip() or None,
-                    department=row.get("department", "").strip() or None,
-                    date_of_birth=dob,
-                    role=row.get("role", "viewer").strip().lower(),
-                )
-                
-                # Skip if exists
-                if await self._repo.exists(session, employee_data.employee_id):
-                    skipped += 1
-                    continue
-                
-                await self.create_employee(session, employee_data)
-                created += 1
-                
-            except Exception as e:
-                errors.append(f"Row {row_num}: {str(e)}")
-        
-        await session.commit()
-        
-=======
 
         created = 0
         skipped = 0
@@ -319,7 +262,6 @@ class EmployeeService:
 
         await session.commit()
 
->>>>>>> origin/codex/provide-assistance-with-coding-issue
         return {
             "created": created,
             "skipped": skipped,
@@ -340,5 +282,4 @@ class EmployeeService:
         return result
 
 
-# Singleton instance
 employee_service = EmployeeService(EmployeeRepository())

@@ -973,6 +973,24 @@ function App() {
     )
   }
 
+  if (activeSection === 'onboarding') {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+        {loginModal}
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl w-full text-center">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Onboarding</h2>
+          <p className="text-gray-600 mb-6">This section is under development.</p>
+          <button
+            onClick={() => handleNavigate('home')}
+            className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (activeSection === 'external') {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
@@ -1029,14 +1047,14 @@ function App() {
         </button>
 
         <button
-          onClick={() => handleNavigate('passes')}
+          onClick={() => handleNavigate('onboarding')}
           className="bg-gradient-to-br from-white to-gray-50 rounded-tr-full rounded-tl-md rounded-bl-md rounded-br-md p-8 flex flex-col items-center justify-center aspect-square transition-all duration-300 hover:scale-105 hover:-translate-y-1"
           style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
         >
           <svg className="w-12 h-12 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
           </svg>
-          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide">Passes</span>
+          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide">Onboarding</span>
         </button>
 
         <button

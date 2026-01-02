@@ -71,13 +71,16 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
+| [Contributing Guide](CONTRIBUTING.md) | **NEW!** Setup instructions, Copilot best practices, troubleshooting | Contributors/Developers |
 | [HR User Guide](docs/HR_USER_GUIDE.md) | How to use the portal | HR Users |
+| [App Analysis Report](docs/APP_ANALYSIS_REPORT.md) | **NEW!** Comprehensive codebase analysis and issue remediation | Admins/Developers |
+| [Process Simplification (UAE)](docs/PROCESS_SIMPLIFICATION_UAE.md) | **NEW!** Automated workflows for solo HR/multi-entity operations | HR Leadership |
 | [Copilot Agents Guide](docs/COPILOT_AGENTS.md) | AI agents for development assistance | Developers |
 | [Agent Deployment Guide](docs/AGENT_DEPLOYMENT_GUIDE.md) | How to deploy and use agents | Developers |
 | [System Health Check](docs/SYSTEM_HEALTH_CHECK.md) | Application assessment & roadmap | Admins/Developers |
 | [Recommended Add-ons](docs/RECOMMENDED_ADDONS.md) | Integration options | Developers |
 | [HR Implementation Plan](docs/HR_IMPLEMENTATION_PLAN.md) | Migration, admin hardening, and HR ops structure | HR Leadership/Admins |
-| [HR Apps Integration Guide](docs/HR_APPS_INTEGRATION_GUIDE.md) | **NEW!** Complete guide to GitHub HR apps & integration strategies | HR Leadership/Developers |
+| [HR Apps Integration Guide](docs/HR_APPS_INTEGRATION_GUIDE.md) | Complete guide to GitHub HR apps & integration strategies | HR Leadership/Developers |
 
 ---
 

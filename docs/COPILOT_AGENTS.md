@@ -4,6 +4,13 @@
 
 The Secure Renewals HR Portal includes specialized GitHub Copilot agents designed to assist with expanding the portal, identifying and fixing issues, and implementing HR features. These agents work together to provide comprehensive support for both technical and HR-focused tasks.
 
+## Quick Answer: The In-Repo System Engineer
+
+For system engineering tasks, use the **Portal Engineer agent** (`.github/agents/portal-engineer.md`). It is the built-in system engineer you can drive with prompts to expand the portal, add employees, generate documents/passes, and more. Open that file in your IDE with Copilot chat enabled, then issue prompts such as:
+- "Add a flow to onboard a new employee and generate their access pass"
+- "Extend the portal with a document generation page for renewals"
+- "Create an admin task to bulk import employees from CSV"
+
 ## Available Agents
 
 ### 1. HR Assistant Agent

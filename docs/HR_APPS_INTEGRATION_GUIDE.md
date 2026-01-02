@@ -155,7 +155,11 @@ if not OPENCATS_DB_URL:
 
 # Use async engine for async operations
 opencats_engine = create_async_engine(OPENCATS_DB_URL, pool_pre_ping=True)
-AsyncSessionLocal = sessionmaker(opencats_engine, class_=AsyncSession, expire_on_commit=False)
+AsyncSessionLocal = sessionmaker(
+    bind=opencats_engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
 
 async def sync_candidates_from_opencats():
     """Periodic sync of candidates from OpenCATS"""
@@ -430,6 +434,12 @@ async def send_onboarding_documents(employee_id: str):
 ```python
 # Backend: Automated onboarding notifications
 from novu.api import EventApi
+import os
+
+# Securely retrieve API key from environment
+NOVU_API_KEY = os.getenv('NOVU_API_KEY')
+if not NOVU_API_KEY:
+    raise ValueError("NOVU_API_KEY environment variable not set")
 
 novu = EventApi(api_key=NOVU_API_KEY)
 

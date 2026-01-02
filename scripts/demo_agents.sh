@@ -78,7 +78,8 @@ echo ""
 
 # Run the proactive scan
 if [ -f "scripts/proactive_scan.py" ]; then
-    python3 scripts/proactive_scan.py 2>&1 | head -40
+    # Show key parts of the scan output
+    python3 scripts/proactive_scan.py 2>&1 | grep -A 30 "PROACTIVE SCAN RESULTS" | head -35
     echo ""
     print_success "Scan completed! See scan_report.json for full details"
 else

@@ -184,7 +184,14 @@ class ProactiveScan:
         sql_keywords = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'FROM', 'WHERE']
         has_sql = any(keyword in line.upper() for keyword in sql_keywords)
         has_formatting = 'f"' in line or 'f\'' in line or '%s' in line or '.format(' in line
-        return has_sql and has_formatting and 'cursor.execute' not in line
+        
+        # Ignore safe patterns
+        if 'cursor.execute' in line or 'text(' in line or 'select(' in line:
+            return False
+        if ':id' in line or ':employee_id' in line:  # Parameterized queries
+            return False
+            
+        return has_sql and has_formatting
     
     def _check_missing_error_handling(self, line: str, lines: List[str], line_num: int) -> bool:
         """Check for async operations without error handling."""
@@ -208,7 +215,9 @@ class ProactiveScan:
             return False
             
         # Check if it has type hints
-        has_param_hints = '->' in line or ': ' in line.split('(')[1] if '(' in line else False
+        if '(' not in line:
+            return False
+        has_param_hints = '->' in line or ': ' in line.split('(')[1]
         return not has_param_hints
     
     def _check_hardcoded_secrets(self, line: str) -> bool:
@@ -232,7 +241,9 @@ class ProactiveScan:
     
     def _check_missing_catch(self, line: str, lines: List[str], line_num: int) -> bool:
         """Check for API calls without error handling."""
-        if 'await' not in line or 'fetch(' not in line and '.get(' not in line and '.post(' not in line:
+        if 'await' not in line:
+            return False
+        if not ('fetch(' in line or '.get(' in line or '.post(' in line):
             return False
         
         # Look for try-catch or .catch in surrounding lines

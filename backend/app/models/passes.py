@@ -14,7 +14,7 @@ class Pass(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     pass_number: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
-    pass_type: Mapped[str] = mapped_column(String(50), nullable=False)  # recruitment, onboarding, visitor, contractor
+    pass_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)  # recruitment, onboarding, visitor, contractor
     
     # Person details
     full_name: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -25,7 +25,7 @@ class Pass(Base):
     
     # Pass validity
     valid_from: Mapped[date] = mapped_column(Date, nullable=False)
-    valid_until: Mapped[date] = mapped_column(Date, nullable=False)
+    valid_until: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     
     # Access details
     access_areas: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON list of allowed areas
@@ -33,7 +33,7 @@ class Pass(Base):
     sponsor_name: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)  # Employee sponsoring
     
     # Status
-    status: Mapped[str] = mapped_column(String(20), default="active", nullable=False)  # active, expired, revoked
+    status: Mapped[str] = mapped_column(String(20), default="active", nullable=False, index=True)  # active, expired, revoked
     is_printed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     
     # Linked employee (for onboarding passes)

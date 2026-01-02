@@ -1,7 +1,7 @@
 from datetime import date, datetime, timezone
 from typing import Optional, Sequence
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.employee import Employee
@@ -104,3 +104,11 @@ class EmployeeRepository:
             select(Employee.id).where(Employee.employee_id == employee_id)
         )
         return result.scalar_one_or_none() is not None
+
+    async def count(self, session: AsyncSession, active_only: bool = True) -> int:
+        """Count employees."""
+        query = select(func.count(Employee.id))
+        if active_only:
+            query = query.where(Employee.is_active.is_(True))
+        result = await session.execute(query)
+        return result.scalar() or 0

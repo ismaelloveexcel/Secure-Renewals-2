@@ -1,6 +1,6 @@
 from typing import List, Optional, Sequence
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.system_settings import SystemSetting, DEFAULT_FEATURE_TOGGLES
@@ -51,21 +51,27 @@ class SystemSettingsRepository:
     async def count_enabled(self, session: AsyncSession) -> int:
         """Count enabled features."""
         result = await session.execute(
-            select(SystemSetting).where(SystemSetting.is_enabled.is_(True))
+            select(func.count(SystemSetting.id)).where(SystemSetting.is_enabled.is_(True))
         )
-        return len(result.scalars().all())
+        return result.scalar() or 0
 
     async def count_total(self, session: AsyncSession) -> int:
         """Count total features."""
-        result = await session.execute(select(SystemSetting))
-        return len(result.scalars().all())
+        result = await session.execute(
+            select(func.count(SystemSetting.id))
+        )
+        return result.scalar() or 0
 
     async def initialize_defaults(self, session: AsyncSession) -> int:
         """Initialize default feature toggles if not exists."""
+        # Get all existing keys in a single query
+        result = await session.execute(select(SystemSetting.key))
+        existing_keys = {row[0] for row in result.all()}
+        
+        # Only create settings that don't exist
         created = 0
         for toggle in DEFAULT_FEATURE_TOGGLES:
-            existing = await self.get_by_key(session, toggle["key"])
-            if not existing:
+            if toggle["key"] not in existing_keys:
                 setting = SystemSetting(
                     key=toggle["key"],
                     value=toggle["value"],

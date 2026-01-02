@@ -34,10 +34,10 @@ class AdminService:
         await self._settings.initialize_defaults(session)
         await session.commit()
         
-        # Get counts
-        employees = await self._employees.list_all(session, active_only=False)
-        active_employees = await self._employees.list_all(session, active_only=True)
-        renewals = await self._renewals.list_pending(session)
+        # Get counts using efficient COUNT queries
+        total_employees = await self._employees.count(session, active_only=False)
+        active_employees = await self._employees.count(session, active_only=True)
+        pending_renewals = await self._renewals.count_pending(session)
         features_enabled = await self._settings.count_enabled(session)
         features_total = await self._settings.count_total(session)
         
@@ -50,9 +50,9 @@ class AdminService:
             system_status = "active"
         
         return AdminDashboard(
-            total_employees=len(employees),
-            active_employees=len(active_employees),
-            pending_renewals=len(renewals) if renewals else 0,
+            total_employees=total_employees,
+            active_employees=active_employees,
+            pending_renewals=pending_renewals,
             features_enabled=features_enabled,
             features_total=features_total,
             system_status=system_status,

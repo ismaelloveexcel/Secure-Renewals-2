@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Sequence
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Renewal, RenewalAuditLog
@@ -20,6 +20,13 @@ class RenewalRepository:
             .order_by(Renewal.contract_end_date)
         )
         return result.scalars().all()
+
+    async def count_pending(self, session: AsyncSession) -> int:
+        """Count pending renewals."""
+        result = await session.execute(
+            select(func.count(Renewal.id)).where(Renewal.status == "pending")
+        )
+        return result.scalar() or 0
 
     async def create(
         self,

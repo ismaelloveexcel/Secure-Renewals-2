@@ -12,6 +12,7 @@ from app.schemas.employee import (
     PasswordChangeRequest,
 )
 from app.services.employees import employee_service
+from app.auth.jwt import create_access_token
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -82,3 +83,15 @@ async def change_password(
     """
     success = await employee_service.change_password(session, employee_id, request)
     return {"success": success, "message": "Password changed successfully"}
+
+
+@router.post(
+    "/refresh",
+    summary="Refresh JWT token",
+)
+def refresh_token(
+    current_user: str = Depends(get_current_employee_id),
+):
+    settings = get_settings()
+    new_token = create_access_token(subject=current_user, secret_key=settings.auth_secret_key)
+    return {"access_token": new_token}

@@ -20,6 +20,7 @@ class RenewalRepository:
             .order_by(Renewal.contract_end_date)
         )
         return result.scalars().all()
+
     async def create(
         self,
         session: AsyncSession,
@@ -41,6 +42,13 @@ class RenewalRepository:
         await session.flush()
         await session.refresh(renewal)
         return renewal
+
+    # Example: Add pagination to a repository method
+    async def get_paginated_renewals(
+        self, db: AsyncSession, skip: int = 0, limit: int = 10
+    ) -> Sequence[Renewal]:
+        result = await db.execute(select(Renewal).offset(skip).limit(limit))
+        return result.scalars().all()
 
 
 class RenewalAuditLogRepository:

@@ -29,3 +29,9 @@ def require_role(allowed: Optional[List[str]] = None):
         return role
 
     return dependency
+
+
+# Placeholder for SSO login integration (extend as needed)
+def sso_login():
+    # Integrate with your SSO provider here
+    pass

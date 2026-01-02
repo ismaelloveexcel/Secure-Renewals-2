@@ -163,6 +163,8 @@ function App() {
     employee_id: '',
   })
   const [passesLoading, setPassesLoading] = useState(false)
+  const [passFilter, setPassFilter] = useState<'all' | 'active' | 'expired' | 'revoked'>('all')
+  const [viewingPass, setViewingPass] = useState<Pass | null>(null)
   
   // Onboarding state
   const [onboardingTokens, setOnboardingTokens] = useState<OnboardingToken[]>([])
@@ -1264,20 +1266,26 @@ function App() {
 
           {/* Dashboard Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
+            <button
+              onClick={() => setPassFilter('all')}
+              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-emerald-500 text-left transition-all hover:shadow-md ${passFilter === 'all' ? 'ring-2 ring-emerald-500' : ''}`}
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Total Passes</p>
                   <p className="text-2xl font-bold text-gray-800">{passes.length}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                   </svg>
                 </div>
               </div>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
+            </button>
+            <button
+              onClick={() => setPassFilter('active')}
+              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500 text-left transition-all hover:shadow-md ${passFilter === 'active' ? 'ring-2 ring-green-500' : ''}`}
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Active</p>
@@ -1289,33 +1297,39 @@ function App() {
                   </svg>
                 </div>
               </div>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500">
+            </button>
+            <button
+              onClick={() => setPassFilter('expired')}
+              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500 text-left transition-all hover:shadow-md ${passFilter === 'expired' ? 'ring-2 ring-amber-500' : ''}`}
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Expired</p>
-                  <p className="text-2xl font-bold text-red-600">{passes.filter(p => p.status === 'expired').length}</p>
+                  <p className="text-2xl font-bold text-amber-600">{passes.filter(p => p.status === 'expired').length}</p>
                 </div>
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm p-5 border-l-4 border-gray-500">
+            </button>
+            <button
+              onClick={() => setPassFilter('revoked')}
+              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500 text-left transition-all hover:shadow-md ${passFilter === 'revoked' ? 'ring-2 ring-red-500' : ''}`}
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500 font-medium">Revoked</p>
-                  <p className="text-2xl font-bold text-gray-600">{passes.filter(p => p.status === 'revoked').length}</p>
+                  <p className="text-2xl font-bold text-red-600">{passes.filter(p => p.status === 'revoked').length}</p>
                 </div>
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                   </svg>
                 </div>
               </div>
-            </div>
+            </button>
           </div>
 
           <div className="flex gap-4 mb-6">
@@ -1421,33 +1435,57 @@ function App() {
             </div>
           )}
 
+          {/* Filter indicator */}
+          {passFilter !== 'all' && (
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm text-gray-600">Showing:</span>
+              <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
+                passFilter === 'active' ? 'bg-green-100 text-green-700' :
+                passFilter === 'expired' ? 'bg-amber-100 text-amber-700' :
+                'bg-red-100 text-red-700'
+              }`}>
+                {passFilter.charAt(0).toUpperCase() + passFilter.slice(1)} passes
+              </span>
+              <button
+                onClick={() => setPassFilter('all')}
+                className="text-sm text-emerald-600 hover:text-emerald-800"
+              >
+                Clear filter
+              </button>
+            </div>
+          )}
+
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             {passesLoading && passes.length === 0 ? (
               <div className="p-8 text-center text-gray-500">Loading passes...</div>
-            ) : passes.length === 0 ? (
+            ) : passes.filter(p => passFilter === 'all' || p.status === passFilter).length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-gray-500 mb-2">No passes generated yet</p>
+                <p className="text-gray-500 mb-2">
+                  {passFilter === 'all' ? 'No passes generated yet' : `No ${passFilter} passes`}
+                </p>
               </div>
             ) : (
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-emerald-50 border-b border-emerald-100">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pass #</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valid</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Pass #</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Valid</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {passes.map(pass => (
-                    <tr key={pass.id} className="hover:bg-gray-50">
+                  {passes.filter(p => passFilter === 'all' || p.status === passFilter).map(pass => (
+                    <tr key={pass.id} className="hover:bg-emerald-50/50">
                       <td className="px-6 py-4 text-sm font-mono text-gray-900">{pass.pass_number}</td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           pass.pass_type === 'recruitment' ? 'bg-blue-100 text-blue-700' :
                           pass.pass_type === 'onboarding' ? 'bg-emerald-100 text-emerald-700' :
+                          pass.pass_type === 'visitor' ? 'bg-purple-100 text-purple-700' :
+                          pass.pass_type === 'contractor' ? 'bg-orange-100 text-orange-700' :
                           'bg-gray-100 text-gray-700'
                         }`}>
                           {pass.pass_type}
@@ -1460,12 +1498,19 @@ function App() {
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           pass.status === 'active' ? 'bg-green-100 text-green-700' :
+                          pass.status === 'expired' ? 'bg-amber-100 text-amber-700' :
                           'bg-red-100 text-red-700'
                         }`}>
                           {pass.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 flex gap-2">
+                        <button
+                          onClick={() => setViewingPass(pass)}
+                          className="text-emerald-600 hover:text-emerald-800 text-sm font-medium"
+                        >
+                          View
+                        </button>
                         {pass.status === 'active' && (
                           <button
                             onClick={() => revokePass(pass.pass_number)}
@@ -1481,6 +1526,93 @@ function App() {
               </table>
             )}
           </div>
+
+          {/* View Pass Modal */}
+          {viewingPass && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-800">Pass Details</h2>
+                  <button
+                    onClick={() => setViewingPass(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg">
+                    <span className="text-sm text-gray-600">Pass Number</span>
+                    <span className="font-mono font-bold text-emerald-700">{viewingPass.pass_number}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Full Name</p>
+                      <p className="font-medium text-gray-800">{viewingPass.full_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Pass Type</p>
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        viewingPass.pass_type === 'recruitment' ? 'bg-blue-100 text-blue-700' :
+                        viewingPass.pass_type === 'onboarding' ? 'bg-emerald-100 text-emerald-700' :
+                        viewingPass.pass_type === 'visitor' ? 'bg-purple-100 text-purple-700' :
+                        viewingPass.pass_type === 'contractor' ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {viewingPass.pass_type}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Valid From</p>
+                      <p className="font-medium text-gray-800">{viewingPass.valid_from}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Valid Until</p>
+                      <p className="font-medium text-gray-800">{viewingPass.valid_until}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-gray-500">Status</p>
+                    <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
+                      viewingPass.status === 'active' ? 'bg-green-100 text-green-700' :
+                      viewingPass.status === 'expired' ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {viewingPass.status.charAt(0).toUpperCase() + viewingPass.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  {viewingPass.status === 'active' && (
+                    <button
+                      onClick={() => {
+                        revokePass(viewingPass.pass_number)
+                        setViewingPass(null)
+                      }}
+                      className="flex-1 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      Revoke Pass
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setViewingPass(null)}
+                    className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )

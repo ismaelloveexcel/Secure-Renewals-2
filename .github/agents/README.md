@@ -39,13 +39,20 @@ Proactive code quality and security scanner.
 - **[Quick Reference](QUICK_REFERENCE.md)** - Fast lookup for common tasks
 - **[Configuration](config.yml)** - Agent settings and rules
 - **[Full Guide](../../docs/COPILOT_AGENTS.md)** - Complete documentation
+- **[Deployment Guide](../../docs/AGENT_DEPLOYMENT_GUIDE.md)** - How to deploy and use agents
 
 ## 🚀 Getting Started
 
+### Already Deployed!
+The agents are markdown files - they work automatically once this repo is cloned. No installation needed!
+
+### Using the Agents
 1. **Identify your need** - HR task, technical implementation, or quality check?
-2. **Choose an agent** - Open the relevant agent file
+2. **Choose an agent** - Open the relevant agent file in your IDE
 3. **Ask questions** - Use GitHub Copilot with agent context
 4. **Follow guidance** - Implement the recommendations
+
+**📖 Need detailed setup instructions?** See [Deployment Guide](../../docs/AGENT_DEPLOYMENT_GUIDE.md)
 
 ## 💡 Example Usage
 

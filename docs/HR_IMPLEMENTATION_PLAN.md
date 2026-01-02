@@ -11,7 +11,7 @@
 **Target API:** `POST /api/employees/import` (CSV with headers: `employee_id,name,email,department,date_of_birth,role`).
 
 **Migration steps (1–2 days):**
-1. **Profiling:** Open the Excel/CSV, validate headers, and normalize DOB to `DDMMYYYY`.
+1. **Profiling:** Open the Excel/CSV, validate headers, and normalize DOB to `DDMMYYYY` (8 digits, no separators).
 2. **Data hygiene:** Deduplicate `employee_id`, enforce roles (`admin|hr|viewer`), and fill missing emails/departments.
 3. **Staging import:** Use `/api/employees/import` in a non-prod environment; capture the returned summary (`created|skipped|errors`).
 4. **Fix & re-run:** Correct errored rows, re-upload until zero errors.
@@ -59,7 +59,7 @@ Add submenus to the Admin area so HR work is grouped and permissions stay centra
 
 Immediate actions (no backend rewrite required):
 1. **Entry gate:** Put the Admin tile behind a feature toggle (e.g., `admin_portal_enabled`) and display the tile only when enabled.  
-2. **Access code on entry:** Require a short-lived admin access code (env-driven, rotated weekly) before showing the admin login modal; store attempts in the audit log.
+2. **Access code on entry:** Require a short-lived admin access code (env-driven, rotated daily or every 3–4 days) before showing the admin login modal; store attempts in the audit log.
 3. **Rate limiting & alerts:** Leverage existing `slowapi` limiter (already wired in `main.py`) for `/auth/login`; add alerting on repeated failures from the same IP.
 4. **Audit everything:** Log admin logins, feature-toggle changes, imports, password resets, and deactivations with actor + timestamp.
 5. **Network allowlist (deployment):** Restrict admin routes to corporate IP/VPN at the reverse proxy level.
@@ -77,7 +77,7 @@ Immediate actions (no backend rewrite required):
 
 ## 5) Automation & Templates
 
-- **Doc templates:** Store DOCX/Markdown templates per document type; render via backend service (e.g., docx templating) and return signed PDFs.  
+- **Doc templates:** Store DOCX/Markdown templates per document type; render via backend service (e.g., docx templating) and return signed PDFs. Validate and sanitize all dynamic fields before rendering to prevent template/code injection.  
 - **Reminders:** Use a daily cron/worker to email or post Teams/Slack reminders for probation, onboarding tasks, and pending passes.  
 - **Exports:** Provide CSV exports for each submenu; align columns with the import schema for round-tripping data.
 

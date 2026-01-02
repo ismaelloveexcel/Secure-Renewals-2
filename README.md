@@ -42,6 +42,7 @@
 | [System Health Check](docs/SYSTEM_HEALTH_CHECK.md) | Application assessment & roadmap | Admins/Developers |
 | [Recommended Add-ons](docs/RECOMMENDED_ADDONS.md) | Integration options | Developers |
 | [HR Implementation Plan](docs/HR_IMPLEMENTATION_PLAN.md) | Migration, admin hardening, and HR ops structure | HR Leadership/Admins |
+| [HR Apps Integration Guide](docs/HR_APPS_INTEGRATION_GUIDE.md) | **NEW!** Complete guide to GitHub HR apps & integration strategies | HR Leadership/Developers |
 
 ---
 

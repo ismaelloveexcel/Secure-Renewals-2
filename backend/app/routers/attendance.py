@@ -11,6 +11,7 @@ from app.core.config import get_settings
 from app.database import get_session
 from app.models.employee import Employee
 from app.models.attendance import AttendanceRecord, STANDARD_WORK_HOURS, GRACE_PERIOD_MINUTES
+from app.models.system_settings import SystemSetting
 from app.schemas.attendance import (
     ClockInRequest, ClockOutRequest, BreakRequest,
     AttendanceResponse, AttendanceDashboard,
@@ -18,6 +19,17 @@ from app.schemas.attendance import (
 )
 
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
+
+
+async def check_feature_enabled(session: AsyncSession, feature_key: str) -> bool:
+    """Check if a feature toggle is enabled."""
+    result = await session.execute(
+        select(SystemSetting).where(SystemSetting.key == feature_key)
+    )
+    setting = result.scalar_one_or_none()
+    if not setting:
+        return True  # Default to enabled if setting doesn't exist
+    return setting.is_enabled
 
 
 async def get_current_employee(
@@ -190,6 +202,15 @@ async def clock_in(
     session: AsyncSession = Depends(get_session)
 ):
     """Clock in for the day."""
+    # Check if attendance feature is enabled
+    if not await check_feature_enabled(session, "feature_attendance"):
+        raise HTTPException(status_code=403, detail="Attendance feature is disabled")
+    
+    # Validate WFH request if feature is disabled
+    if request.work_type == "wfh":
+        if not await check_feature_enabled(session, "feature_attendance_wfh"):
+            raise HTTPException(status_code=403, detail="WFH feature is disabled")
+    
     today = date.today()
     now = datetime.now(timezone.utc)
     
@@ -207,25 +228,34 @@ async def clock_in(
     if existing and existing.clock_in:
         raise HTTPException(status_code=400, detail="Already clocked in today")
     
-    # Check if late (after 8:15 AM local time)
-    local_hour = now.hour
-    local_minute = now.minute
-    is_late = local_hour > 8 or (local_hour == 8 and local_minute > GRACE_PERIOD_MINUTES)
+    # Check if late (after 8:15 AM - using UTC for now, assuming UAE timezone UTC+4)
+    # Standard start time is 8:00 AM UAE (04:00 UTC)
+    uae_hour = (now.hour + 4) % 24  # Convert UTC to UAE time
+    uae_minute = now.minute
+    is_late = uae_hour > 8 or (uae_hour == 8 and uae_minute > GRACE_PERIOD_MINUTES)
     late_minutes = None
     if is_late:
-        standard_time = now.replace(hour=8, minute=0, second=0, microsecond=0)
-        late_minutes = int((now - standard_time).total_seconds() / 60)
+        # Calculate minutes late from 8:00 AM UAE time
+        late_minutes = (uae_hour - 8) * 60 + uae_minute
+        if late_minutes < 0:
+            late_minutes = 0
     
     # Determine status
     att_status = "late" if is_late else "present"
+    
+    # Store GPS coordinates if GPS feature is enabled
+    gps_enabled = await check_feature_enabled(session, "feature_attendance_gps")
+    lat = request.latitude if gps_enabled else None
+    lng = request.longitude if gps_enabled else None
+    addr = request.address if gps_enabled else None
     
     record = AttendanceRecord(
         employee_id=current_user.id,
         attendance_date=today,
         clock_in=now,
-        clock_in_latitude=request.latitude,
-        clock_in_longitude=request.longitude,
-        clock_in_address=request.address,
+        clock_in_latitude=lat,
+        clock_in_longitude=lng,
+        clock_in_address=addr,
         work_type=request.work_type,
         wfh_reason=request.wfh_reason if request.work_type == "wfh" else None,
         wfh_approved=None if request.work_type == "wfh" else None,
@@ -249,6 +279,10 @@ async def clock_out(
     session: AsyncSession = Depends(get_session)
 ):
     """Clock out for the day."""
+    # Check if attendance feature is enabled
+    if not await check_feature_enabled(session, "feature_attendance"):
+        raise HTTPException(status_code=403, detail="Attendance feature is disabled")
+    
     today = date.today()
     now = datetime.now(timezone.utc)
     
@@ -273,10 +307,12 @@ async def clock_out(
         record.break_end = now
         record.break_duration_minutes = int((now - record.break_start).total_seconds() / 60)
     
+    # Store GPS coordinates if GPS feature is enabled
+    gps_enabled = await check_feature_enabled(session, "feature_attendance_gps")
     record.clock_out = now
-    record.clock_out_latitude = request.latitude
-    record.clock_out_longitude = request.longitude
-    record.clock_out_address = request.address
+    record.clock_out_latitude = request.latitude if gps_enabled else None
+    record.clock_out_longitude = request.longitude if gps_enabled else None
+    record.clock_out_address = request.address if gps_enabled else None
     if request.notes:
         record.notes = (record.notes or "") + "\n" + request.notes
     
@@ -287,15 +323,21 @@ async def clock_out(
     record.regular_hours = regular_hrs
     record.overtime_hours = overtime_hrs
     
-    if overtime_hrs and overtime_hrs > 0:
+    # Check if overtime feature is enabled
+    overtime_enabled = await check_feature_enabled(session, "feature_attendance_overtime")
+    if overtime_hrs and overtime_hrs > 0 and overtime_enabled:
         record.overtime_type = "auto-calculated"
+        record.overtime_approved = None  # Requires approval
+    elif overtime_hrs and overtime_hrs > 0:
+        # Overtime disabled, don't track overtime
+        record.overtime_hours = Decimal("0")
     
-    # Check early departure (before 5 PM)
-    local_hour = now.hour
-    if local_hour < 17:
+    # Check early departure (before 5 PM UAE time = 13:00 UTC)
+    uae_hour = (now.hour + 4) % 24  # Convert UTC to UAE time
+    if uae_hour < 17:
         record.is_early_departure = True
-        standard_end = now.replace(hour=17, minute=0, second=0, microsecond=0)
-        record.early_departure_minutes = int((standard_end - now).total_seconds() / 60)
+        # Calculate minutes before 5 PM UAE
+        record.early_departure_minutes = (17 - uae_hour) * 60 - now.minute
     
     await session.commit()
     await session.refresh(record)

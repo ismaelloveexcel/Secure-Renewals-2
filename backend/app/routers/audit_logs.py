@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.audit_log import AuditLogService
 from app.repositories.audit_log import AuditLogRepository
 from app.schemas.audit_log import AuditLogBase, AuditLogResponse
-from app.auth.dependencies import require_role, get_session
+from app.auth.dependencies import require_role
+from app.database import get_session
 from typing import List, Optional
 
 router = APIRouter(prefix="/api/audit-logs", tags=["audit-logs"])

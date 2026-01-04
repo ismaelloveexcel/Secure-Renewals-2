@@ -20,6 +20,46 @@ interface Employee {
   probation_status?: string
   employment_status?: string
   profile_status?: string
+  // UAE Compliance fields
+  visa_number?: string
+  visa_issue_date?: string
+  visa_expiry_date?: string
+  emirates_id_number?: string
+  emirates_id_expiry?: string
+  medical_fitness_date?: string
+  medical_fitness_expiry?: string
+  iloe_status?: string
+  iloe_expiry?: string
+  contract_type?: string
+  contract_start_date?: string
+  contract_end_date?: string
+  nationality?: string
+  gender?: string
+  joining_date?: string
+  line_manager_name?: string
+}
+
+interface EmployeeFormData {
+  name: string
+  email: string
+  department: string
+  job_title: string
+  location: string
+  nationality: string
+  gender: string
+  employment_status: string
+  visa_number: string
+  visa_issue_date: string
+  visa_expiry_date: string
+  emirates_id_number: string
+  emirates_id_expiry: string
+  medical_fitness_date: string
+  medical_fitness_expiry: string
+  iloe_status: string
+  iloe_expiry: string
+  contract_type: string
+  contract_start_date: string
+  contract_end_date: string
 }
 
 interface FeatureToggle {
@@ -254,6 +294,33 @@ function App() {
   const [wfhReason, setWfhReason] = useState('')
   const [gpsCoords, setGpsCoords] = useState<{latitude: number, longitude: number} | null>(null)
 
+  // Employee management state
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false)
+  const [employeeFormData, setEmployeeFormData] = useState<EmployeeFormData>({
+    name: '',
+    email: '',
+    department: '',
+    job_title: '',
+    location: '',
+    nationality: '',
+    gender: '',
+    employment_status: '',
+    visa_number: '',
+    visa_issue_date: '',
+    visa_expiry_date: '',
+    emirates_id_number: '',
+    emirates_id_expiry: '',
+    medical_fitness_date: '',
+    medical_fitness_expiry: '',
+    iloe_status: '',
+    iloe_expiry: '',
+    contract_type: '',
+    contract_start_date: '',
+    contract_end_date: '',
+  })
+  const [employeeModalLoading, setEmployeeModalLoading] = useState(false)
+
   const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
 
   // Check for onboarding token in URL on mount
@@ -382,6 +449,76 @@ function App() {
       console.error('Failed to fetch employees:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const openEmployeeModal = async (emp: Employee) => {
+    setSelectedEmployee(emp)
+    setEmployeeFormData({
+      name: emp.name || '',
+      email: emp.email || '',
+      department: emp.department || '',
+      job_title: emp.job_title || '',
+      location: emp.location || '',
+      nationality: emp.nationality || '',
+      gender: emp.gender || '',
+      employment_status: emp.employment_status || '',
+      visa_number: emp.visa_number || '',
+      visa_issue_date: emp.visa_issue_date || '',
+      visa_expiry_date: emp.visa_expiry_date || '',
+      emirates_id_number: emp.emirates_id_number || '',
+      emirates_id_expiry: emp.emirates_id_expiry || '',
+      medical_fitness_date: emp.medical_fitness_date || '',
+      medical_fitness_expiry: emp.medical_fitness_expiry || '',
+      iloe_status: emp.iloe_status || '',
+      iloe_expiry: emp.iloe_expiry || '',
+      contract_type: emp.contract_type || '',
+      contract_start_date: emp.contract_start_date || '',
+      contract_end_date: emp.contract_end_date || '',
+    })
+    setShowEmployeeModal(true)
+    setError(null)
+  }
+
+  const closeEmployeeModal = () => {
+    setShowEmployeeModal(false)
+    setSelectedEmployee(null)
+    setError(null)
+  }
+
+  const updateEmployee = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedEmployee) return
+    
+    setEmployeeModalLoading(true)
+    setError(null)
+    
+    try {
+      const updateData: Record<string, string> = {}
+      // Only send non-empty fields
+      Object.entries(employeeFormData).forEach(([key, value]) => {
+        if (value && value.trim() !== '') {
+          updateData[key] = value
+        }
+      })
+      
+      const res = await fetchWithAuth(`${API_BASE}/employees/${selectedEmployee.employee_id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updateData),
+      })
+      
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Failed to update employee')
+      }
+      
+      // Refresh employees list
+      await fetchEmployees()
+      closeEmployeeModal()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update employee')
+    } finally {
+      setEmployeeModalLoading(false)
     }
   }
 
@@ -1134,6 +1271,315 @@ function App() {
     return (
       <div className="min-h-screen bg-gray-100 p-8">
         {loginModal}
+        
+        {/* Employee Edit Modal */}
+        {showEmployeeModal && selectedEmployee && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-800">Edit Employee</h2>
+                    <p className="text-sm text-gray-500">{selectedEmployee.employee_id}</p>
+                  </div>
+                  <button
+                    onClick={closeEmployeeModal}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              {error && (
+                <div className="mx-6 mt-4 bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>
+              )}
+              
+              <form onSubmit={updateEmployee} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                {/* Basic Info */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Basic Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                      <input
+                        type="text"
+                        value={employeeFormData.name}
+                        onChange={e => setEmployeeFormData({...employeeFormData, name: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        value={employeeFormData.email}
+                        onChange={e => setEmployeeFormData({...employeeFormData, email: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                      <input
+                        type="text"
+                        value={employeeFormData.department}
+                        onChange={e => setEmployeeFormData({...employeeFormData, department: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+                      <input
+                        type="text"
+                        value={employeeFormData.job_title}
+                        onChange={e => setEmployeeFormData({...employeeFormData, job_title: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                      <input
+                        type="text"
+                        value={employeeFormData.location}
+                        onChange={e => setEmployeeFormData({...employeeFormData, location: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                      <input
+                        type="text"
+                        value={employeeFormData.nationality}
+                        onChange={e => setEmployeeFormData({...employeeFormData, nationality: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                      <select
+                        value={employeeFormData.gender}
+                        onChange={e => setEmployeeFormData({...employeeFormData, gender: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="">Select...</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Employment Status</label>
+                      <select
+                        value={employeeFormData.employment_status}
+                        onChange={e => setEmployeeFormData({...employeeFormData, employment_status: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="">Select...</option>
+                        <option value="Active">Active</option>
+                        <option value="Probation">Probation</option>
+                        <option value="On Leave">On Leave</option>
+                        <option value="Resigned">Resigned</option>
+                        <option value="Terminated">Terminated</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* UAE Compliance - Visa */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    Visa Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Visa Number</label>
+                      <input
+                        type="text"
+                        value={employeeFormData.visa_number}
+                        onChange={e => setEmployeeFormData({...employeeFormData, visa_number: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Issue Date</label>
+                      <input
+                        type="date"
+                        value={employeeFormData.visa_issue_date}
+                        onChange={e => setEmployeeFormData({...employeeFormData, visa_issue_date: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                      <input
+                        type="date"
+                        value={employeeFormData.visa_expiry_date}
+                        onChange={e => setEmployeeFormData({...employeeFormData, visa_expiry_date: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* UAE Compliance - Emirates ID */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    </svg>
+                    Emirates ID
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Emirates ID Number</label>
+                      <input
+                        type="text"
+                        value={employeeFormData.emirates_id_number}
+                        onChange={e => setEmployeeFormData({...employeeFormData, emirates_id_number: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        placeholder="784-XXXX-XXXXXXX-X"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                      <input
+                        type="date"
+                        value={employeeFormData.emirates_id_expiry}
+                        onChange={e => setEmployeeFormData({...employeeFormData, emirates_id_expiry: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* UAE Compliance - Medical & ILOE */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    Medical & Insurance
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Medical Fitness Date</label>
+                      <input
+                        type="date"
+                        value={employeeFormData.medical_fitness_date}
+                        onChange={e => setEmployeeFormData({...employeeFormData, medical_fitness_date: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Medical Fitness Expiry</label>
+                      <input
+                        type="date"
+                        value={employeeFormData.medical_fitness_expiry}
+                        onChange={e => setEmployeeFormData({...employeeFormData, medical_fitness_expiry: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">ILOE Status</label>
+                      <select
+                        value={employeeFormData.iloe_status}
+                        onChange={e => setEmployeeFormData({...employeeFormData, iloe_status: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="">Select...</option>
+                        <option value="Active">Active</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Expired">Expired</option>
+                        <option value="Not Applicable">Not Applicable</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">ILOE Expiry</label>
+                      <input
+                        type="date"
+                        value={employeeFormData.iloe_expiry}
+                        onChange={e => setEmployeeFormData({...employeeFormData, iloe_expiry: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contract Details */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Contract Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contract Type</label>
+                      <select
+                        value={employeeFormData.contract_type}
+                        onChange={e => setEmployeeFormData({...employeeFormData, contract_type: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="">Select...</option>
+                        <option value="Limited">Limited</option>
+                        <option value="Unlimited">Unlimited</option>
+                        <option value="Fixed Term">Fixed Term</option>
+                        <option value="Probation">Probation</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                      <input
+                        type="date"
+                        value={employeeFormData.contract_start_date}
+                        onChange={e => setEmployeeFormData({...employeeFormData, contract_start_date: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                      <input
+                        type="date"
+                        value={employeeFormData.contract_end_date}
+                        onChange={e => setEmployeeFormData({...employeeFormData, contract_end_date: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex gap-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={closeEmployeeModal}
+                    className="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={employeeModalLoading}
+                    className="flex-1 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium disabled:opacity-50"
+                  >
+                    {employeeModalLoading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -1155,6 +1601,15 @@ function App() {
             </div>
           </div>
           
+          {/* Instructions */}
+          {(user?.role === 'admin' || user?.role === 'hr') && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+              <p className="text-emerald-700 text-sm">
+                <strong>Tip:</strong> Click on any employee row to view and edit their details including UAE compliance information.
+              </p>
+            </div>
+          )}
+          
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             {loading ? (
               <div className="p-8 text-center text-gray-500">Loading employees...</div>
@@ -1173,11 +1628,16 @@ function App() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profile</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {employees.map(emp => (
-                    <tr key={emp.id} className="hover:bg-gray-50">
+                    <tr 
+                      key={emp.id} 
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() => (user?.role === 'admin' || user?.role === 'hr') && openEmployeeModal(emp)}
+                    >
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">{emp.employee_id}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{emp.name}</td>
                       <td className="px-6 py-4 text-sm text-gray-500">{emp.job_title || '-'}</td>
@@ -1202,6 +1662,19 @@ function App() {
                            emp.profile_status === 'pending_review' ? 'Pending Review' :
                            'Incomplete'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {(user?.role === 'admin' || user?.role === 'hr') && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openEmployeeModal(emp)
+                            }}
+                            className="px-3 py-1 text-sm text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                          >
+                            Edit
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

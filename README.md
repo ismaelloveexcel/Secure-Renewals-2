@@ -302,20 +302,25 @@ For production deployments, **Azure App Service** is recommended:
 
 **Quick Start with Azure:**
 
-1. **Run the setup script** in [Azure Cloud Shell](https://shell.azure.com):
+1. **Clone the repository** in [Azure Cloud Shell](https://shell.azure.com):
    ```bash
-   cd scripts
-   chmod +x azure-setup.sh
-   ./azure-setup.sh
+   git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
+   cd Secure-Renewals-2
    ```
 
-2. **Add GitHub Secrets** (from script output):
+2. **Run the setup script**:
+   ```bash
+   chmod +x scripts/azure-setup.sh
+   ./scripts/azure-setup.sh
+   ```
+
+3. **Add GitHub Secrets** (from script output):
    - `AZURE_CREDENTIALS`
    - `AZURE_WEBAPP_NAME_BACKEND`
    - `AZURE_WEBAPP_NAME_FRONTEND`
    - `AZURE_RESOURCE_GROUP`
 
-3. **Push to main branch** - GitHub Actions deploys automatically!
+4. **Push to main branch** - GitHub Actions deploys automatically!
 
 **📖 Full Azure Guide**: [Azure Deployment Guide](docs/AZURE_DEPLOYMENT_GUIDE.md)
 

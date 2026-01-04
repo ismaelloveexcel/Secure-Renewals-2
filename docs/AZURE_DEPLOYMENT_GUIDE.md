@@ -153,13 +153,19 @@ The output looks like:
 
 ### Step 2: Create Azure Resources
 
-Run the setup script:
+First, clone the repository:
 
 ```bash
 # In Azure Cloud Shell or local terminal with Azure CLI
-cd scripts
-chmod +x azure-setup.sh
-./azure-setup.sh
+git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
+cd Secure-Renewals-2
+```
+
+Then run the setup script:
+
+```bash
+chmod +x scripts/azure-setup.sh
+./scripts/azure-setup.sh
 ```
 
 Or create resources manually:

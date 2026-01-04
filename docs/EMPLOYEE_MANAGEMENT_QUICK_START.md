@@ -193,7 +193,8 @@ contract_end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 Add to `backend/app/routers/employees.py`:
 
 ```python
-from app.schemas.employee import EmployeeUpdate
+# Add this import at the top of the file
+from app.schemas.employee import EmployeeUpdate  # Note: Define EmployeeUpdate schema first (Step 6)
 
 @router.get(
     "/{employee_id}",
@@ -256,6 +257,15 @@ async def get_compliance_alerts(
 Add to `backend/app/services/employees.py`:
 
 ```python
+# Required imports (add at top of file if not already present)
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import HTTPException
+from app.models.employee import Employee
+from app.schemas.employee import EmployeeUpdate
+
+# Add these methods to your EmployeeService class:
+
 async def get_employee(self, session: AsyncSession, employee_id: str) -> Employee:
     """Get single employee by employee_id"""
     result = await session.execute(
@@ -445,6 +455,9 @@ CSV_COLUMN_MAP = {
 Add a helper to calculate profile completion:
 
 ```python
+# Add to backend/app/services/employees.py or a new utils file
+from app.models.employee import Employee
+
 def calculate_profile_completion(employee: Employee) -> dict:
     """Calculate profile completion percentage"""
     

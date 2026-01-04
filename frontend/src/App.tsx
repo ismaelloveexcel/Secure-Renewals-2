@@ -818,7 +818,7 @@ function App() {
   // Universal loader for all loading states
   if (loading || passesLoading || onboardingLoading || attendanceLoading || chamberLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <GlassLoader />
       </div>
     )

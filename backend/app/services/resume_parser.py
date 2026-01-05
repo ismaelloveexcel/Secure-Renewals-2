@@ -59,12 +59,31 @@ class ResumeParserService:
             # Clean and structure data
             cleaned_data = self._clean_parsed_data(data)
 
-            # Try to extract UAE-specific data
+            # Try to extract UAE-specific data from text content
             try:
-                with open(file_path, 'rb') as f:
-                    text_content = str(f.read())
-                uae_data = self._extract_uae_specific_data(text_content)
-                cleaned_data.update(uae_data)
+                # Try to read file as text with different encodings
+                text_content = ""
+                file_ext = Path(file_path).suffix.lower()
+                
+                if file_ext == '.txt':
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        text_content = f.read()
+                else:
+                    # For PDF/DOCX, try to get text from parsed data
+                    # pyresparser extracts text internally
+                    if data:
+                        # Combine all text fields for UAE-specific extraction
+                        text_parts = []
+                        for key, value in data.items():
+                            if isinstance(value, str):
+                                text_parts.append(value)
+                            elif isinstance(value, list):
+                                text_parts.extend([str(v) for v in value])
+                        text_content = ' '.join(text_parts)
+                
+                if text_content:
+                    uae_data = self._extract_uae_specific_data(text_content)
+                    cleaned_data.update(uae_data)
             except Exception as e:
                 logger.warning(f"Could not extract UAE-specific data: {e}")
 

@@ -9,7 +9,7 @@ import tempfile
 import os
 from pathlib import Path
 
-from app.core.security import require_role
+from app.auth.dependencies import require_role
 from app.database import get_session
 from app.routers.auth import get_current_employee_id
 from app.schemas.recruitment import (
@@ -478,7 +478,6 @@ async def create_candidate_from_resume(
             f.write(content)
 
         # Update candidate with resume path
-        from app.schemas.recruitment import CandidateUpdate
         await recruitment_service.update_candidate(
             session, candidate.id,
             CandidateUpdate(notes=f"{candidate.notes or ''}\nResume: {resume_path}".strip())

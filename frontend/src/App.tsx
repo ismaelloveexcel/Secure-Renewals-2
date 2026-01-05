@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { GlassLoader } from './components/GlassLoader'
 import { TemplateList } from './components/Templates/TemplateList'
+import { EmployeeProfile } from './components/EmployeeProfile'
 
 type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance'
 
@@ -323,6 +324,7 @@ function App() {
   const [showImportModal, setShowImportModal] = useState(false)
   const [importLoading, setImportLoading] = useState(false)
   const [importResult, setImportResult] = useState<{created: number, skipped: number, errors: string[]} | null>(null)
+  const [viewingProfileId, setViewingProfileId] = useState<string | null>(null)
 
   const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
 
@@ -1313,6 +1315,17 @@ function App() {
       <div className="min-h-screen bg-gray-100 p-8">
         {loginModal}
         
+        {/* Employee Profile Modal */}
+        {viewingProfileId && user?.token && (
+          <EmployeeProfile
+            employeeId={viewingProfileId}
+            token={user.token}
+            currentUserRole={user.role}
+            currentUserId={user.employee_id}
+            onClose={() => setViewingProfileId(null)}
+          />
+        )}
+        
         {/* Employee Edit Modal */}
         {showEmployeeModal && selectedEmployee && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -1763,17 +1776,28 @@ function App() {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        {(user?.role === 'admin' || user?.role === 'hr') && (
+                        <div className="flex items-center gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              openEmployeeModal(emp)
+                              setViewingProfileId(emp.employee_id)
                             }}
-                            className="px-3 py-1 text-sm text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            className="px-3 py-1 text-sm text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                           >
-                            Edit
+                            View
                           </button>
-                        )}
+                          {(user?.role === 'admin' || user?.role === 'hr') && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openEmployeeModal(emp)
+                              }}
+                              className="px-3 py-1 text-sm text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

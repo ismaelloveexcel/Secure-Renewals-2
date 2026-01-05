@@ -1,6 +1,12 @@
 from typing import List, Optional
 
-from fastapi import Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
+from jose import JWTError, jwt
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import get_settings
+from app.database import get_session
 
 ALLOWED_ROLES = {"admin", "hr", "viewer"}
 
@@ -13,11 +19,42 @@ def sanitize_text(value: str) -> str:
 
 
 def require_role(allowed: Optional[List[str]] = None):
-    async def dependency(x_role: str | None = Header(default=None, alias="X-Role")) -> str:
-        if x_role is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="X-Role header missing")
+    """
+    Dependency that authenticates via JWT token and validates role.
+    Supports both JWT-based auth and X-Role header fallback for compatibility.
+    """
+    async def dependency(
+        authorization: str | None = Header(default=None),
+        x_role: str | None = Header(default=None, alias="X-Role"),
+        session: AsyncSession = Depends(get_session),
+    ) -> str:
+        from app.models import Employee
+        
+        role = None
+        
+        if authorization:
+            scheme, _, token = authorization.partition(" ")
+            if scheme.lower() == "bearer" and token:
+                try:
+                    settings = get_settings()
+                    payload = jwt.decode(token.strip(), settings.auth_secret_key, algorithms=["HS256"])
+                    employee_id = payload.get("sub")
+                    if employee_id:
+                        result = await session.execute(
+                            select(Employee).where(Employee.employee_id == employee_id)
+                        )
+                        employee = result.scalar_one_or_none()
+                        if employee and employee.is_active:
+                            role = employee.role
+                except JWTError:
+                    pass
+        
+        if not role and x_role:
+            role = x_role.strip().lower()
+        
+        if not role:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
 
-        role = x_role.strip().lower()
         if role not in ALLOWED_ROLES:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid role")
         if allowed and role not in allowed:

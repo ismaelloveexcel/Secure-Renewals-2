@@ -16,6 +16,7 @@ from app.schemas.employee import (
     EmployeeCreate,
     EmployeeCSVRow,
     EmployeeResponse,
+    EmployeeUpdate,
     LoginRequest,
     LoginResponse,
     PasswordChangeRequest,
@@ -215,11 +216,26 @@ class EmployeeService:
     async def import_from_csv(
         self, session: AsyncSession, file: UploadFile
     ) -> dict:
-        """Import employees from CSV file."""
+        """
+        Import employees from CSV file.
+        
+        Supports two formats:
+        1. Baynunah Employee Database format (Employee No, Employee Name, etc.)
+        2. Simple format (employee_id, name, email, department, date_of_birth, role)
+        """
         content = await file.read()
-        text = content.decode("utf-8")
+        # Try UTF-8 with BOM first (Excel exports), then plain UTF-8
+        try:
+            text = content.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            text = content.decode("utf-8")
+        
         reader = csv.DictReader(StringIO(text))
-
+        headers = reader.fieldnames or []
+        
+        # Detect format based on headers
+        is_baynunah_format = "Employee No" in headers or "Employee Name" in headers
+        
         created = 0
         skipped = 0
         errors = []
@@ -227,35 +243,141 @@ class EmployeeService:
 
         for row_num, row in enumerate(reader, start=2):
             try:
-                employee_id = row.get("employee_id", "").strip()
-                name = row.get("name", "").strip()
+                if is_baynunah_format:
+                    # Baynunah Employee Database format
+                    employee_id = row.get("Employee No", "").strip()
+                    name = row.get("Employee Name", "").strip()
+                    
+                    if not employee_id or not name:
+                        skipped += 1
+                        continue
+                    
+                    # Parse DOB
+                    dob_str = row.get("DOB", "").strip()
+                    dob = self._parse_date_flexible(dob_str)
+                    if not dob:
+                        dob = date(1990, 1, 1)  # Default DOB if not provided
+                    
+                    # Determine role based on department/function
+                    department = row.get("Department", "").strip()
+                    function = row.get("Function", "").strip()
+                    role = "viewer"
+                    if "HR" in department:
+                        role = "hr"
+                    if function.lower() in ["executive", "director"]:
+                        role = "hr"
+                    
+                    # Check if already exists
+                    if await self._repo.exists(session, employee_id):
+                        skipped += 1
+                        continue
+                    
+                    # Create employee with all Baynunah fields
+                    password_hash = hash_password(dob.strftime("%d%m%Y"))
+                    
+                    employee = Employee(
+                        employee_id=employee_id,
+                        name=name,
+                        email=row.get("Company Email Address", "").strip() or None,
+                        department=department or None,
+                        date_of_birth=dob,
+                        password_hash=password_hash,
+                        password_changed=False,
+                        role=role,
+                        is_active=self._map_employment_status(row.get("Employment Status")) == "Active",
+                        
+                        # Job info
+                        job_title=row.get("Job Title", "").strip() or None,
+                        function=function or None,
+                        location=row.get("Location", "").strip() or None,
+                        work_schedule=row.get("Work Schedule", "").strip() or None,
+                        
+                        # Personal info
+                        gender=row.get("Gender", "").strip() or None,
+                        nationality=row.get("Nationality", "").strip() or None,
+                        company_phone=row.get("Company Phone Number", "").strip() or None,
+                        
+                        # Line manager
+                        line_manager_name=row.get("Line Manager", "").strip() or None,
+                        line_manager_email=row.get("Line Manager's Email (from Line Manager)", "").strip() or None,
+                        
+                        # Employment dates
+                        joining_date=self._parse_date_flexible(row.get("Joining Date", "")),
+                        last_promotion_date=self._parse_date_flexible(row.get("Last Promotion Date", "")),
+                        last_increment_date=self._parse_date_flexible(row.get("Last Increment Date", "")),
+                        
+                        # Probation
+                        probation_start_date=self._parse_date_flexible(row.get("Joining Date", "")),
+                        one_month_eval_date=self._parse_date_flexible(row.get("1 Month Eval Date", "")),
+                        three_month_eval_date=self._parse_date_flexible(row.get("3 Month Eval Date", "")),
+                        six_month_eval_date=self._parse_date_flexible(row.get("6 Month Eval Date", "")),
+                        probation_status=self._map_probation_status(row.get("Probation Status", "")),
+                        
+                        # Employment status
+                        employment_status=self._map_employment_status(row.get("Employment Status")),
+                        years_of_service=self._parse_int(row.get("Years of Service", "")),
+                        
+                        # Leave and overtime
+                        annual_leave_entitlement=self._parse_int(row.get("Annual Leave Entitlement", "")),
+                        overtime_type=row.get("Overtime Type", "").strip() or None,
+                        
+                        # Compliance
+                        security_clearance=row.get("Security Clearance", "").strip() or None,
+                        visa_status=row.get("Visa Status", "").strip() or None,
+                        
+                        # Medical insurance
+                        medical_insurance_provider=row.get("Medical Insurance Provider", "").strip() or None,
+                        medical_insurance_category=row.get("Medical Insurance Category", "").strip() or None,
+                        
+                        # Compensation
+                        basic_salary=self._parse_decimal(row.get("Basic Salary", "")),
+                        housing_allowance=self._parse_decimal(row.get("Housing", "")),
+                        transportation_allowance=self._parse_decimal(row.get("Transportation", "")),
+                        air_ticket_entitlement=self._parse_decimal(row.get("Air Ticket Entitlement", "")),
+                        other_allowance=self._parse_decimal(row.get("Other Allowance", "")),
+                        consultancy_fees=self._parse_decimal(row.get("Consultancy Fees", "")),
+                        air_fare_allowance=self._parse_decimal(row.get("Air Fare Allowance", "")),
+                        family_air_ticket_allowance=self._parse_decimal(row.get("Family Air Ticket Allowance", "")),
+                        net_salary=self._parse_decimal(row.get("Net Salary", "")),
+                        
+                        # Profile status
+                        profile_status="incomplete",
+                    )
+                    
+                    session.add(employee)
+                    created += 1
+                    
+                else:
+                    # Simple format: employee_id, name, email, department, date_of_birth, role
+                    employee_id = row.get("employee_id", "").strip()
+                    name = row.get("name", "").strip()
 
-                if not employee_id or not name:
-                    raise ValueError("Employee ID and name are required")
+                    if not employee_id or not name:
+                        raise ValueError("Employee ID and name are required")
 
-                dob = parse_dob(row.get("date_of_birth", ""))
-                role = (row.get("role", "viewer") or "viewer").strip().lower()
+                    dob = parse_dob(row.get("date_of_birth", ""))
+                    role = (row.get("role", "viewer") or "viewer").strip().lower()
 
-                if role not in allowed_roles:
-                    raise ValueError(
-                        "Invalid role. Allowed values: admin, hr, viewer"
+                    if role not in allowed_roles:
+                        raise ValueError(
+                            "Invalid role. Allowed values: admin, hr, viewer"
+                        )
+
+                    employee_data = EmployeeCreate(
+                        employee_id=employee_id,
+                        name=name,
+                        email=row.get("email", "").strip() or None,
+                        department=row.get("department", "").strip() or None,
+                        date_of_birth=dob,
+                        role=role,
                     )
 
-                employee_data = EmployeeCreate(
-                    employee_id=employee_id,
-                    name=name,
-                    email=row.get("email", "").strip() or None,
-                    department=row.get("department", "").strip() or None,
-                    date_of_birth=dob,
-                    role=role,
-                )
+                    if await self._repo.exists(session, employee_data.employee_id):
+                        skipped += 1
+                        continue
 
-                if await self._repo.exists(session, employee_data.employee_id):
-                    skipped += 1
-                    continue
-
-                await self.create_employee(session, employee_data)
-                created += 1
+                    await self.create_employee(session, employee_data)
+                    created += 1
 
             except Exception as e:
                 errors.append(f"Row {row_num}: {str(e)}")
@@ -266,7 +388,90 @@ class EmployeeService:
             "created": created,
             "skipped": skipped,
             "errors": errors,
+            "format_detected": "baynunah" if is_baynunah_format else "simple",
         }
+    
+    def _parse_date_flexible(self, date_str: Optional[str]) -> Optional[date]:
+        """Parse various date formats from CSV."""
+        if not date_str or not isinstance(date_str, str) or date_str.strip() == "":
+            return None
+        
+        date_str = date_str.strip()
+        
+        # Try various formats
+        formats = [
+            "%B %d, %Y",      # "March 11, 1979"
+            "%d/%m/%Y",       # "11/03/1979"
+            "%Y-%m-%d",       # "1979-03-11"
+            "%m/%d/%Y",       # "03/11/1979"
+            "%d-%m-%Y",       # "11-03-1979"
+        ]
+        
+        for fmt in formats:
+            try:
+                return datetime.strptime(date_str, fmt).date()
+            except ValueError:
+                continue
+        
+        return None
+    
+    def _parse_decimal(self, value_str: Optional[str]):
+        """Parse decimal value from CSV."""
+        from decimal import Decimal, InvalidOperation
+        
+        if not value_str or not isinstance(value_str, str) or value_str.strip() == "":
+            return None
+        
+        try:
+            clean = value_str.strip().replace(",", "")
+            return Decimal(clean)
+        except (InvalidOperation, ValueError):
+            return None
+    
+    def _parse_int(self, value_str: Optional[str]) -> Optional[int]:
+        """Parse integer value from CSV."""
+        if not value_str or not isinstance(value_str, str) or value_str.strip() == "":
+            return None
+        
+        try:
+            clean = value_str.strip()
+            if clean.lower() == "nan":
+                return None
+            return int(float(clean))
+        except (ValueError, TypeError):
+            return None
+    
+    def _map_employment_status(self, status: Optional[str]) -> str:
+        """Map employment status to standard values."""
+        if not status:
+            return "Active"
+        
+        status_lower = status.lower().strip()
+        mapping = {
+            "active": "Active",
+            "terminated": "Terminated",
+            "resigned": "Resigned",
+            "consultant": "Consultant",
+            "pending": "Pending",
+            "backed out": "Backed Out",
+            "outsourced": "Outsourced",
+            "freelancer": "Freelancer",
+        }
+        return mapping.get(status_lower, status)
+    
+    def _map_probation_status(self, status: Optional[str]) -> Optional[str]:
+        """Map probation status to standard values."""
+        if not status:
+            return None
+        
+        status_lower = status.lower().strip()
+        mapping = {
+            "confirmed": "Confirmed",
+            "under probation": "Under Probation",
+            "not yet joined": "Not Yet Joined",
+            "n/a": None,
+        }
+        return mapping.get(status_lower, status)
 
     async def deactivate_employee(
         self, session: AsyncSession, employee_id: str
@@ -280,6 +485,106 @@ class EmployeeService:
         result = await self._repo.deactivate(session, employee_id)
         await session.commit()
         return result
+
+    async def get_employee(
+        self, session: AsyncSession, employee_id: str
+    ) -> Employee:
+        """Get a single employee by their employee ID."""
+        employee = await self._repo.get_by_employee_id(session, employee_id)
+        if not employee:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Employee {employee_id} not found",
+            )
+        return employee
+
+    async def update_employee(
+        self, session: AsyncSession, employee_id: str, data: EmployeeUpdate
+    ) -> Employee:
+        """Update an employee's information."""
+        if not await self._repo.exists(session, employee_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Employee not found",
+            )
+        
+        # Get update data, excluding unset fields
+        update_data = data.model_dump(exclude_unset=True)
+        
+        if not update_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No fields to update",
+            )
+        
+        employee = await self._repo.update(session, employee_id, update_data)
+        await session.commit()
+        await session.refresh(employee)
+        return employee
+
+    async def get_compliance_alerts(
+        self, session: AsyncSession, days: int = 60
+    ) -> dict:
+        """
+        Get employees with expiring compliance documents.
+        
+        Returns alerts grouped by urgency:
+        - expired: Already expired
+        - days_7: Expiring within 7 days
+        - days_30: Expiring within 30 days
+        - days_custom: Expiring within specified days (default 60)
+        """
+        # Validate days parameter
+        if days < 1 or days > 365:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Days must be between 1 and 365",
+            )
+        
+        today = date.today()
+        employees = await self._repo.get_all_active_for_compliance(session)
+        
+        alerts = {
+            'expired': [],
+            'days_7': [],
+            'days_30': [],
+            'days_custom': []
+        }
+        
+        # Fields to check for expiry
+        compliance_fields = [
+            ('visa_expiry_date', 'Visa'),
+            ('emirates_id_expiry', 'Emirates ID'),
+            ('medical_fitness_expiry', 'Medical Fitness'),
+            ('iloe_expiry', 'ILOE'),
+            ('contract_end_date', 'Contract'),
+        ]
+        
+        for emp in employees:
+            for field_name, label in compliance_fields:
+                expiry = getattr(emp, field_name, None)
+                if expiry:
+                    days_until = (expiry - today).days
+                    
+                    alert = {
+                        'employee_id': emp.employee_id,
+                        'name': emp.name,
+                        'document_type': label,
+                        'expiry_date': expiry.isoformat(),
+                        'days_remaining': days_until
+                    }
+                    
+                    if days_until < 0:
+                        alert['days_overdue'] = abs(days_until)
+                        alerts['expired'].append(alert)
+                    elif days_until <= 7:
+                        alerts['days_7'].append(alert)
+                    elif days_until <= 30:
+                        alerts['days_30'].append(alert)
+                    elif days_until <= days:
+                        alerts['days_custom'].append(alert)
+        
+        return alerts
 
 
 employee_service = EmployeeService(EmployeeRepository())

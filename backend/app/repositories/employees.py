@@ -105,3 +105,30 @@ class EmployeeRepository:
             select(Employee.id).where(Employee.employee_id == employee_id)
         )
         return result.scalar_one_or_none() is not None
+
+    async def update(
+        self, session: AsyncSession, employee_id: str, data: dict
+    ) -> Optional[Employee]:
+        """Update employee with provided data."""
+        employee = await self.get_by_employee_id(session, employee_id)
+        if not employee:
+            return None
+        
+        for field, value in data.items():
+            if hasattr(employee, field):
+                setattr(employee, field, value)
+        
+        await session.flush()
+        await session.refresh(employee)
+        return employee
+
+    async def get_all_active_for_compliance(
+        self, session: AsyncSession
+    ) -> Sequence[Employee]:
+        """Get all active employees for compliance checking."""
+        result = await session.execute(
+            select(Employee)
+            .where(Employee.is_active.is_(True))
+            .order_by(Employee.name)
+        )
+        return result.scalars().all()

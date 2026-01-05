@@ -73,6 +73,28 @@ class Employee(Base):
     security_clearance: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     visa_status: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     
+    # UAE Compliance - Visa tracking (detailed)
+    visa_number: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    visa_issue_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    visa_expiry_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # UAE Compliance - Emirates ID
+    emirates_id_number: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    emirates_id_expiry: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # UAE Compliance - Medical Fitness
+    medical_fitness_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    medical_fitness_expiry: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # UAE Compliance - ILOE (Insurance)
+    iloe_status: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    iloe_expiry: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # UAE Compliance - Contract
+    contract_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    contract_start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    contract_end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
     # Medical insurance
     medical_insurance_provider: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     medical_insurance_category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)

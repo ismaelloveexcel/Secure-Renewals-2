@@ -8,6 +8,12 @@
 
 | HR Function | GitHub Repository | Stars | Language | Difficulty |
 |------------|-------------------|-------|----------|-----------|
+| **Complete HRMS Solutions** |
+| Full HR Suite | `frappe/hrms` | 7k+ | Python/JS | Medium |
+| Open Source HRMS | `horilla-opensource/horilla` | 965+ | Python/Django | Low-Medium |
+| ERP/CRM/HRM Platform | `ever-co/ever-gauzy` | 3.3k+ | TypeScript | Medium |
+| Enterprise HR | `orangehrm/orangehrm` | 1k+ | PHP | Medium |
+| All-in-One Platform | `hcengineering/platform` (Huly) | 24k+ | TypeScript | Medium |
 | **Recruitment** |
 | Applicant Tracking System | `opencats/OpenCATS` | 1.5k+ | PHP | Medium |
 | CRM/Pipeline Management | `twentyhq/twenty` | 15k+ | TypeScript | Low-Medium |
@@ -100,6 +106,13 @@
 
 ## 🔗 Direct GitHub Links
 
+### Complete HRMS Solutions
+- Frappe HRMS: https://github.com/frappe/hrms
+- Horilla HRMS: https://github.com/horilla-opensource/horilla
+- Ever Gauzy: https://github.com/ever-co/ever-gauzy
+- OrangeHRM: https://github.com/orangehrm/orangehrm
+- Huly Platform: https://github.com/hcengineering/platform
+
 ### Recruitment
 - OpenCATS: https://github.com/opencats/OpenCATS
 - Twenty CRM: https://github.com/twentyhq/twenty
@@ -160,15 +173,17 @@ When choosing which apps to integrate, consider:
 ## 🚀 Next Steps
 
 1. Review the [full integration guide](HR_APPS_INTEGRATION_GUIDE.md)
-2. Choose 2-3 high-priority modules
-3. Set up development environment
-4. Deploy chosen apps (Docker recommended)
-5. Build API integration layer
-6. Test with small user group
-7. Roll out to full organization
+2. Review the [employee migration apps guide](EMPLOYEE_MIGRATION_APPS_GUIDE.md) for layered migration strategy
+3. Choose 2-3 high-priority modules
+4. Set up development environment
+5. Deploy chosen apps (Docker recommended)
+6. Build API integration layer
+7. Test with small user group
+8. Roll out to full organization
 
 ---
 
 **Last Updated:** January 2026  
-**For detailed integration instructions, see:** [HR Apps Integration Guide](HR_APPS_INTEGRATION_GUIDE.md)
+**For detailed integration instructions, see:** [HR Apps Integration Guide](HR_APPS_INTEGRATION_GUIDE.md)  
+**For employee migration strategy, see:** [Employee Migration Apps Guide](EMPLOYEE_MIGRATION_APPS_GUIDE.md)
 

@@ -77,6 +77,29 @@ class EmployeeUpdate(BaseModel):
     overtime_type: Optional[str] = None
     security_clearance: Optional[str] = None
     visa_status: Optional[str] = None
+    
+    # UAE Compliance - Visa tracking
+    visa_number: Optional[str] = None
+    visa_issue_date: Optional[date] = None
+    visa_expiry_date: Optional[date] = None
+    
+    # UAE Compliance - Emirates ID
+    emirates_id_number: Optional[str] = None
+    emirates_id_expiry: Optional[date] = None
+    
+    # UAE Compliance - Medical Fitness
+    medical_fitness_date: Optional[date] = None
+    medical_fitness_expiry: Optional[date] = None
+    
+    # UAE Compliance - ILOE (Insurance)
+    iloe_status: Optional[str] = None
+    iloe_expiry: Optional[date] = None
+    
+    # UAE Compliance - Contract
+    contract_type: Optional[str] = None
+    contract_start_date: Optional[date] = None
+    contract_end_date: Optional[date] = None
+    
     medical_insurance_provider: Optional[str] = None
     medical_insurance_category: Optional[str] = None
     basic_salary: Optional[Decimal] = None
@@ -140,6 +163,29 @@ class EmployeeDetailResponse(EmployeeResponse):
     overtime_type: Optional[str] = None
     security_clearance: Optional[str] = None
     visa_status: Optional[str] = None
+    
+    # UAE Compliance - Visa tracking
+    visa_number: Optional[str] = None
+    visa_issue_date: Optional[date] = None
+    visa_expiry_date: Optional[date] = None
+    
+    # UAE Compliance - Emirates ID
+    emirates_id_number: Optional[str] = None
+    emirates_id_expiry: Optional[date] = None
+    
+    # UAE Compliance - Medical Fitness
+    medical_fitness_date: Optional[date] = None
+    medical_fitness_expiry: Optional[date] = None
+    
+    # UAE Compliance - ILOE (Insurance)
+    iloe_status: Optional[str] = None
+    iloe_expiry: Optional[date] = None
+    
+    # UAE Compliance - Contract
+    contract_type: Optional[str] = None
+    contract_start_date: Optional[date] = None
+    contract_end_date: Optional[date] = None
+    
     medical_insurance_provider: Optional[str] = None
     medical_insurance_category: Optional[str] = None
     basic_salary: Optional[Decimal] = None
@@ -296,6 +342,33 @@ class EmployeeProfileResponse(EmployeeProfileBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# UAE Compliance Alert Schemas
+
+class ComplianceAlertItem(BaseModel):
+    """Single compliance alert item."""
+    
+    employee_id: str = Field(..., description="Employee ID")
+    name: str = Field(..., description="Employee name")
+    document_type: str = Field(..., description="Type of document (Visa, Emirates ID, etc.)")
+    expiry_date: str = Field(..., description="Expiry date (ISO format)")
+    days_remaining: int = Field(..., description="Days until expiry (negative if expired)")
+    days_overdue: Optional[int] = Field(None, description="Days overdue (if expired)")
+
+
+class ComplianceAlertsResponse(BaseModel):
+    """Response schema for compliance alerts."""
+    
+    expired: list[ComplianceAlertItem] = Field(default_factory=list, description="Expired documents")
+    days_7: list[ComplianceAlertItem] = Field(default_factory=list, description="Expiring within 7 days")
+    days_30: list[ComplianceAlertItem] = Field(default_factory=list, description="Expiring within 30 days")
+    days_custom: list[ComplianceAlertItem] = Field(default_factory=list, description="Expiring within specified days")
+    
+    @property
+    def total_alerts(self) -> int:
+        """Total number of alerts."""
+        return len(self.expired) + len(self.days_7) + len(self.days_30) + len(self.days_custom)
 
 
 # Onboarding Token Schemas

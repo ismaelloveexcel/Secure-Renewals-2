@@ -84,6 +84,12 @@ Ask: "Scan for security vulnerabilities"
 | [Employee Management Quick Start](docs/EMPLOYEE_MANAGEMENT_QUICK_START.md) | **NEW!** Add employee management features to your existing app | Developers |
 | [Employee Migration Apps Guide](docs/EMPLOYEE_MIGRATION_APPS_GUIDE.md) | GitHub apps for layered employee migration strategy | HR Leadership/Developers |
 | [Frappe HRMS Implementation Plan](docs/FRAPPE_HRMS_IMPLEMENTATION_PLAN.md) | 6-week plan to integrate Frappe HRMS (if needed later) | HR Leadership/Developers |
+| [Recruitment Systems Research](docs/RECRUITMENT_SYSTEMS_RESEARCH.md) | **NEW!** Comprehensive analysis of open-source ATS options & custom build recommendation | HR Leadership/Developers |
+| [Recruitment Implementation Architecture](docs/RECRUITMENT_IMPLEMENTATION_ARCHITECTURE.md) | **NEW!** Technical architecture for custom lightweight ATS with pass integration | Developers |
+| [Recruitment Quick Reference](docs/RECRUITMENT_QUICK_REFERENCE.md) | **NEW!** Executive summary and quick decision guide for recruitment system | HR Leadership |
+| [AI CV Parsing Solutions](docs/AI_CV_PARSING_SOLUTIONS.md) | **NEW!** AI-powered resume parsing with pyresparser for automatic candidate data extraction | Developers/HR |
+| [Recruitment Full Implementation Guide](docs/RECRUITMENT_FULL_IMPLEMENTATION_GUIDE.md) | **NEW!** Complete ready-to-implement code for recruitment system (solo HR, UAE startup) | Developers |
+| [Recruitment Deployment Checklist](docs/RECRUITMENT_DEPLOYMENT_CHECKLIST.md) | **NEW!** Step-by-step deployment checklist and verification guide | Developers/DevOps |
 
 ---
 

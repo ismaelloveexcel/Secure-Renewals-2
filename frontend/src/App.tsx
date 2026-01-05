@@ -237,6 +237,8 @@ const API_BASE = '/api'
 
 function App() {
   const [activeSection, setActiveSection] = useState<Section>('home')
+  const [adminTab, setAdminTab] = useState<'dashboard' | 'employees' | 'compliance'>('dashboard')
+  const [adminEmployeeSearch, setAdminEmployeeSearch] = useState('')
   const [user, setUser] = useState<User | null>(null)
   const [employees, setEmployees] = useState<Employee[]>([])
   const [features, setFeatures] = useState<FeatureToggle[]>([])
@@ -954,6 +956,17 @@ function App() {
       fetchComplianceAlerts()
     }
   }, [activeSection, user])
+
+  // Fetch data when admin tab changes
+  useEffect(() => {
+    if (activeSection === 'admin' && user?.role === 'admin') {
+      if (adminTab === 'employees') {
+        fetchEmployees()
+      } else if (adminTab === 'compliance') {
+        fetchComplianceAlerts()
+      }
+    }
+  }, [adminTab, activeSection, user])
 
   const loginModal = showLoginModal ? (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -1958,6 +1971,15 @@ function App() {
     return (
       <div className="min-h-screen bg-gray-100 p-8 relative">
         {loginModal}
+        {viewingProfileId && user?.token && (
+          <EmployeeProfile
+            employeeId={viewingProfileId}
+            token={user.token}
+            currentUserRole={user.role}
+            currentUserId={user.employee_id}
+            onClose={() => setViewingProfileId(null)}
+          />
+        )}
         
         <button
           onClick={() => setActiveSection('secret-chamber')}
@@ -1986,11 +2008,11 @@ function App() {
           </svg>
         </button>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
               <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
-              <h1 className="text-2xl font-semibold text-gray-800">Admin Dashboard</h1>
+              <h1 className="text-2xl font-semibold text-gray-800">Admin Section</h1>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">
@@ -2005,82 +2027,474 @@ function App() {
             </div>
           </div>
 
-          {dashboard && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white rounded-xl shadow p-6">
-                <p className="text-sm text-gray-500">Total Employees</p>
-                <p className="text-3xl font-semibold text-gray-800">{dashboard.total_employees}</p>
-              </div>
-              <div className="bg-white rounded-xl shadow p-6">
-                <p className="text-sm text-gray-500">Active Employees</p>
-                <p className="text-3xl font-semibold text-emerald-600">{dashboard.active_employees}</p>
-              </div>
-              <div className="bg-white rounded-xl shadow p-6">
-                <p className="text-sm text-gray-500">Pending Renewals</p>
-                <p className="text-3xl font-semibold text-amber-600">{dashboard.pending_renewals}</p>
-              </div>
-              <div className="bg-white rounded-xl shadow p-6">
-                <p className="text-sm text-gray-500">Features Enabled</p>
-                <p className="text-3xl font-semibold text-blue-600">{dashboard.features_enabled}/{dashboard.features_total}</p>
-              </div>
-            </div>
-          )}
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <button 
-                onClick={() => setActiveSection('employees')}
-                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+          {/* Admin Tab Navigation */}
+          <div className="bg-white rounded-xl shadow-lg mb-6">
+            <div className="flex border-b border-gray-200">
+              <button
+                onClick={() => setAdminTab('dashboard')}
+                className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
+                  adminTab === 'dashboard'
+                    ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
               >
-                <svg className="w-8 h-8 text-emerald-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <p className="font-medium text-gray-800">Manage Employees</p>
-                <p className="text-sm text-gray-500">View and manage employees</p>
+                <div className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                  </svg>
+                  Dashboard
+                </div>
               </button>
-              <button 
-                onClick={() => setActiveSection('onboarding')}
-                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              <button
+                onClick={() => setAdminTab('employees')}
+                className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
+                  adminTab === 'employees'
+                    ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
               >
-                <svg className="w-8 h-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <p className="font-medium text-gray-800">Onboarding</p>
-                <p className="text-sm text-gray-500">Invite new joiners</p>
+                <div className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  Employees ({employees.length})
+                </div>
               </button>
-              <button 
-                onClick={() => setActiveSection('passes')}
-                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              <button
+                onClick={() => setAdminTab('compliance')}
+                className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
+                  adminTab === 'compliance'
+                    ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
               >
-                <svg className="w-8 h-8 text-amber-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                </svg>
-                <p className="font-medium text-gray-800">Pass Generation</p>
-                <p className="text-sm text-gray-500">Create visitor passes</p>
-              </button>
-              <button 
-                onClick={() => setActiveSection('recruitment')}
-                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
-              >
-                <svg className="w-8 h-8 text-purple-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <p className="font-medium text-gray-800">Recruitment</p>
-                <p className="text-sm text-gray-500">Requests & Benefits</p>
-              </button>
-              <button 
-                onClick={() => setActiveSection('templates')}
-                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
-              >
-                <svg className="w-8 h-8 text-indigo-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                </svg>
-                <p className="font-medium text-gray-800">Templates</p>
-                <p className="text-sm text-gray-500">Pass templates</p>
+                <div className="flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Compliance Alerts
+                  {complianceAlerts && (complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0)) > 0 && (
+                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                      {complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0)}
+                    </span>
+                  )}
+                </div>
               </button>
             </div>
           </div>
+
+          {/* Dashboard Tab Content */}
+          {adminTab === 'dashboard' && (
+            <>
+              {dashboard && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white rounded-xl shadow p-6">
+                    <p className="text-sm text-gray-500">Total Employees</p>
+                    <p className="text-3xl font-semibold text-gray-800">{dashboard.total_employees}</p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow p-6">
+                    <p className="text-sm text-gray-500">Active Employees</p>
+                    <p className="text-3xl font-semibold text-emerald-600">{dashboard.active_employees}</p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow p-6">
+                    <p className="text-sm text-gray-500">Pending Renewals</p>
+                    <p className="text-3xl font-semibold text-amber-600">{dashboard.pending_renewals}</p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow p-6">
+                    <p className="text-sm text-gray-500">Features Enabled</p>
+                    <p className="text-3xl font-semibold text-blue-600">{dashboard.features_enabled}/{dashboard.features_total}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <button 
+                    onClick={() => setAdminTab('employees')}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <svg className="w-8 h-8 text-emerald-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <p className="font-medium text-gray-800">Manage Employees</p>
+                    <p className="text-sm text-gray-500">View and manage employees</p>
+                  </button>
+                  <button 
+                    onClick={() => setActiveSection('onboarding')}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <svg className="w-8 h-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                    <p className="font-medium text-gray-800">Onboarding</p>
+                    <p className="text-sm text-gray-500">Invite new joiners</p>
+                  </button>
+                  <button 
+                    onClick={() => setActiveSection('passes')}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <svg className="w-8 h-8 text-amber-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                    </svg>
+                    <p className="font-medium text-gray-800">Pass Generation</p>
+                    <p className="text-sm text-gray-500">Create visitor passes</p>
+                  </button>
+                  <button 
+                    onClick={() => setAdminTab('compliance')}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <svg className="w-8 h-8 text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <p className="font-medium text-gray-800">Compliance Alerts</p>
+                    <p className="text-sm text-gray-500">Document expiry warnings</p>
+                  </button>
+                  <button 
+                    onClick={() => setActiveSection('templates')}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <svg className="w-8 h-8 text-indigo-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                    </svg>
+                    <p className="font-medium text-gray-800">Templates</p>
+                    <p className="text-sm text-gray-500">Pass templates</p>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Employees Tab Content */}
+          {adminTab === 'employees' && (
+            <>
+              {/* Search Bar */}
+              <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex-1 min-w-64">
+                    <div className="relative">
+                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder="Search employees by name, ID, or job title..."
+                        value={adminEmployeeSearch}
+                        onChange={e => setAdminEmployeeSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Employees Table */}
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
+                  <h2 className="text-lg font-semibold text-gray-800">Employee Directory</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {employees.filter(e => 
+                      e.name.toLowerCase().includes(adminEmployeeSearch.toLowerCase()) ||
+                      e.employee_id.toLowerCase().includes(adminEmployeeSearch.toLowerCase()) ||
+                      (e.job_title || '').toLowerCase().includes(adminEmployeeSearch.toLowerCase())
+                    ).length} employees found
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                      <tr>
+                        <th className="px-6 py-3 text-left">Employee</th>
+                        <th className="px-6 py-3 text-left">ID</th>
+                        <th className="px-6 py-3 text-left">Job Title</th>
+                        <th className="px-6 py-3 text-left">Department</th>
+                        <th className="px-6 py-3 text-left">Status</th>
+                        <th className="px-6 py-3 text-left">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {employees
+                        .filter(e => 
+                          e.name.toLowerCase().includes(adminEmployeeSearch.toLowerCase()) ||
+                          e.employee_id.toLowerCase().includes(adminEmployeeSearch.toLowerCase()) ||
+                          (e.job_title || '').toLowerCase().includes(adminEmployeeSearch.toLowerCase())
+                        )
+                        .slice(0, 50)
+                        .map(emp => (
+                          <tr key={emp.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-medium">
+                                  {emp.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-800">{emp.name}</p>
+                                  <p className="text-sm text-gray-500">{emp.email}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600 font-mono">{emp.employee_id}</td>
+                            <td className="px-6 py-4 text-sm text-gray-600">{emp.job_title || '-'}</td>
+                            <td className="px-6 py-4 text-sm text-gray-600">{emp.function || '-'}</td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                emp.status === 'active' ? 'bg-green-100 text-green-800' : 
+                                emp.status === 'on_leave' ? 'bg-amber-100 text-amber-800' : 
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {emp.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <button
+                                onClick={() => setViewingProfileId(emp.employee_id)}
+                                className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
+                              >
+                                View Profile
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Compliance Tab Content */}
+          {adminTab === 'compliance' && (
+            <>
+              {complianceAlertsLoading ? (
+                <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                  <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading compliance alerts...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-4 gap-4 mb-6">
+                    <div className="bg-red-50 rounded-xl p-4 border border-red-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-lg">!</div>
+                        <div>
+                          <p className="text-2xl font-bold text-red-700">{complianceAlerts?.expired.length || 0}</p>
+                          <p className="text-xs text-red-600">Expired</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 text-lg">!</div>
+                        <div>
+                          <p className="text-2xl font-bold text-orange-700">{complianceAlerts?.days_7?.length || 0}</p>
+                          <p className="text-xs text-orange-600">Within 7 days</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600 text-lg">!</div>
+                        <div>
+                          <p className="text-2xl font-bold text-yellow-700">{complianceAlerts?.days_30?.length || 0}</p>
+                          <p className="text-xs text-yellow-600">Within 30 days</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 text-lg">!</div>
+                        <div>
+                          <p className="text-2xl font-bold text-amber-700">{complianceAlerts?.days_custom?.length || 0}</p>
+                          <p className="text-xs text-amber-600">Within 60 days</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expired Documents */}
+                  {complianceAlerts?.expired && complianceAlerts.expired.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg mb-6">
+                      <div className="px-6 py-4 border-b border-gray-100 bg-red-50 rounded-t-xl">
+                        <h2 className="text-lg font-semibold text-red-700 flex items-center gap-2">
+                          <span>!</span> Expired Documents ({complianceAlerts.expired.length})
+                        </h2>
+                        <p className="text-sm text-red-600 mt-1">These documents need immediate attention</p>
+                      </div>
+                      <table className="w-full">
+                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                          <tr>
+                            <th className="px-6 py-3 text-left">Employee</th>
+                            <th className="px-6 py-3 text-left">Document</th>
+                            <th className="px-6 py-3 text-left">Expiry Date</th>
+                            <th className="px-6 py-3 text-left">Days Overdue</th>
+                            <th className="px-6 py-3 text-left">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {complianceAlerts.expired.map((alert, idx) => (
+                            <tr key={`expired-${idx}`} className="hover:bg-gray-50">
+                              <td className="px-6 py-4">
+                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
+                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
+                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4">
+                                <span className="text-red-600 font-medium">{Math.abs(alert.days_until_expiry)} days overdue</span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                  View Profile
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Expiring in 7 Days */}
+                  {complianceAlerts?.days_7 && complianceAlerts.days_7.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg mb-6">
+                      <div className="px-6 py-4 border-b border-gray-100 bg-orange-50 rounded-t-xl">
+                        <h2 className="text-lg font-semibold text-orange-700 flex items-center gap-2">
+                          <span>!</span> Expiring Within 7 Days ({complianceAlerts.days_7.length})
+                        </h2>
+                        <p className="text-sm text-orange-600 mt-1">Urgent - documents that need immediate attention</p>
+                      </div>
+                      <table className="w-full">
+                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                          <tr>
+                            <th className="px-6 py-3 text-left">Employee</th>
+                            <th className="px-6 py-3 text-left">Document</th>
+                            <th className="px-6 py-3 text-left">Expiry Date</th>
+                            <th className="px-6 py-3 text-left">Days Left</th>
+                            <th className="px-6 py-3 text-left">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {complianceAlerts.days_7.map((alert, idx) => (
+                            <tr key={`days7-${idx}`} className="hover:bg-gray-50">
+                              <td className="px-6 py-4">
+                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
+                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
+                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4">
+                                <span className="text-orange-600 font-medium">{alert.days_until_expiry} days</span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                  View Profile
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Expiring in 30 Days */}
+                  {complianceAlerts?.days_30 && complianceAlerts.days_30.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg mb-6">
+                      <div className="px-6 py-4 border-b border-gray-100 bg-yellow-50 rounded-t-xl">
+                        <h2 className="text-lg font-semibold text-yellow-700 flex items-center gap-2">
+                          <span>!</span> Expiring Within 30 Days ({complianceAlerts.days_30.length})
+                        </h2>
+                        <p className="text-sm text-yellow-600 mt-1">Documents that need to be renewed soon</p>
+                      </div>
+                      <table className="w-full">
+                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                          <tr>
+                            <th className="px-6 py-3 text-left">Employee</th>
+                            <th className="px-6 py-3 text-left">Document</th>
+                            <th className="px-6 py-3 text-left">Expiry Date</th>
+                            <th className="px-6 py-3 text-left">Days Left</th>
+                            <th className="px-6 py-3 text-left">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {complianceAlerts.days_30.map((alert, idx) => (
+                            <tr key={`days30-${idx}`} className="hover:bg-gray-50">
+                              <td className="px-6 py-4">
+                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
+                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
+                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4">
+                                <span className="text-yellow-600 font-medium">{alert.days_until_expiry} days</span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                  View Profile
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Expiring in 60 Days */}
+                  {complianceAlerts?.days_custom && complianceAlerts.days_custom.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg mb-6">
+                      <div className="px-6 py-4 border-b border-gray-100 bg-amber-50 rounded-t-xl">
+                        <h2 className="text-lg font-semibold text-amber-700 flex items-center gap-2">
+                          <span>!</span> Expiring Within 60 Days ({complianceAlerts.days_custom.length})
+                        </h2>
+                      </div>
+                      <table className="w-full">
+                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                          <tr>
+                            <th className="px-6 py-3 text-left">Employee</th>
+                            <th className="px-6 py-3 text-left">Document</th>
+                            <th className="px-6 py-3 text-left">Expiry Date</th>
+                            <th className="px-6 py-3 text-left">Days Left</th>
+                            <th className="px-6 py-3 text-left">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {complianceAlerts.days_custom.map((alert, idx) => (
+                            <tr key={`days60-${idx}`} className="hover:bg-gray-50">
+                              <td className="px-6 py-4">
+                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
+                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
+                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4">
+                                <span className="text-amber-600 font-medium">{alert.days_until_expiry} days</span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                  View Profile
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* No Alerts */}
+                  {complianceAlerts && (complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0) + (complianceAlerts.days_30?.length || 0) + (complianceAlerts.days_custom?.length || 0)) === 0 && (
+                    <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                      <p className="text-4xl mb-4">All Clear!</p>
+                      <p className="text-xl font-semibold text-emerald-600 mb-2">No Compliance Issues</p>
+                      <p className="text-gray-600">No documents are expired or expiring within the next 60 days.</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
     )

@@ -21,11 +21,9 @@ def sanitize_text(value: str) -> str:
 def require_role(allowed: Optional[List[str]] = None):
     """
     Dependency that authenticates via JWT token and validates role.
-    Supports both JWT-based auth and X-Role header fallback for compatibility.
     """
     async def dependency(
         authorization: str | None = Header(default=None),
-        x_role: str | None = Header(default=None, alias="X-Role"),
         session: AsyncSession = Depends(get_session),
     ) -> str:
         from app.models import Employee
@@ -48,9 +46,6 @@ def require_role(allowed: Optional[List[str]] = None):
                             role = employee.role
                 except JWTError:
                     pass
-        
-        if not role and x_role:
-            role = x_role.strip().lower()
         
         if not role:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")

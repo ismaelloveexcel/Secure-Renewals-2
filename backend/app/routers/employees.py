@@ -154,6 +154,45 @@ async def update_employee(
 
 
 @router.post(
+    "/bulk-update",
+    summary="Bulk update employees from CSV",
+)
+async def bulk_update_employees_csv(
+    file: UploadFile = File(..., description="CSV file with employee data"),
+    update_layer: str = Query(
+        default="employee",
+        description="Which layer to update: employee, compliance, bank, or all"
+    ),
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Bulk update existing employees from a CSV file.
+    
+    **Matches by Employee ID and updates existing records.**
+    
+    **Layer options:**
+    - `employee`: Updates core employee fields (name, job_title, department, etc.)
+    - `compliance`: Updates UAE compliance fields (visa, emirates_id, medical, etc.)
+    - `bank`: Updates bank account details
+    - `all`: Updates all layers based on CSV columns
+    
+    **CSV format:**
+    - First column must be `employee_id` or `Employee No`
+    - Include any fields you want to update
+    - Empty cells are skipped (won't overwrite existing data)
+    
+    **Example compliance columns:**
+    visa_number, visa_issue_date, visa_expiry_date, emirates_id_number, emirates_id_expiry,
+    medical_fitness_date, medical_fitness_expiry, iloe_status, iloe_expiry
+    
+    **Example bank columns:**
+    bank_name, account_name, account_number, iban, swift_code, routing_number
+    """
+    return await employee_service.bulk_update_from_csv(session, file, update_layer)
+
+
+@router.post(
     "/reset-password",
     status_code=status.HTTP_200_OK,
     summary="Reset employee password to DOB",

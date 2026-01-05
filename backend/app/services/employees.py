@@ -370,6 +370,10 @@ class EmployeeService:
                         department=row.get("department", "").strip() or None,
                         date_of_birth=dob,
                         role=role,
+                        job_title=row.get("job_title", "").strip() or None,
+                        function=row.get("function", "").strip() or None,
+                        location=row.get("location", "").strip() or None,
+                        joining_date=self._parse_date_flexible(row.get("joining_date", "")),
                     )
 
                     if await self._repo.exists(session, employee_data.employee_id):
@@ -518,6 +522,11 @@ class EmployeeService:
             )
         
         employee = await self._repo.update(session, employee_id, update_data)
+        if not employee:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Employee not found after update",
+            )
         await session.commit()
         await session.refresh(employee)
         return employee
@@ -585,6 +594,177 @@ class EmployeeService:
                         alerts['days_custom'].append(alert)
         
         return alerts
+
+    async def bulk_update_from_csv(
+        self, session: AsyncSession, file: UploadFile, update_layer: str
+    ) -> dict:
+        """
+        Bulk update existing employees from CSV file.
+        
+        Matches by Employee ID and updates records in the specified layer.
+        """
+        from app.models.employee_compliance import EmployeeCompliance
+        from app.models.employee_bank import EmployeeBank
+        from sqlalchemy import select
+        
+        content = await file.read()
+        try:
+            text = content.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            text = content.decode("utf-8")
+        
+        reader = csv.DictReader(StringIO(text))
+        headers = reader.fieldnames or []
+        
+        updated = 0
+        not_found = 0
+        skipped = 0
+        errors = []
+        
+        # Field mappings for each layer
+        employee_fields = {
+            'name', 'email', 'department', 'job_title', 'function', 'location',
+            'work_schedule', 'gender', 'nationality', 'company_phone',
+            'line_manager_name', 'line_manager_email', 'joining_date',
+            'employment_status', 'security_clearance', 'visa_status',
+            'medical_insurance_provider', 'medical_insurance_category',
+            'basic_salary', 'housing_allowance', 'transportation_allowance',
+            'air_ticket_entitlement', 'other_allowance', 'net_salary'
+        }
+        
+        compliance_fields = {
+            'visa_number', 'visa_uid', 'visa_type', 'visa_issue_date', 'visa_expiry_date',
+            'emirates_id_number', 'emirates_id_issue_date', 'emirates_id_expiry',
+            'medical_fitness_date', 'medical_fitness_expiry', 'medical_certificate_number',
+            'work_permit_number', 'work_permit_issue_date', 'work_permit_expiry_date',
+            'iloe_status', 'iloe_issue_date', 'iloe_expiry', 'iloe_certificate_number',
+            'labour_card_number', 'labour_card_issue_date', 'labour_card_expiry_date',
+            'contract_type', 'contract_start_date', 'contract_end_date'
+        }
+        
+        bank_fields = {
+            'bank_name', 'bank_branch', 'account_name', 'account_number',
+            'iban', 'swift_code', 'routing_number', 'currency'
+        }
+        
+        for row_num, row in enumerate(reader, start=2):
+            # Get employee ID first (no DB operations)
+            employee_id = (
+                row.get("employee_id", "").strip() or
+                row.get("Employee No", "").strip() or
+                row.get("Employee ID", "").strip()
+            )
+            
+            if not employee_id:
+                skipped += 1
+                continue
+            
+            # Use savepoint to isolate each row's changes
+            try:
+                async with session.begin_nested():
+                    # Check employee exists
+                    employee = await self._repo.get_by_employee_id(session, employee_id)
+                    if not employee:
+                        not_found += 1
+                        errors.append(f"Row {row_num}: Employee {employee_id} not found")
+                        continue
+                    
+                    any_updated = False
+                    
+                    # Update employee layer
+                    if update_layer in ("employee", "all"):
+                        employee_data = {}
+                        for field in employee_fields:
+                            csv_key = field
+                            value = row.get(csv_key, "").strip() if row.get(csv_key) else None
+                            if value:
+                                if 'date' in field or field.endswith('_date'):
+                                    parsed = self._parse_date_flexible(value)
+                                    if parsed:
+                                        employee_data[field] = parsed
+                                elif field in ('basic_salary', 'housing_allowance', 'transportation_allowance',
+                                              'air_ticket_entitlement', 'other_allowance', 'net_salary'):
+                                    parsed = self._parse_decimal(value)
+                                    if parsed:
+                                        employee_data[field] = parsed
+                                else:
+                                    employee_data[field] = value
+                        
+                        if employee_data:
+                            for field, value in employee_data.items():
+                                setattr(employee, field, value)
+                            any_updated = True
+                    
+                    # Update compliance layer
+                    if update_layer in ("compliance", "all"):
+                        compliance_data = {}
+                        for field in compliance_fields:
+                            value = row.get(field, "").strip() if row.get(field) else None
+                            if value:
+                                if 'date' in field or field.endswith('_date') or 'expiry' in field:
+                                    parsed = self._parse_date_flexible(value)
+                                    if parsed:
+                                        compliance_data[field] = parsed
+                                else:
+                                    compliance_data[field] = value
+                        
+                        if compliance_data:
+                            result = await session.execute(
+                                select(EmployeeCompliance).where(
+                                    EmployeeCompliance.employee_id == employee.id
+                                )
+                            )
+                            compliance = result.scalar_one_or_none()
+                            
+                            if not compliance:
+                                compliance = EmployeeCompliance(employee_id=employee.id)
+                                session.add(compliance)
+                            
+                            for field, value in compliance_data.items():
+                                setattr(compliance, field, value)
+                            any_updated = True
+                    
+                    # Update bank layer
+                    if update_layer in ("bank", "all"):
+                        bank_data = {}
+                        for field in bank_fields:
+                            value = row.get(field, "").strip() if row.get(field) else None
+                            if value:
+                                bank_data[field] = value
+                        
+                        if bank_data:
+                            result = await session.execute(
+                                select(EmployeeBank).where(
+                                    EmployeeBank.employee_id == employee.id
+                                )
+                            )
+                            bank = result.scalar_one_or_none()
+                            
+                            if not bank:
+                                bank = EmployeeBank(employee_id=employee.id)
+                                session.add(bank)
+                            
+                            for field, value in bank_data.items():
+                                setattr(bank, field, value)
+                            any_updated = True
+                    
+                    if any_updated:
+                        updated += 1
+                    else:
+                        skipped += 1
+                        
+            except Exception as e:
+                errors.append(f"Row {row_num}: {str(e)}")
+        
+        await session.commit()
+        
+        return {
+            "updated": updated,
+            "not_found": not_found,
+            "skipped": skipped,
+            "errors": errors[:20],  # Limit errors returned
+            "layer": update_layer,
+        }
 
 
 employee_service = EmployeeService(EmployeeRepository())

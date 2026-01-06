@@ -64,6 +64,28 @@ Eight main tables with migrations managed by Alembic:
 
 ### Key Features
 
+**Recruitment Pass System** (New):
+- **Candidate Pass** (CPASS-xxx): Self-service portal for candidates
+  - Journey tracker showing recruitment stages (Applied → Screening → Assessment → Interview → Offer → Onboarding)
+  - Interview slot booking with calendar view
+  - Inbox for HR communications
+  - WhatsApp/Email quick contact options
+  - Entity-specific color coding (Blue for Watergeneration, Green for Agriculture)
+- **Manager Pass** (MPASS-xxx): Position management for hiring managers
+  - Pipeline view with candidate counts by stage
+  - Document tracking (JD, Recruitment Form status)
+  - Interview setup panel (format, rounds, assessment requirements)
+  - Time slot management with bulk creation
+  - Confirmed interviews calendar
+  - Access via "Manager Pass" buttons on recruitment request cards
+
+**Interview Scheduling Flow**:
+1. Manager sets up interview configuration (format, rounds)
+2. Manager creates available time slots
+3. Candidate views slots and books preferred time
+4. Candidate confirms booking
+5. Both parties see confirmed interview in calendar
+
 **Self-Service Onboarding System**:
 - Employee profile completion with progress tracking
 - Self-service bank details submission requiring HR approval

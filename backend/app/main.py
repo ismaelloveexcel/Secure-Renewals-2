@@ -43,7 +43,7 @@ def create_app() -> FastAPI:
     app.include_router(admin.router, prefix=settings.api_prefix)
     from app.routers import templates, audit_logs, notifications
     from app.routers import employee_compliance, employee_bank, employee_documents
-    from app.routers import recruitment
+    from app.routers import recruitment, interview
     app.include_router(templates.router, prefix=settings.api_prefix)
     app.include_router(audit_logs.router, prefix=settings.api_prefix)
     app.include_router(notifications.router, prefix=settings.api_prefix)
@@ -52,6 +52,8 @@ def create_app() -> FastAPI:
     app.include_router(employee_documents.router)
     # Recruitment module - under admin section
     app.include_router(recruitment.router, prefix=settings.api_prefix)
+    # Interview scheduling
+    app.include_router(interview.router, prefix=settings.api_prefix)
 
     @app.on_event("startup")
     async def on_startup():

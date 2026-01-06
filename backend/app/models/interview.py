@@ -5,7 +5,7 @@ from sqlalchemy import String, Integer, Boolean, Text, Date, Time, DateTime, For
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from app.core.database import Base
+from app.models.renewal import Base
 
 
 class InterviewSetup(Base):

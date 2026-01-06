@@ -1,0 +1,1 @@
+export { CandidatePass } from './CandidatePass'

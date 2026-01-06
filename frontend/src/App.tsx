@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { GlassLoader } from './components/GlassLoader'
 import { TemplateList } from './components/Templates/TemplateList'
 import { EmployeeProfile } from './components/EmployeeProfile'
+import { CandidatePass } from './components/CandidatePass'
+import { ManagerPass } from './components/ManagerPass'
 
-type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'compliance-alerts'
+type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass'
 
 interface Employee {
   id: number
@@ -365,6 +367,11 @@ function App() {
   const [importLoading, setImportLoading] = useState(false)
   const [importResult, setImportResult] = useState<{created: number, skipped: number, errors: string[]} | null>(null)
   const [viewingProfileId, setViewingProfileId] = useState<string | null>(null)
+  
+  // Candidate/Manager Pass state
+  const [viewingCandidatePassId, setViewingCandidatePassId] = useState<number | null>(null)
+  const [viewingManagerPassPositionId, setViewingManagerPassPositionId] = useState<number | null>(null)
+  const [viewingManagerId, setViewingManagerId] = useState<string>('')
 
   const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
 
@@ -2697,11 +2704,25 @@ function App() {
                               <span className="text-xs text-gray-400">{req.request_number}</span>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm font-medium text-gray-600">Headcount: {req.headcount || 1}</p>
-                            {req.salary_range_min && req.salary_range_max && (
-                              <p className="text-xs text-gray-400">AED {req.salary_range_min.toLocaleString()} - {req.salary_range_max.toLocaleString()}</p>
-                            )}
+                          <div className="text-right flex flex-col items-end gap-2">
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">Headcount: {req.headcount || 1}</p>
+                              {req.salary_range_min && req.salary_range_max && (
+                                <p className="text-xs text-gray-400">AED {req.salary_range_min.toLocaleString()} - {req.salary_range_max.toLocaleString()}</p>
+                              )}
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setViewingManagerPassPositionId(req.id)
+                                setViewingManagerId(req.hiring_manager_id || user?.employee_id || '')
+                                setActiveSection('manager-pass')
+                              }}
+                              className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 flex items-center gap-1"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                              Manager Pass
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -3143,7 +3164,7 @@ function App() {
                       References will only be contacted if candidate is finalised for the position.
                     </p>
                     <div className="space-y-3">
-                      {selectedCandidate.references?.length > 0 ? selectedCandidate.references.map((ref: any, i: number) => (
+                      {selectedCandidate.references_list?.length > 0 ? selectedCandidate.references_list.map((ref: any, i: number) => (
                         <div key={i} className="bg-gray-50 p-3 rounded-lg">
                           <p className="font-medium text-gray-800">{ref.name}</p>
                           <p className="text-sm text-gray-600">{ref.relationship} at {ref.company}</p>
@@ -3218,7 +3239,19 @@ function App() {
                   ) : null}
 
                   {/* Actions */}
-                  <div className="flex justify-end pt-4 border-t">
+                  <div className="flex justify-end gap-3 pt-4 border-t">
+                    <button
+                      onClick={() => {
+                        setViewingCandidatePassId(selectedCandidate.id)
+                        setShowCandidateProfileModal(false)
+                        setSelectedCandidate(null)
+                        setActiveSection('candidate-pass')
+                      }}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                      View Candidate Pass
+                    </button>
                     <button
                       onClick={() => { setShowCandidateProfileModal(false); setSelectedCandidate(null); }}
                       className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
@@ -4227,6 +4260,35 @@ function App() {
           )}
         </div>
       </div>
+    )
+  }
+
+  // Candidate Pass View
+  if (activeSection === 'candidate-pass' && viewingCandidatePassId) {
+    return (
+      <CandidatePass
+        candidateId={viewingCandidatePassId}
+        token={user?.token || ''}
+        onBack={() => {
+          setViewingCandidatePassId(null)
+          setActiveSection('admin')
+        }}
+      />
+    )
+  }
+
+  // Manager Pass View
+  if (activeSection === 'manager-pass' && viewingManagerPassPositionId) {
+    return (
+      <ManagerPass
+        recruitmentRequestId={viewingManagerPassPositionId}
+        managerId={viewingManagerId || user?.employee_id || ''}
+        token={user?.token || ''}
+        onBack={() => {
+          setViewingManagerPassPositionId(null)
+          setActiveSection('admin')
+        }}
+      />
     )
   }
 

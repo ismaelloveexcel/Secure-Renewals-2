@@ -111,7 +111,7 @@ class Candidate(Base):
     protocols_tools: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
     
     # References for reference checks
-    references: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # [{name, relationship, company, email, phone}]
+    references_list: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # [{name, relationship, company, email, phone}]
     
     # Evaluations (HR/Hiring Manager only)
     soft_skills: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)  # {communication: 4, teamwork: 5, ...}

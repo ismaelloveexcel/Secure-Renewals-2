@@ -320,6 +320,7 @@ function App() {
   const [recruitmentRequests, setRecruitmentRequests] = useState<any[]>([])
   const [recruitmentStats, setRecruitmentStats] = useState<{active_positions: number, total_candidates: number, in_interview: number, hired_30_days: number} | null>(null)
   const [pipelineCounts, setPipelineCounts] = useState<{applied: number, screening: number, interview: number, offer: number, hired: number} | null>(null)
+  const [candidatesList, setCandidatesList] = useState<any[]>([])
   const [showNewRequestModal, setShowNewRequestModal] = useState(false)
   const [newRequestForm, setNewRequestForm] = useState({
     position_title: '',
@@ -642,14 +643,16 @@ function App() {
   const fetchRecruitmentData = async () => {
     if (!user || (user.role !== 'admin' && user.role !== 'hr')) return
     try {
-      const [statsRes, requestsRes, pipelineRes] = await Promise.all([
+      const [statsRes, requestsRes, pipelineRes, candidatesRes] = await Promise.all([
         fetchWithAuth(`${API_BASE}/recruitment/stats`),
         fetchWithAuth(`${API_BASE}/recruitment/requests`),
-        fetchWithAuth(`${API_BASE}/recruitment/pipeline`)
+        fetchWithAuth(`${API_BASE}/recruitment/pipeline`),
+        fetchWithAuth(`${API_BASE}/recruitment/candidates`)
       ])
       if (statsRes.ok) setRecruitmentStats(await statsRes.json())
       if (requestsRes.ok) setRecruitmentRequests(await requestsRes.json())
       if (pipelineRes.ok) setPipelineCounts(await pipelineRes.json())
+      if (candidatesRes.ok) setCandidatesList(await candidatesRes.json())
     } catch (err) {
       console.error('Failed to fetch recruitment data:', err)
     }
@@ -2741,6 +2744,83 @@ function App() {
                   ))}
                 </div>
               </div>
+
+              {/* Candidates List */}
+              {candidatesList.length > 0 && (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    All Candidates ({candidatesList.length})
+                  </h2>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="text-left text-sm text-gray-500 border-b">
+                          <th className="pb-3 font-medium">Candidate</th>
+                          <th className="pb-3 font-medium">Position Applied</th>
+                          <th className="pb-3 font-medium">Current Role</th>
+                          <th className="pb-3 font-medium">Experience</th>
+                          <th className="pb-3 font-medium">Stage</th>
+                          <th className="pb-3 font-medium">Pass #</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {candidatesList.map((candidate: any) => {
+                          const position = recruitmentRequests.find((r: any) => r.id === candidate.recruitment_request_id)
+                          return (
+                            <tr key={candidate.id} className="hover:bg-gray-50">
+                              <td className="py-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                    {candidate.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-gray-800">{candidate.full_name}</p>
+                                    <p className="text-sm text-gray-500">{candidate.email}</p>
+                                    {candidate.phone && <p className="text-xs text-gray-400">{candidate.phone}</p>}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-4">
+                                <p className="text-sm font-medium text-gray-700">{position?.position_title || 'Unknown'}</p>
+                                <p className="text-xs text-gray-400">{candidate.candidate_number}</p>
+                              </td>
+                              <td className="py-4">
+                                <p className="text-sm text-gray-700">{candidate.current_position || '-'}</p>
+                                <p className="text-xs text-gray-500">{candidate.current_company || ''}</p>
+                              </td>
+                              <td className="py-4">
+                                <span className="text-sm font-medium text-gray-700">
+                                  {candidate.years_experience ? `${candidate.years_experience} years` : '-'}
+                                </span>
+                              </td>
+                              <td className="py-4">
+                                <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                                  candidate.stage === 'applied' ? 'bg-blue-100 text-blue-700' :
+                                  candidate.stage === 'screening' ? 'bg-yellow-100 text-yellow-700' :
+                                  candidate.stage === 'interview' ? 'bg-purple-100 text-purple-700' :
+                                  candidate.stage === 'offer' ? 'bg-green-100 text-green-700' :
+                                  candidate.stage === 'hired' ? 'bg-emerald-100 text-emerald-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {candidate.stage?.charAt(0).toUpperCase() + candidate.stage?.slice(1)}
+                                </span>
+                              </td>
+                              <td className="py-4">
+                                <span className="text-xs font-mono text-purple-600 bg-purple-50 px-2 py-1 rounded">
+                                  {candidate.pass_number}
+                                </span>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
               {/* Quick Actions */}
               <div className="bg-white rounded-xl shadow-lg p-6">

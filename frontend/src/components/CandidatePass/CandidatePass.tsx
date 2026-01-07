@@ -253,22 +253,25 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                     href={getProfileUrl()}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-16 h-16 bg-white rounded-xl border-2 border-slate-100 flex items-center justify-center shadow-sm hover:shadow-md hover:border-slate-200 transition-all cursor-pointer active:scale-95 group"
+                    className="block w-24 h-24 bg-white rounded-xl border-3 flex items-center justify-center shadow-lg hover:shadow-xl transition-all cursor-pointer active:scale-95 group"
+                    style={{ borderColor: passData.entity?.includes('Agriculture') ? '#00bf63' : '#00B0F0' }}
                     title="Click to open profile"
                   >
                     <QRCodeSVG 
                       value={getProfileUrl()} 
-                      size={48}
+                      size={72}
                       level="M"
+                      fgColor={passData.entity?.includes('Agriculture') ? '#00bf63' : '#00B0F0'}
                       className="group-hover:scale-105 transition-transform"
                     />
                   </a>
                   <button 
                     onClick={() => setShowProfile(true)}
-                    className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-slate-700 transition-colors"
+                    className="absolute -bottom-1.5 -right-1.5 w-7 h-7 text-white rounded-full flex items-center justify-center shadow-lg hover:opacity-90 transition-colors"
+                    style={{ backgroundColor: passData.entity?.includes('Agriculture') ? '#00bf63' : '#00B0F0' }}
                     title="Expand QR code"
                   >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                     </svg>
                   </button>
@@ -635,12 +638,16 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
               <div className="p-6">
                 {/* Large QR Code */}
                 <div className="flex justify-center mb-6">
-                  <div className="p-4 bg-white rounded-2xl border-2 border-slate-100 shadow-lg">
+                  <div 
+                    className="p-5 bg-white rounded-2xl border-4 shadow-xl"
+                    style={{ borderColor: passData.entity?.includes('Agriculture') ? '#00bf63' : '#00B0F0' }}
+                  >
                     <QRCodeSVG 
                       value={getProfileUrl()} 
-                      size={160}
+                      size={180}
                       level="H"
                       includeMargin={true}
+                      fgColor={passData.entity?.includes('Agriculture') ? '#00bf63' : '#00B0F0'}
                     />
                   </div>
                 </div>

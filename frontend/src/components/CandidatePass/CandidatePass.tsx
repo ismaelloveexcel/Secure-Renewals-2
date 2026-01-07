@@ -292,10 +292,10 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                   href={getProfileUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-14 h-14 bg-white rounded-xl border-2 border-slate-100 flex items-center justify-center shadow-sm hover:shadow-md hover:border-slate-200 transition-all"
+                  className="block w-20 h-20 bg-white rounded-xl border-2 border-slate-100 flex items-center justify-center shadow-sm hover:shadow-md hover:border-slate-200 transition-all"
                   title="Click to open profile"
                 >
-                  <QRCodeSVG value={getProfileUrl()} size={40} level="M" />
+                  <QRCodeSVG value={getProfileUrl()} size={60} level="M" />
                 </a>
                 <button 
                   onClick={() => setShowProfile(true)}

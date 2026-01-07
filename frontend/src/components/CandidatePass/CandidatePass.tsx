@@ -330,9 +330,6 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-slate-700">Complete Profile</p>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-600 mt-1">
-                    Active
-                  </span>
                 </div>
               </div>
             </div>

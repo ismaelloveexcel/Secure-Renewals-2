@@ -211,14 +211,8 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           <div className="px-6 pt-6 pb-4">
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
-                {onBack && (
-                  <button onClick={onBack} className="p-1 -ml-1 text-slate-400 hover:text-slate-600 transition-colors">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-                )}
-                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium">Universal Pass</span>
+                <img src="/assets/logo.png" alt="Baynunah" className="h-3 w-auto opacity-30 grayscale" />
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium italic">Universal Pass</span>
               </div>
               <div className="flex items-center gap-2">
                 <button className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">

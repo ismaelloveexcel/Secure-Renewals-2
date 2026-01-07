@@ -28,11 +28,11 @@ export function BasePassContainer({
   onTabChange
 }: BasePassContainerProps) {
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex items-start justify-center p-4 pt-2">
       <div className="w-full max-w-md">
         <div 
           className="bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-3xl overflow-hidden flex flex-col" 
-          style={{ height: '95vh', maxHeight: '900px' }}
+          style={{ minHeight: '500px', maxHeight: '95vh' }}
         >
           {header}
           

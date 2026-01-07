@@ -64,10 +64,10 @@ interface CandidatePassProps {
 }
 
 const CANDIDATE_TABS: PassTab[] = [
-  { id: 'home', label: 'Overview', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-  { id: 'documents', label: 'Inbox', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+  { id: 'home', label: 'Home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+  { id: 'documents', label: 'Documents', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
   { id: 'calendar', label: 'Calendar', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-  { id: 'engage', label: 'Contact', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' }
+  { id: 'engage', label: 'Engage', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' }
 ]
 
 export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps) {
@@ -271,51 +271,51 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
   }))
 
   const renderHeader = () => (
-    <div className="px-5 pt-5 pb-3 flex-shrink-0 bg-gradient-to-b from-white to-transparent">
-      <div className="flex items-center justify-between mb-1">
-        <img src="/assets/logo.png" alt="Baynunah" className="h-5 w-auto" />
-        <div className="flex items-center gap-2">
-          <button className="relative p-2 rounded-full hover:bg-slate-100 transition-colors">
-            <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <div className="px-4 pt-3 pb-2 flex-shrink-0 bg-gradient-to-b from-white to-transparent">
+      <div className="flex items-center justify-between mb-0.5">
+        <img src="/assets/logo.png" alt="Baynunah" className="h-4 w-auto" />
+        <div className="flex items-center gap-1.5">
+          <button className="relative p-1.5 rounded-full hover:bg-slate-100 transition-colors">
+            <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
             </svg>
             {passData.unread_messages > 0 && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+              <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
             )}
           </button>
-          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
             passData.status === 'revoked' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
           }`}>Active</span>
         </div>
       </div>
-      <span className="text-lg font-bold text-slate-500">Candidate Pass</span>
+      <span className="text-base font-bold text-slate-500">Candidate Pass</span>
       
       {/* Candidate Info Card */}
-      <div className="mt-3">
+      <div className="mt-2">
         <div 
-          className="p-4 bg-white rounded-2xl border-4 shadow-lg"
+          className="p-3 bg-white rounded-xl border-[3px] shadow-md"
           style={{ borderColor: getEntityColor() }}
         >
-          <div className="flex items-start justify-between mb-3">
+          <div className="flex items-start justify-between mb-2">
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-black text-slate-900 leading-tight truncate tracking-tight">{passData.full_name}</h2>
-              <p className="text-xs text-slate-600 truncate font-semibold mt-0.5">{passData.position_title}</p>
-              <div className="inline-block mt-1.5 px-2 py-0.5 bg-emerald-50 rounded-md">
-                <p className="text-[10px] text-emerald-700 font-mono font-bold tracking-wider">{passData.candidate_number}</p>
+              <h2 className="text-base font-black text-slate-900 leading-tight truncate tracking-tight">{passData.full_name}</h2>
+              <p className="text-[11px] text-slate-600 truncate font-semibold">{passData.position_title}</p>
+              <div className="inline-block mt-1 px-1.5 py-0.5 bg-emerald-50 rounded">
+                <p className="text-[9px] text-emerald-700 font-mono font-bold tracking-wider">{passData.candidate_number}</p>
               </div>
             </div>
-            <div className="relative flex-shrink-0 ml-3">
+            <div className="relative flex-shrink-0 ml-2">
               <a 
                 href={getProfileUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-20 h-20 bg-white rounded-xl border-2 flex items-center justify-center shadow hover:shadow-lg transition-all cursor-pointer active:scale-95 group"
+                className="block w-16 h-16 bg-white rounded-lg border-2 flex items-center justify-center shadow hover:shadow-md transition-all cursor-pointer active:scale-95 group"
                 style={{ borderColor: getEntityColor() }}
                 title="Click to open profile"
               >
                 <QRCodeSVG 
                   value={getProfileUrl()} 
-                  size={60}
+                  size={48}
                   level="M"
                   fgColor={getEntityColor()}
                   className="group-hover:scale-105 transition-transform"
@@ -323,32 +323,32 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
               </a>
               <button 
                 onClick={() => setShowProfile(true)}
-                className="absolute -bottom-1 -right-1 w-6 h-6 text-white rounded-full flex items-center justify-center shadow hover:opacity-90 transition-colors"
+                className="absolute -bottom-1 -right-1 w-5 h-5 text-white rounded-full flex items-center justify-center shadow hover:opacity-90 transition-colors"
                 style={{ backgroundColor: getEntityColor() }}
                 title="Expand QR code"
               >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                 </svg>
               </button>
             </div>
           </div>
           
-          <div className="flex pt-3 border-t border-slate-100">
+          <div className="flex pt-2 border-t border-slate-100">
             <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)] animate-pulse"></div>
-                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Stage</p>
+              <div className="flex items-center gap-1 mb-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.5)] animate-pulse"></div>
+                <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold">Stage</p>
               </div>
-              <p className="text-xs font-semibold text-slate-700">{stageLabels[passData.current_stage.toLowerCase()] || passData.current_stage}</p>
+              <p className="text-[11px] font-semibold text-slate-700">{stageLabels[passData.current_stage.toLowerCase()] || passData.current_stage}</p>
             </div>
-            <div className="w-px bg-slate-200 self-stretch my-1"></div>
+            <div className="w-px bg-slate-200 self-stretch my-0.5"></div>
             <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.5)]"></div>
-                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Status</p>
+              <div className="flex items-center gap-1 mb-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_4px_rgba(59,130,246,0.5)]"></div>
+                <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold">Status</p>
               </div>
-              <p className="text-[11px] font-semibold text-slate-700 leading-tight">{getStatusLabel(passData.current_stage, passData.status)}</p>
+              <p className="text-[10px] font-semibold text-slate-700 leading-tight">{getStatusLabel(passData.current_stage, passData.status)}</p>
             </div>
           </div>
         </div>
@@ -357,7 +357,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
   )
 
   const renderJourney = () => (
-    <div className="mx-4 mb-3 flex-shrink-0">
+    <div className="mx-3 mb-2 flex-shrink-0">
       <JourneyTimeline 
         stages={CANDIDATE_STAGES}
         currentStageIndex={currentStageIndex}
@@ -368,7 +368,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
 
   const renderActionRequired = () => (
     activeTab === 'home' ? (
-      <div className="mx-4 mb-3">
+      <div className="mx-3 mb-2">
         <ActionRequired action={actionRequiredConfig} entityColor={getEntityColor()} />
       </div>
     ) : null
@@ -379,10 +379,19 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
       case 'home':
         return (
           <div className="px-4 space-y-3">
-            {/* Activity History */}
-            <ActivityHistory 
-              activities={activityItems}
-            />
+            {activityItems.length > 0 ? (
+              <ActivityHistory activities={activityItems} />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-semibold text-slate-700 mb-1">You're all caught up!</h3>
+                <p className="text-xs text-slate-400">No pending actions at this time</p>
+              </div>
+            )}
           </div>
         )
 

@@ -57,6 +57,9 @@ def create_app() -> FastAPI:
     app.include_router(interview.router, prefix=settings.api_prefix)
     # Performance management
     app.include_router(performance.router, prefix=settings.api_prefix)
+    # Employee of the Year nominations
+    from app.routers import nominations
+    app.include_router(nominations.router, prefix=settings.api_prefix)
 
     @app.on_event("startup")
     async def on_startup():

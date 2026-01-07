@@ -41,12 +41,13 @@ def create_app() -> FastAPI:
     app.include_router(onboarding.router, prefix=settings.api_prefix)
     app.include_router(attendance.router, prefix=settings.api_prefix)
     app.include_router(admin.router, prefix=settings.api_prefix)
-    from app.routers import templates, audit_logs, notifications
+    from app.routers import templates, audit_logs, notifications, activity_logs
     from app.routers import employee_compliance, employee_bank, employee_documents
     from app.routers import recruitment, interview, performance
     app.include_router(templates.router, prefix=settings.api_prefix)
     app.include_router(audit_logs.router, prefix=settings.api_prefix)
     app.include_router(notifications.router, prefix=settings.api_prefix)
+    app.include_router(activity_logs.router, prefix=settings.api_prefix)
     app.include_router(employee_compliance.router)
     app.include_router(employee_bank.router)
     app.include_router(employee_documents.router)

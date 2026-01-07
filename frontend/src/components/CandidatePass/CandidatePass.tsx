@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 
 interface ActivityLogEntry {
   id: number
@@ -60,8 +61,14 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null)
   const [bookingLoading, setBookingLoading] = useState(false)
   const [historyExpanded, setHistoryExpanded] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
 
   const API_URL = '/api'
+  
+  const getProfileUrl = () => {
+    if (!passData) return ''
+    return `${window.location.origin}/candidate-profile/${passData.candidate_id}?token=${passData.pass_token}`
+  }
 
   useEffect(() => {
     fetchPassData()
@@ -241,10 +248,30 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                     <p className="text-[11px] text-emerald-700 font-mono font-bold tracking-wider">{passData.candidate_number}</p>
                   </div>
                 </div>
-                <div className="w-16 h-16 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center flex-shrink-0 ml-3 shadow-inner">
-                  <svg className="w-10 h-10 text-slate-300" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5z"/>
-                  </svg>
+                <div className="relative flex-shrink-0 ml-3">
+                  <a 
+                    href={getProfileUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-16 h-16 bg-white rounded-xl border-2 border-slate-100 flex items-center justify-center shadow-sm hover:shadow-md hover:border-slate-200 transition-all cursor-pointer active:scale-95 group"
+                    title="Click to open profile"
+                  >
+                    <QRCodeSVG 
+                      value={getProfileUrl()} 
+                      size={48}
+                      level="M"
+                      className="group-hover:scale-105 transition-transform"
+                    />
+                  </a>
+                  <button 
+                    onClick={() => setShowProfile(true)}
+                    className="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-800 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-slate-700 transition-colors"
+                    title="Expand QR code"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    </svg>
+                  </button>
                 </div>
               </div>
               
@@ -586,6 +613,85 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             </div>
           </div>
         </div>
+
+        {/* ===== PROFILE MODAL ===== */}
+        {showProfile && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              {/* Modal Header */}
+              <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
+                <h3 className="text-base font-bold text-slate-800">Candidate Profile</h3>
+                <button 
+                  onClick={() => setShowProfile(false)}
+                  className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                >
+                  <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Profile Content */}
+              <div className="p-6">
+                {/* Large QR Code */}
+                <div className="flex justify-center mb-6">
+                  <div className="p-4 bg-white rounded-2xl border-2 border-slate-100 shadow-lg">
+                    <QRCodeSVG 
+                      value={getProfileUrl()} 
+                      size={160}
+                      level="H"
+                      includeMargin={true}
+                    />
+                  </div>
+                </div>
+                
+                {/* Candidate Info */}
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-black text-slate-900 mb-1">{passData.full_name}</h2>
+                  <p className="text-sm text-slate-600 font-medium">{passData.position_title}</p>
+                  <div className="inline-block mt-2 px-3 py-1 bg-emerald-50 rounded-lg">
+                    <p className="text-xs text-emerald-700 font-mono font-bold">{passData.candidate_number}</p>
+                  </div>
+                </div>
+                
+                {/* Info Grid */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="p-3 bg-slate-50 rounded-xl">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Stage</p>
+                    <p className="text-sm font-bold text-slate-800">{stageLabels[passData.current_stage.toLowerCase()] || passData.current_stage}</p>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Status</p>
+                    <p className="text-sm font-bold text-slate-800 capitalize">{passData.status}</p>
+                  </div>
+                </div>
+                
+                {/* Scan Instructions */}
+                <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    </svg>
+                    <div>
+                      <p className="text-xs font-semibold text-blue-800">Scan to Access Profile</p>
+                      <p className="text-[11px] text-blue-600 mt-0.5">Use any QR scanner app to open this candidate's full profile</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Modal Footer */}
+              <div className="px-5 py-4 border-t border-slate-100 bg-slate-50">
+                <button 
+                  onClick={() => setShowProfile(false)}
+                  className="w-full py-3 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-900 transition-colors active:scale-[0.98]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

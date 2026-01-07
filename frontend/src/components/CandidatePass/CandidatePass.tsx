@@ -271,16 +271,16 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
   }))
 
   const renderHeader = () => (
-    <div className="px-4 pt-3 pb-2 flex-shrink-0 bg-gradient-to-b from-white to-transparent">
+    <div className="px-4 pt-5 pb-2 flex-shrink-0 bg-gradient-to-b from-white to-transparent">
       <div className="flex items-center justify-between">
         <span className="text-base font-bold text-slate-500">Candidate Pass</span>
         <img src="/assets/logo.png" alt="Baynunah" className="h-4 w-auto" />
       </div>
       
       {/* Candidate Info Card */}
-      <div className="mt-2">
+      <div className="mt-3">
         <div 
-          className="p-3 bg-white rounded-xl border-[3px] shadow-md"
+          className="p-4 bg-white rounded-xl border-[3px] shadow-md"
           style={{ borderColor: getEntityColor() }}
         >
           <div className="flex items-start justify-between mb-2">

@@ -313,11 +313,17 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                 ></div>
               </div>
               <div className="flex items-center justify-between relative z-10">
-                {['Application', 'Screening', 'Interview', 'Offer', 'Onboarding'].map((stage, idx) => {
+                {[
+                  { full: 'Application', short: 'Apply' },
+                  { full: 'Screening', short: 'Screen' },
+                  { full: 'Interview', short: 'Interview' },
+                  { full: 'Offer', short: 'Offer' },
+                  { full: 'Onboarding', short: 'Onboard' }
+                ].map((stage, idx) => {
                   const isCompleted = idx < currentStageIndex
                   const isCurrent = idx === currentStageIndex
                   return (
-                    <div key={stage} className="flex flex-col items-center">
+                    <div key={stage.full} className="flex flex-col items-center w-14">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold border-2 transition-all duration-300 shadow-sm ${
                         isCompleted ? 'bg-emerald-500 border-emerald-500 text-white shadow-emerald-200' :
                         isCurrent ? 'bg-white border-emerald-500 text-emerald-600 shadow-emerald-100 ring-4 ring-emerald-50' :
@@ -329,8 +335,8 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                           </svg>
                         ) : idx + 1}
                       </div>
-                      <span className={`text-[8px] font-semibold mt-1.5 ${isCurrent ? 'text-emerald-600' : isCompleted ? 'text-slate-600' : 'text-slate-400'}`}>
-                        {stage.substring(0, 5)}
+                      <span className={`text-[8px] font-medium mt-1.5 text-center leading-tight ${isCurrent ? 'text-emerald-600' : isCompleted ? 'text-slate-600' : 'text-slate-400'}`}>
+                        {stage.short}
                       </span>
                     </div>
                   )

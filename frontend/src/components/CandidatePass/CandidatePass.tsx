@@ -282,26 +282,36 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             </div>
           </div>
 
-          {/* ===== ACTION REQUIRED (Persistent CTA Zone - Fixed) ===== */}
-          {primaryAction && (
-            <div className="mx-4 mb-3 flex-shrink-0">
+          {/* ===== NEXT ACTION (Always visible) ===== */}
+          <div className="mx-4 mb-3 flex-shrink-0">
+            <p className="text-[9px] uppercase tracking-widest text-slate-400 mb-2">Next Action</p>
+            {primaryAction ? (
               <button
                 onClick={handlePrimaryAction}
                 disabled={bookingLoading}
                 className="w-full p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center justify-between transition-colors disabled:opacity-50"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </div>
                   <span className="text-sm font-semibold">{primaryAction.label}</span>
                 </div>
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Action Required</span>
+                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Required</span>
               </button>
-            </div>
-          )}
+            ) : (
+              <div className="p-3 bg-slate-50 rounded-xl text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-xs text-slate-500">No pending actions</span>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* ===== CONTENT AREA (Scrollable - Swaps by activeTab) ===== */}
           <div className="flex-1 overflow-y-auto mx-4 mb-2">

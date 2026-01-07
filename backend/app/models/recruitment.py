@@ -1,6 +1,6 @@
 """Recruitment models for ATS system."""
 from datetime import date, datetime
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean, Date, DateTime, ForeignKey, Integer,
@@ -10,6 +10,10 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.renewal import Base
+
+if TYPE_CHECKING:
+    from app.models.employee import Employee
+    from app.models.passes import Pass
 
 
 class RecruitmentRequest(Base):
@@ -23,10 +27,19 @@ class RecruitmentRequest(Base):
     # Position details
     position_title: Mapped[str] = mapped_column(String(200), nullable=False)
     department: Mapped[str] = mapped_column(String(100), nullable=False)
+    # String reference for display
     hiring_manager_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    # FK to employees masterfile
+    hiring_manager_employee_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("employees.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
-    # Request info
+    # Request info - string reference for display
     requested_by: Mapped[str] = mapped_column(String(50), nullable=False)
+    # FK to employees masterfile
+    requested_by_employee_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("employees.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     request_date: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
     target_hire_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
@@ -46,14 +59,27 @@ class RecruitmentRequest(Base):
     approval_status: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     # {requisition: {status, approver, date}, budget: {...}, offer: {...}}
 
-    # Manager pass reference
+    # Manager pass reference - string reference
     manager_pass_number: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    # FK to passes masterfile
+    manager_pass_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("passes.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     # Audit
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    # Relationships
+    # Relationships to masterfiles
+    hiring_manager: Mapped[Optional["Employee"]] = relationship(
+        "Employee", foreign_keys=[hiring_manager_employee_id]
+    )
+    requester: Mapped[Optional["Employee"]] = relationship(
+        "Employee", foreign_keys=[requested_by_employee_id]
+    )
+    manager_pass: Mapped[Optional["Pass"]] = relationship(
+        "Pass", foreign_keys=[manager_pass_id]
+    )
     candidates: Mapped[List["Candidate"]] = relationship(back_populates="recruitment_request", cascade="all, delete-orphan")
 
 
@@ -68,8 +94,12 @@ class Candidate(Base):
     # Link to recruitment request
     recruitment_request_id: Mapped[int] = mapped_column(ForeignKey("recruitment_requests.id"), nullable=False)
 
-    # Pass reference
+    # Pass reference - string reference for display
     pass_number: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, index=True)
+    # FK to passes masterfile
+    pass_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("passes.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     # Personal info
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -154,6 +184,7 @@ class Candidate(Base):
 
     # Relationships
     recruitment_request: Mapped["RecruitmentRequest"] = relationship(back_populates="candidates")
+    candidate_pass: Mapped[Optional["Pass"]] = relationship("Pass", foreign_keys=[pass_id])
     interviews: Mapped[List["Interview"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
     evaluations: Mapped[List["Evaluation"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
 

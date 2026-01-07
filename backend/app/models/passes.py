@@ -1,10 +1,13 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.renewal import Base
+
+if TYPE_CHECKING:
+    from app.models.employee import Employee
 
 
 class Pass(Base):
@@ -36,16 +39,32 @@ class Pass(Base):
     status: Mapped[str] = mapped_column(String(20), default="active", nullable=False)  # active, expired, revoked
     is_printed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     
-    # Linked employee (for onboarding passes)
+    # Linked employee (for onboarding passes) - string reference for display
     employee_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    # FK to employees masterfile
+    linked_employee_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("employees.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     
-    # Audit
+    # Audit - string reference for display
     created_by: Mapped[str] = mapped_column(String(50), nullable=False)
+    # FK to employees masterfile for creator
+    created_by_employee_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("employees.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+    
+    # Relationships to employees masterfile
+    linked_employee: Mapped[Optional["Employee"]] = relationship(
+        "Employee", foreign_keys=[linked_employee_id]
+    )
+    creator: Mapped[Optional["Employee"]] = relationship(
+        "Employee", foreign_keys=[created_by_employee_id]
     )
 
 

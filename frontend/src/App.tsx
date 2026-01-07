@@ -252,6 +252,7 @@ function App() {
   const [employeeId, setEmployeeId] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberAdmin, setRememberAdmin] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [pendingSection, setPendingSection] = useState<Section | null>(null)
   const [passes, setPasses] = useState<Pass[]>([])
@@ -376,6 +377,24 @@ function App() {
 
   const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
 
+  // Load saved admin session on mount
+  useEffect(() => {
+    const savedSession = localStorage.getItem('admin_session')
+    if (savedSession && !user) {
+      try {
+        const session = JSON.parse(savedSession)
+        if (session.token && session.expiry > Date.now()) {
+          setUser(session)
+          setRememberAdmin(true)
+        } else {
+          localStorage.removeItem('admin_session')
+        }
+      } catch {
+        localStorage.removeItem('admin_session')
+      }
+    }
+  }, [])
+
   // Check for onboarding token in URL on mount
   useEffect(() => {
     const path = window.location.pathname
@@ -461,6 +480,18 @@ function App() {
         token: data.access_token,
       }
       setUser(loggedInUser)
+      
+      // Save session if "Remember me" is checked (for admin login)
+      if (rememberAdmin && isAdminLogin) {
+        const sessionData = {
+          ...loggedInUser,
+          expiry: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+        }
+        localStorage.setItem('admin_session', JSON.stringify(sessionData))
+      } else {
+        localStorage.removeItem('admin_session')
+      }
+      
       setShowLoginModal(false)
       setEmployeeId('')
       setPassword('')
@@ -481,6 +512,8 @@ function App() {
     setEmployees([])
     setFeatures([])
     setDashboard(null)
+    localStorage.removeItem('admin_session')
+    setRememberAdmin(false)
   }
 
   const closeLoginModal = () => {
@@ -1135,6 +1168,20 @@ function App() {
               </button>
             </div>
           </div>
+          {isAdminLogin && (
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="remember-admin"
+                checked={rememberAdmin}
+                onChange={e => setRememberAdmin(e.target.checked)}
+                className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+              />
+              <label htmlFor="remember-admin" className="text-sm text-gray-600">
+                Remember me
+              </label>
+            </div>
+          )}
           <button
             type="submit"
             disabled={loading}

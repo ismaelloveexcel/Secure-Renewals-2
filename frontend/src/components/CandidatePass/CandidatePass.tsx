@@ -215,21 +215,40 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             <span className="text-lg font-bold text-slate-500">Candidate Pass</span>
           </div>
 
-          {/* ===== CANDIDATE INFO (Fixed) ===== */}
+          {/* ===== CANDIDATE INFO CARD (Fixed) ===== */}
           <div 
-            className="mx-4 mb-3 p-3 bg-slate-50/80 rounded-xl border-4 flex items-center justify-between flex-shrink-0"
+            className="mx-4 mb-3 p-3 bg-slate-50/80 rounded-xl border-4 flex-shrink-0"
             style={{ borderColor: passData.entity?.includes('Agriculture') ? '#00bf63' : '#00B0F0' }}
           >
-            <div>
-              <p className="text-[9px] uppercase tracking-widest text-slate-400 mb-0.5">Candidate</p>
-              <h2 className="text-lg font-semibold text-slate-800 leading-tight">{passData.full_name}</h2>
-              <p className="text-xs text-slate-500">{passData.position_title}</p>
-              <p className="text-[10px] text-emerald-600 font-mono mt-1">{passData.candidate_number}</p>
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] uppercase tracking-widest text-slate-400 mb-0.5">Candidate</p>
+                <h2 className="text-base font-semibold text-slate-800 leading-tight truncate">{passData.full_name}</h2>
+                <p className="text-xs text-slate-500 truncate">{passData.position_title}</p>
+                <p className="text-[10px] text-emerald-600 font-mono mt-0.5">{passData.candidate_number}</p>
+              </div>
+              <div className="w-12 h-12 bg-white rounded-lg border border-slate-200 flex items-center justify-center flex-shrink-0 ml-2">
+                <svg className="w-8 h-8 text-slate-300" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5z"/>
+                </svg>
+              </div>
             </div>
-            <div className="w-14 h-14 bg-white rounded-lg border border-slate-200 flex items-center justify-center flex-shrink-0">
-              <svg className="w-10 h-10 text-slate-300" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5z"/>
-              </svg>
+            <div className="flex gap-2 pt-2 border-t border-slate-200/60">
+              <div className="flex-1 flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></div>
+                <div>
+                  <p className="text-[8px] uppercase text-slate-400 leading-none">Stage</p>
+                  <p className="text-[11px] font-medium text-slate-800 leading-tight">{stageLabels[passData.current_stage.toLowerCase()] || passData.current_stage}</p>
+                </div>
+              </div>
+              <div className="w-px bg-slate-200"></div>
+              <div className="flex-1 flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></div>
+                <div>
+                  <p className="text-[8px] uppercase text-slate-400 leading-none">Status</p>
+                  <p className="text-[11px] font-medium text-slate-800 leading-tight capitalize">{passData.status}</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -237,7 +256,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           <div className="mx-4 mb-3 flex-shrink-0">
             <p className="text-[9px] uppercase tracking-widest text-slate-400 mb-2">Journey</p>
             <div className="relative">
-              <div className="absolute top-4 left-0 right-0 h-0.5 bg-slate-100">
+              <div className="absolute top-3 left-0 right-0 h-0.5 bg-slate-100">
                 <div className="h-full bg-emerald-500 transition-all" style={{ width: `${(currentStageIndex / 4) * 100}%` }}></div>
               </div>
               <div className="flex items-center justify-between relative z-10">
@@ -246,7 +265,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                   const isCurrent = idx === currentStageIndex
                   return (
                     <div key={stage} className="flex flex-col items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 ${
                         isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' :
                         isCurrent ? 'bg-emerald-50 border-emerald-500 text-emerald-600' :
                         'bg-slate-100 border-slate-200 text-slate-400'
@@ -260,18 +279,6 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                   )
                 })}
               </div>
-            </div>
-          </div>
-
-          {/* ===== CURRENT STATUS (Fixed) ===== */}
-          <div className="mx-4 mb-2 flex gap-3 flex-shrink-0">
-            <div className="flex-1 p-2 bg-slate-50 rounded-lg">
-              <p className="text-[8px] uppercase text-slate-400">Stage</p>
-              <p className="text-xs font-medium text-slate-800">{stageLabels[passData.current_stage.toLowerCase()] || passData.current_stage}</p>
-            </div>
-            <div className="flex-1 p-2 bg-slate-50 rounded-lg">
-              <p className="text-[8px] uppercase text-slate-400">Status</p>
-              <p className="text-xs font-medium text-slate-800">{passData.status}</p>
             </div>
           </div>
 

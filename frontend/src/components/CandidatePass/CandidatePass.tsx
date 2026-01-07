@@ -227,8 +227,9 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
   }
 
   const getStageIndex = (stageName: string) => {
-    const stages = ['application', 'screening', 'interview', 'offer', 'onboarding']
-    return stages.indexOf(stageName)
+    const stages = ['Application', 'Screening', 'Interview', 'Offer', 'Onboarding']
+    // Case-insensitive search
+    return stages.findIndex(s => s.toLowerCase() === stageName.toLowerCase())
   }
 
   const currentStageIndex = getStageIndex(passData.current_stage)
@@ -294,12 +295,14 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           <div className="mx-4 mb-4 flex gap-4">
             <div className="flex-1">
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Current Stage</p>
-              <p className="text-sm font-medium text-slate-800 capitalize">{stageLabels[passData.current_stage] || passData.current_stage}</p>
+              <p className="text-sm font-medium text-slate-800">
+                {passData.current_stage}
+              </p>
             </div>
             <div className="flex-1">
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Status</p>
               <p className="text-sm font-medium text-slate-800">
-                {statusLabels[passData.status] || passData.status || 'Active'}
+                {passData.status}
               </p>
             </div>
           </div>
@@ -318,11 +321,11 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
               
               <div className="flex items-center justify-between relative z-10">
                 {[
-                  { id: 'application', label: 'Application', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-                  { id: 'screening', label: 'Screening', icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' },
-                  { id: 'interview', label: 'Interview', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
-                  { id: 'offer', label: 'Offer', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-                  { id: 'onboarding', label: 'Onboarding', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
+                  { id: 'Application', label: 'Application', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+                  { id: 'Screening', label: 'Screening', icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' },
+                  { id: 'Interview', label: 'Interview', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+                  { id: 'Offer', label: 'Offer', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+                  { id: 'Onboarding', label: 'Onboarding', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
                 ].map((stage, idx) => {
                   const isCompleted = idx < currentStageIndex
                   const isCurrent = idx === currentStageIndex

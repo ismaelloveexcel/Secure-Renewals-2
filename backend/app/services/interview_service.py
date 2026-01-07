@@ -332,9 +332,25 @@ class InterviewService:
         
         candidate, position = row
         
-        # Build stage tracking
-        all_stages = ["application", "screening", "interview", "offer", "onboarding"]
-        current_stage_idx = all_stages.index(candidate.stage) if candidate.stage in all_stages else 0
+        # Correct Stage/Status Mapping logic based on user list
+        stage_mapping = {
+            "application": ["Submitted", "Incomplete (Missing Information)", "Withdrawn by Candidate", "Application Received (Validated)"],
+            "screening": ["Under Screening", "Shortlisted", "On Hold", "Rejected at Screening"],
+            "interview": ["Interview Scheduled", "Interview Completed", "Second Interview Required (if applicable)", "Pending Interview Feedback", "Rejected After Interview"],
+            "offer": ["Offer In Preparation", "Offer Sent", "Offer Accepted", "Offer Declined", "Offer Expired", "Offer Withdrawn"],
+            "onboarding": ["Onboarding Initiated", "Documents Pending", "Background / Clearance in Progress", "Onboarding Completed", "No Show / Onboarding Failed"]
+        }
+
+        all_stages = ["Application", "Screening", "Interview", "Offer", "Onboarding"]
+        current_stage_idx = 0
+        current_stage_name = str(candidate.stage).strip()
+        
+        # Match case-insensitive
+        for idx, stage in enumerate(all_stages):
+            if stage.lower() == current_stage_name.lower():
+                current_stage_idx = idx
+                break
+        
         stages = []
         for i, stage in enumerate(all_stages):
             if i < current_stage_idx:
@@ -344,7 +360,43 @@ class InterviewService:
             else:
                 stage_status = "pending"
             stages.append({"name": stage, "status": stage_status, "timestamp": None})
+
+        # Correct display status based on candidate.status matching the list
+        # We'll use the mapping to ensure the status matches the list exactly if possible
+        display_status = str(candidate.status).strip()
         
+        # If the status in DB is a slug, we should ideally map it to the label
+        # But based on user feedback "Applied" vs "applied", they want the exact label
+        # Let's check if the status is one of our slugs and map to label
+        status_slug_to_label = {
+            "submitted": "Submitted",
+            "incomplete": "Incomplete (Missing Information)",
+            "withdrawn": "Withdrawn by Candidate",
+            "received": "Application Received (Validated)",
+            "under_screening": "Under Screening",
+            "shortlisted": "Shortlisted",
+            "on_hold": "On Hold",
+            "rejected_screening": "Rejected at Screening",
+            "interview_scheduled": "Interview Scheduled",
+            "interview_completed": "Interview Completed",
+            "second_interview": "Second Interview Required (if applicable)",
+            "pending_feedback": "Pending Interview Feedback",
+            "rejected_interview": "Rejected After Interview",
+            "offer_preparation": "Offer In Preparation",
+            "offer_sent": "Offer Sent",
+            "offer_accepted": "Offer Accepted",
+            "offer_declined": "Offer Declined",
+            "offer_expired": "Offer Expired",
+            "offer_withdrawn": "Offer Withdrawn",
+            "onboarding_initiated": "Onboarding Initiated",
+            "documents_pending": "Documents Pending",
+            "clearance_in_progress": "Background / Clearance in Progress",
+            "onboarding_completed": "Onboarding Completed",
+            "no_show": "No Show / Onboarding Failed"
+        }
+        
+        final_status = status_slug_to_label.get(display_status.lower(), display_status)
+
         # Get available slots
         available_slots = await self.get_available_slots(session, position.id)
         
@@ -362,16 +414,17 @@ class InterviewService:
         
         # Build next actions based on stage
         next_actions = []
-        if candidate.stage == "application":
+        c_stage_lower = current_stage_name.lower()
+        if c_stage_lower == "application":
             next_actions.append({"action_id": "complete_profile", "label": "Complete Profile", "type": "form"})
-        elif candidate.stage == "screening":
+        elif c_stage_lower == "screening":
             next_actions.append({"action_id": "upload_documents", "label": "Upload Documents", "type": "upload"})
-        elif candidate.stage == "interview":
+        elif c_stage_lower == "interview":
             if not booked_slot:
                 next_actions.append({"action_id": "book_interview", "label": "Choose Interview Slot", "type": "calendar"})
             elif not booked_slot.candidate_confirmed:
                 next_actions.append({"action_id": "confirm_interview", "label": "Confirm Interview", "type": "confirm"})
-        elif candidate.stage == "offer":
+        elif c_stage_lower == "offer":
             next_actions.append({"action_id": "review_offer", "label": "Review Offer", "type": "document"})
         
         return CandidatePassData(
@@ -385,8 +438,8 @@ class InterviewService:
             position_title=position.position_title,
             position_id=position.id,
             entity=candidate.entity,
-            current_stage=candidate.stage,
-            status=candidate.status,
+            current_stage=all_stages[current_stage_idx], # Ensure exact casing
+            status=final_status, # Use the mapped label
             stages=stages,
             interview_slots=available_slots,
             booked_slot=booked_slot_response,

@@ -243,7 +243,10 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           </div>
 
           {/* Candidate Info Card */}
-          <div className="mx-4 mb-4 p-4 bg-slate-50/80 rounded-2xl border border-slate-100 flex items-center justify-between">
+          <div 
+            className="mx-4 mb-4 p-4 bg-slate-50/80 rounded-2xl border-4 flex items-center justify-between"
+            style={{ borderColor: passData.entity?.includes('Agriculture') ? '#00bf63' : '#71acdb' }}
+          >
             <div>
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Candidate Journey</p>
               <h2 className="text-xl font-semibold text-slate-800 mb-0.5">{passData.full_name}</h2>

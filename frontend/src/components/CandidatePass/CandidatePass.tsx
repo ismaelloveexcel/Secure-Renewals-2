@@ -352,15 +352,15 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
 
           {/* ===== JOURNEY TIMELINE (Fixed) ===== */}
           <div className="mx-4 mb-4 flex-shrink-0">
-            <div className="bg-slate-800 rounded-2xl p-4">
+            <div className="bg-white/60 backdrop-blur-md rounded-2xl p-4 border border-slate-200/50">
               <div className="relative">
                 {/* Progress Line */}
-                <div className="absolute top-6 left-8 right-8 h-0.5 bg-slate-600 z-0">
+                <div className="absolute top-6 left-8 right-8 h-0.5 bg-slate-200 z-0">
                   <div 
                     className="h-full transition-all duration-500 ease-out"
                     style={{ 
                       width: `${(currentStageIndex / 4) * 100}%`,
-                      background: 'linear-gradient(90deg, #00B0F0 0%, #10b981 100%)'
+                      background: '#10b981'
                     }}
                   ></div>
                 </div>
@@ -374,18 +374,17 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                   ].map((stage, idx) => {
                     const isCompleted = idx < currentStageIndex
                     const isCurrent = idx === currentStageIndex
+                    const isActive = isCompleted || isCurrent
                     return (
                       <div key={stage.full} className="flex flex-col items-center" style={{ width: '60px' }}>
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                          isCompleted ? 'bg-slate-700 ring-2 ring-cyan-400' :
-                          isCurrent ? 'bg-slate-700 ring-2 ring-emerald-400 shadow-lg shadow-emerald-500/20' :
-                          'bg-slate-700'
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-slate-100 border-2 border-emerald-500 shadow-md shadow-emerald-100' 
+                            : 'bg-slate-100 border border-slate-300'
                         }`}>
                           <svg 
                             className={`w-5 h-5 transition-colors ${
-                              isCompleted ? 'text-cyan-400' : 
-                              isCurrent ? 'text-emerald-400' : 
-                              'text-slate-500'
+                              isActive ? 'text-emerald-500' : 'text-slate-400'
                             }`} 
                             fill="none" 
                             viewBox="0 0 24 24" 
@@ -396,9 +395,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                           </svg>
                         </div>
                         <span className={`text-[9px] font-medium mt-2 text-center leading-tight ${
-                          isCurrent ? 'text-emerald-400' : 
-                          isCompleted ? 'text-cyan-400' : 
-                          'text-slate-500'
+                          isActive ? 'text-emerald-600' : 'text-slate-500'
                         }`}>
                           {stage.label}
                         </span>

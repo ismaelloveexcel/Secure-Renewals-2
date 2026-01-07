@@ -212,7 +212,6 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <img src="/assets/logo.png" alt="Baynunah" className="h-3 w-auto opacity-30 grayscale" />
-                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium italic">Universal Pass</span>
               </div>
               <div className="flex items-center gap-2">
                 <button className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">

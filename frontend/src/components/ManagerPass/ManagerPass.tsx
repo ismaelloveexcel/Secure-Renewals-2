@@ -67,7 +67,7 @@ interface InterviewSlot {
   candidate_confirmed: boolean
 }
 
-type ActiveTab = 'home' | 'documents' | 'calendar' | 'engage'
+type ActiveTab = 'home' | 'documents' | 'interview' | 'engage'
 
 interface ManagerPassProps {
   recruitmentRequestId: number
@@ -79,7 +79,7 @@ interface ManagerPassProps {
 const MANAGER_TABS: PassTab[] = [
   { id: 'home', label: 'Home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
   { id: 'documents', label: 'Documents', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-  { id: 'calendar', label: 'Calendar', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+  { id: 'interview', label: 'Interview', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
   { id: 'engage', label: 'Engage', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' }
 ]
 
@@ -205,7 +205,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
       return {
         label: 'Configure Interview',
         description: 'Set up interview format and rounds',
-        onClick: () => setShowInterviewSetup(true),
+        onClick: () => setActiveTab('interview'),
         loading: false
       }
     }
@@ -214,7 +214,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
       return {
         label: 'Add Interview Slots',
         description: 'Provide available times for candidates',
-        onClick: () => setShowInterviewSetup(true),
+        onClick: () => setActiveTab('interview'),
         loading: false
       }
     }
@@ -377,162 +377,51 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
     switch (activeTab) {
       case 'home':
         return (
-          <div className="space-y-4">
-            {/* INTERVIEW SETUP DISPLAY */}
-            {passData.interview_setup && !showInterviewSetup && (
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Interview Setup</p>
-                <div className="p-4 rounded-xl bg-white border border-slate-100 shadow-sm">
-                  <div className="grid grid-cols-3 gap-3 text-center">
-                    <div>
-                      <p className="text-[9px] text-slate-400 uppercase">Format</p>
-                      <p className="text-xs font-semibold text-slate-700 capitalize">{passData.interview_setup.interview_format}</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] text-slate-400 uppercase">Rounds</p>
-                      <p className="text-xs font-semibold text-slate-700">{passData.interview_setup.interview_rounds}</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] text-slate-400 uppercase">Assessment</p>
-                      <p className="text-xs font-semibold text-slate-700">{passData.interview_setup.technical_assessment_required ? 'Yes' : 'No'}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowInterviewSetup(true)}
-                    className="mt-3 w-full py-2 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                  >
-                    Edit Configuration
-                  </button>
+          <div className="space-y-3">
+            {/* Pipeline Stats Summary */}
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Pipeline Overview</p>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-center">
+                  <p className="text-lg font-bold text-slate-800">{passData.total_candidates || 0}</p>
+                  <p className="text-[9px] text-slate-400">Total</p>
+                </div>
+                <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-center">
+                  <p className="text-lg font-bold" style={{ color: entityColor }}>{passData.pipeline_stats['interview'] || 0}</p>
+                  <p className="text-[9px] text-slate-400">Interview</p>
+                </div>
+                <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-center">
+                  <p className="text-lg font-bold text-emerald-600">{passData.pipeline_stats['offer'] || 0}</p>
+                  <p className="text-[9px] text-slate-400">Offer</p>
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* INTERVIEW SETUP FORM */}
-            {showInterviewSetup && (
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-semibold text-slate-700">Interview Configuration</p>
-                  <button onClick={() => setShowInterviewSetup(false)} className="text-slate-400 hover:text-slate-600">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            {/* Quick Status Card */}
+            <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: `${entityColor}15` }}
+                  >
+                    <svg className="w-4 h-4" style={{ color: entityColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                  </button>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-700">Position Status</p>
+                    <p className="text-[10px] text-slate-400">Active recruitment</p>
+                  </div>
                 </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-[10px] text-slate-500 uppercase mb-1.5">Technical Assessment?</p>
-                    <div className="flex gap-2">
-                      {[true, false].map(val => (
-                        <button
-                          key={String(val)}
-                          onClick={() => setSetupForm({ ...setupForm, technical_assessment_required: val })}
-                          className={`flex-1 py-2 text-xs rounded-lg border transition-colors ${
-                            setupForm.technical_assessment_required === val
-                              ? 'text-white border-transparent'
-                              : 'bg-white text-slate-600 border-slate-200'
-                          }`}
-                          style={setupForm.technical_assessment_required === val ? { backgroundColor: entityColor } : {}}
-                        >
-                          {val ? 'Yes' : 'No'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] text-slate-500 uppercase mb-1.5">Format</p>
-                    <div className="flex gap-2">
-                      {['online', 'in-person', 'hybrid'].map(format => (
-                        <button
-                          key={format}
-                          onClick={() => setSetupForm({ ...setupForm, interview_format: format })}
-                          className={`flex-1 py-2 text-[10px] rounded-lg border transition-colors capitalize ${
-                            setupForm.interview_format === format
-                              ? 'text-white border-transparent'
-                              : 'bg-white text-slate-600 border-slate-200'
-                          }`}
-                          style={setupForm.interview_format === format ? { backgroundColor: entityColor } : {}}
-                        >
-                          {format}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] text-slate-500 uppercase mb-1.5">Rounds</p>
-                    <select
-                      value={setupForm.interview_rounds}
-                      onChange={(e) => setSetupForm({ ...setupForm, interview_rounds: parseInt(e.target.value) })}
-                      className="w-full p-2.5 border border-slate-200 rounded-lg text-xs bg-white"
-                    >
-                      {[1, 2, 3, 4].map(n => (
-                        <option key={n} value={n}>{n} Round{n > 1 ? 's' : ''}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] text-slate-500 uppercase mb-1.5">Add Interview Dates</p>
-                    <input
-                      type="date"
-                      min={new Date().toISOString().split('T')[0]}
-                      onChange={(e) => {
-                        if (e.target.value && !selectedDates.includes(e.target.value)) {
-                          setSelectedDates([...selectedDates, e.target.value])
-                        }
-                      }}
-                      className="w-full p-2.5 border border-slate-200 rounded-lg text-xs bg-white"
-                    />
-                    {selectedDates.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {selectedDates.map(date => (
-                          <span key={date} className="inline-flex items-center gap-1 px-2 py-1 bg-white text-slate-600 text-[10px] rounded-full border border-slate-200">
-                            {new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                            <button onClick={() => setSelectedDates(selectedDates.filter(d => d !== date))} className="text-slate-400 hover:text-slate-600">×</button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] text-slate-500 uppercase mb-1.5">Time Slots</p>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {timeSlots.map(slot => (
-                        <button
-                          key={slot}
-                          onClick={() => {
-                            if (selectedSlots.includes(slot)) {
-                              setSelectedSlots(selectedSlots.filter(s => s !== slot))
-                            } else {
-                              setSelectedSlots([...selectedSlots, slot])
-                            }
-                          }}
-                          className={`py-2 text-[10px] rounded-lg border transition-colors ${
-                            selectedSlots.includes(slot)
-                              ? 'text-white border-transparent'
-                              : 'bg-white text-slate-600 border-slate-200'
-                          }`}
-                          style={selectedSlots.includes(slot) ? { backgroundColor: entityColor } : {}}
-                        >
-                          {slot}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={saveInterviewSetup}
-                    className="w-full py-2.5 text-white text-xs font-semibold rounded-lg transition-colors"
-                    style={{ backgroundColor: entityColor }}
-                  >
-                    Save Configuration
-                  </button>
-                </div>
+                <span 
+                  className="text-[9px] px-2 py-1 rounded-full font-semibold"
+                  style={{ backgroundColor: `${entityColor}15`, color: entityColor }}
+                >
+                  {passData.position_status}
+                </span>
               </div>
-            )}
+            </div>
 
             {/* Activity History - Full audit trail for managers */}
             {passData.activity_history && passData.activity_history.length > 0 && (
@@ -604,91 +493,267 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
           </div>
         )
 
-      case 'calendar':
+      case 'interview':
         return (
-          <div className="space-y-3">
-            <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm font-semibold text-slate-800">
-                  {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </h4>
-                <div className="flex gap-1">
-                  <button className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-                  <button className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+          <div className="space-y-2">
+            {/* Split view: Calendar + Setup/Availability */}
+            <div className="grid grid-cols-2 gap-2">
+              {/* Left: Mini Calendar */}
+              <div className="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-semibold text-slate-700">
+                    {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                  </p>
+                  <div className="flex gap-0.5">
+                    <button className="p-1 hover:bg-slate-100 rounded transition-colors">
+                      <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button className="p-1 hover:bg-slate-100 rounded transition-colors">
+                      <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-7 gap-0.5 text-center mb-1">
+                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                    <div key={i} className="text-[8px] text-slate-400 font-medium">{d}</div>
+                  ))}
+                </div>
+                
+                <div className="grid grid-cols-7 gap-0.5 text-center">
+                  {Array.from({ length: 35 }, (_, i) => {
+                    const day = i - new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay() + 1
+                    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
+                    const isToday = day === new Date().getDate()
+                    const hasInterview = passData.confirmed_interviews.some(s => new Date(s.slot_date).getDate() === day)
+                    return (
+                      <div 
+                        key={i} 
+                        className={`text-[9px] py-1 rounded transition-colors ${
+                          hasInterview ? 'text-white font-bold' :
+                          isToday ? 'bg-slate-100 font-semibold text-slate-800' :
+                          day > 0 && day <= daysInMonth ? 'text-slate-600' : 'text-slate-200'
+                        }`}
+                        style={hasInterview ? { backgroundColor: entityColor } : {}}
+                      >
+                        {day > 0 && day <= daysInMonth ? day : ''}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
-              
-              <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                  <div key={i} className="text-[10px] text-slate-400 font-semibold py-1">{d}</div>
-                ))}
-              </div>
-              
-              <div className="grid grid-cols-7 gap-1 text-center">
-                {Array.from({ length: 35 }, (_, i) => {
-                  const day = i - new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay() + 1
-                  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
-                  const isToday = day === new Date().getDate()
-                  const hasInterview = passData.confirmed_interviews.some(s => new Date(s.slot_date).getDate() === day)
-                  return (
-                    <div 
-                      key={i} 
-                      className={`text-xs py-2 rounded-lg transition-colors ${
-                        hasInterview ? 'text-white font-bold' :
-                        isToday ? 'bg-slate-100 font-semibold text-slate-800' :
-                        day > 0 && day <= daysInMonth ? 'text-slate-600' : 'text-slate-200'
-                      }`}
-                      style={hasInterview ? { backgroundColor: entityColor } : {}}
-                    >
-                      {day > 0 && day <= daysInMonth ? day : ''}
+
+              {/* Right: Interview Setup or Availability */}
+              <div className="bg-white rounded-xl p-2.5 border border-slate-100 shadow-sm">
+                {passData.interview_setup ? (
+                  <div>
+                    <p className="text-[10px] font-semibold text-slate-700 mb-2">Availability</p>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-[9px]">
+                        <span className="text-slate-400">Format</span>
+                        <span className="font-medium text-slate-700 capitalize">{passData.interview_setup.interview_format}</span>
+                      </div>
+                      <div className="flex justify-between text-[9px]">
+                        <span className="text-slate-400">Rounds</span>
+                        <span className="font-medium text-slate-700">{passData.interview_setup.interview_rounds}</span>
+                      </div>
+                      <div className="flex justify-between text-[9px]">
+                        <span className="text-slate-400">Assessment</span>
+                        <span className="font-medium text-slate-700">{passData.interview_setup.technical_assessment_required ? 'Yes' : 'No'}</span>
+                      </div>
                     </div>
-                  )
-                })}
+                    <button
+                      onClick={() => setShowInterviewSetup(true)}
+                      className="mt-2 w-full py-1.5 text-[9px] font-medium text-white rounded-lg transition-colors"
+                      style={{ backgroundColor: entityColor }}
+                    >
+                      Add Time Slots
+                    </button>
+                  </div>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-center">
+                    <svg className="w-6 h-6 text-slate-300 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-[10px] text-slate-500 mb-2">Setup Required</p>
+                    <button
+                      onClick={() => setShowInterviewSetup(true)}
+                      className="px-3 py-1.5 text-[9px] font-semibold text-white rounded-lg transition-colors"
+                      style={{ backgroundColor: entityColor }}
+                    >
+                      Interview Setup
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Confirmed Interviews</p>
-              {passData.confirmed_interviews.length > 0 ? (
+            {/* Interview Setup Modal/Panel */}
+            {showInterviewSetup && (
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-slate-700">Configure Interview</p>
+                  <button onClick={() => setShowInterviewSetup(false)} className="text-slate-400 hover:text-slate-600">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
                 <div className="space-y-2">
-                  {passData.confirmed_interviews.map(interview => (
-                    <div key={interview.id} className="rounded-xl bg-white p-3 border border-slate-100 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-medium text-slate-800">
-                            {interview.candidate_name || 'Candidate'}
-                          </p>
-                          <p className="text-[10px] text-slate-500">
-                            {new Date(interview.slot_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} • {interview.start_time.substring(0, 5)}
-                          </p>
-                        </div>
-                        <span 
-                          className="text-[9px] px-2 py-0.5 rounded-full font-semibold"
-                          style={{ 
-                            backgroundColor: interview.candidate_confirmed ? '#dcfce7' : '#fef3c7',
-                            color: interview.candidate_confirmed ? '#166534' : '#92400e'
-                          }}
-                        >
-                          {interview.candidate_confirmed ? 'Confirmed' : 'Pending'}
-                        </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-[9px] text-slate-500 mb-1">Assessment?</p>
+                      <div className="flex gap-1">
+                        {[true, false].map(val => (
+                          <button
+                            key={String(val)}
+                            onClick={() => setSetupForm({ ...setupForm, technical_assessment_required: val })}
+                            className={`flex-1 py-1.5 text-[9px] rounded-lg border transition-colors ${
+                              setupForm.technical_assessment_required === val ? 'text-white border-transparent' : 'bg-white text-slate-600 border-slate-200'
+                            }`}
+                            style={setupForm.technical_assessment_required === val ? { backgroundColor: entityColor } : {}}
+                          >
+                            {val ? 'Yes' : 'No'}
+                          </button>
+                        ))}
                       </div>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-slate-500 mb-1">Rounds</p>
+                      <select
+                        value={setupForm.interview_rounds}
+                        onChange={(e) => setSetupForm({ ...setupForm, interview_rounds: parseInt(e.target.value) })}
+                        className="w-full p-1.5 border border-slate-200 rounded-lg text-[10px] bg-white"
+                      >
+                        {[1, 2, 3, 4].map(n => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[9px] text-slate-500 mb-1">Format</p>
+                    <div className="flex gap-1">
+                      {['online', 'in-person', 'hybrid'].map(format => (
+                        <button
+                          key={format}
+                          onClick={() => setSetupForm({ ...setupForm, interview_format: format })}
+                          className={`flex-1 py-1.5 text-[9px] rounded-lg border transition-colors capitalize ${
+                            setupForm.interview_format === format ? 'text-white border-transparent' : 'bg-white text-slate-600 border-slate-200'
+                          }`}
+                          style={setupForm.interview_format === format ? { backgroundColor: entityColor } : {}}
+                        >
+                          {format}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-[9px] text-slate-500 mb-1">Add Dates</p>
+                      <input
+                        type="date"
+                        min={new Date().toISOString().split('T')[0]}
+                        onChange={(e) => {
+                          if (e.target.value && !selectedDates.includes(e.target.value)) {
+                            setSelectedDates([...selectedDates, e.target.value])
+                          }
+                        }}
+                        className="w-full p-1.5 border border-slate-200 rounded-lg text-[10px] bg-white"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-slate-500 mb-1">Selected: {selectedDates.length}</p>
+                      <div className="flex flex-wrap gap-1 max-h-8 overflow-y-auto">
+                        {selectedDates.slice(0, 3).map(date => (
+                          <span key={date} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white text-slate-600 text-[8px] rounded border border-slate-200">
+                            {new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                            <button onClick={() => setSelectedDates(selectedDates.filter(d => d !== date))} className="text-slate-400">×</button>
+                          </span>
+                        ))}
+                        {selectedDates.length > 3 && <span className="text-[8px] text-slate-400">+{selectedDates.length - 3}</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[9px] text-slate-500 mb-1">Time Slots</p>
+                    <div className="grid grid-cols-3 gap-1">
+                      {timeSlots.map(slot => (
+                        <button
+                          key={slot}
+                          onClick={() => {
+                            if (selectedSlots.includes(slot)) {
+                              setSelectedSlots(selectedSlots.filter(s => s !== slot))
+                            } else {
+                              setSelectedSlots([...selectedSlots, slot])
+                            }
+                          }}
+                          className={`py-1 text-[8px] rounded-lg border transition-colors ${
+                            selectedSlots.includes(slot) ? 'text-white border-transparent' : 'bg-white text-slate-600 border-slate-200'
+                          }`}
+                          style={selectedSlots.includes(slot) ? { backgroundColor: entityColor } : {}}
+                        >
+                          {slot}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={saveInterviewSetup}
+                    className="w-full py-2 text-white text-[10px] font-semibold rounded-lg transition-colors"
+                    style={{ backgroundColor: entityColor }}
+                  >
+                    Save Configuration
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Confirmed Interviews List */}
+            {passData.interview_setup && passData.confirmed_interviews.length > 0 && (
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-bold mb-1.5">Confirmed Candidates</p>
+                <div className="space-y-1.5">
+                  {passData.confirmed_interviews.map(interview => (
+                    <div key={interview.id} className="rounded-lg bg-white p-2 border border-slate-100 shadow-sm flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] font-medium text-slate-800">{interview.candidate_name || 'Candidate'}</p>
+                        <p className="text-[9px] text-slate-500">
+                          {new Date(interview.slot_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} • {interview.start_time.substring(0, 5)}
+                        </p>
+                      </div>
+                      <span 
+                        className="text-[8px] px-1.5 py-0.5 rounded-full font-semibold"
+                        style={{ 
+                          backgroundColor: interview.candidate_confirmed ? '#dcfce7' : '#fef3c7',
+                          color: interview.candidate_confirmed ? '#166534' : '#92400e'
+                        }}
+                      >
+                        {interview.candidate_confirmed ? 'Confirmed' : 'Pending'}
+                      </span>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="rounded-xl bg-slate-50 p-4 text-center">
-                  <p className="text-xs text-slate-500">No confirmed interviews yet</p>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* Empty state when no confirmed interviews */}
+            {passData.interview_setup && passData.confirmed_interviews.length === 0 && !showInterviewSetup && (
+              <div className="rounded-xl bg-slate-50 p-3 text-center">
+                <svg className="w-6 h-6 text-slate-300 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-[10px] text-slate-500">No confirmed interviews yet</p>
+                <p className="text-[9px] text-slate-400">Candidates will appear here once they book</p>
+              </div>
+            )}
           </div>
         )
 

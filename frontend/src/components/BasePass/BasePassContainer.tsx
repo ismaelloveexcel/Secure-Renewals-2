@@ -34,8 +34,8 @@ export function BasePassContainer({
   const isAgriculture = entityName?.includes('Agriculture')
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 flex items-center justify-center p-2 sm:p-4">
-      <div className="w-full max-w-md h-full min-h-[600px] max-h-[700px] sm:max-h-[750px]">
+    <div className="h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+      <div className="w-full max-w-md" style={{ height: 'calc(100vh - 32px)', maxHeight: '700px' }}>
         {/* Premium 3D Card Container */}
         <div 
           className="bg-gradient-to-br from-white via-white to-slate-50 border border-white/80 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col h-full transition-all duration-500 hover:-translate-y-0.5"

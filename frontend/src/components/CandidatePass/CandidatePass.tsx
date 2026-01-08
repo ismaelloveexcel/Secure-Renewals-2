@@ -780,70 +780,81 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
         </div>
       )}
 
-      {/* Candidate Details Modal */}
+      {/* Candidate Details Modal - Baynunah Theme */}
       {showDetailsModal && (
         <div 
-          className="fixed inset-0 bg-slate-900/80 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowDetailsModal(false)}
         >
           <div 
-            className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl border border-slate-700/50"
+            className="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-hidden"
+            style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/50">
-              <div>
-                <h3 className="text-lg font-bold text-white">Candidate Details</h3>
-                <p className="text-xs text-slate-400">Please verify your information below</p>
+            <div className="px-6 pt-6 pb-4">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2EB67D15' }}>
+                    <svg className="w-4 h-4" style={{ color: '#2EB67D' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-800">Your Details</h3>
+                </div>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 hover:text-white transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <p className="text-sm text-slate-500 ml-10">Please verify your information below</p>
             </div>
 
             {/* Form */}
-            <div className="px-6 py-5 overflow-y-auto max-h-[calc(90vh-180px)] space-y-4">
+            <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-200px)] space-y-4">
               {/* Phone */}
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Phone</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wide">Phone</label>
                 <input
                   type="tel"
                   value={detailsForm.phone}
                   onChange={(e) => setDetailsForm({ ...detailsForm, phone: e.target.value })}
-                  placeholder="+1 (555) 000-0000"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all"
+                  placeholder="+971 50 000 0000"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:bg-white transition-all"
+                  style={{ '--tw-ring-color': '#2EB67D40' } as React.CSSProperties}
                 />
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Email</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wide">Email</label>
                 <input
                   type="email"
                   value={detailsForm.email}
                   onChange={(e) => setDetailsForm({ ...detailsForm, email: e.target.value })}
                   placeholder="email@example.com"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:bg-white transition-all"
+                  style={{ '--tw-ring-color': '#2EB67D40' } as React.CSSProperties}
                 />
               </div>
 
               {/* Location */}
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Location</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wide">Location</label>
                 <div className="relative">
                   <select
                     value={detailsForm.location}
                     onChange={(e) => setDetailsForm({ ...detailsForm, location: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white appearance-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all cursor-pointer"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 appearance-none focus:outline-none focus:ring-2 focus:bg-white transition-all cursor-pointer"
+                    style={{ '--tw-ring-color': '#2EB67D40' } as React.CSSProperties}
                   >
-                    <option value="" className="bg-slate-800">Select location</option>
+                    <option value="">Select location</option>
                     {UAE_LOCATIONS.map(loc => (
-                      <option key={loc} value={loc} className="bg-slate-800">{loc}</option>
+                      <option key={loc} value={loc}>{loc}</option>
                     ))}
                   </select>
                   <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -855,28 +866,30 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
               {/* Visa Status & Notice Period Row */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Visa Status</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wide">Visa Status</label>
                   <select
                     value={detailsForm.visa_status}
                     onChange={(e) => setDetailsForm({ ...detailsForm, visa_status: e.target.value })}
-                    className="w-full px-3 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all cursor-pointer"
+                    className="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm appearance-none focus:outline-none focus:ring-2 focus:bg-white transition-all cursor-pointer"
+                    style={{ '--tw-ring-color': '#2EB67D40' } as React.CSSProperties}
                   >
-                    <option value="" className="bg-slate-800">Select</option>
+                    <option value="">Select</option>
                     {VISA_STATUSES.map(status => (
-                      <option key={status} value={status} className="bg-slate-800">{status}</option>
+                      <option key={status} value={status}>{status}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Notice Period</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wide">Notice Period</label>
                   <select
                     value={detailsForm.notice_period}
                     onChange={(e) => setDetailsForm({ ...detailsForm, notice_period: e.target.value })}
-                    className="w-full px-3 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all cursor-pointer"
+                    className="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm appearance-none focus:outline-none focus:ring-2 focus:bg-white transition-all cursor-pointer"
+                    style={{ '--tw-ring-color': '#2EB67D40' } as React.CSSProperties}
                   >
-                    <option value="" className="bg-slate-800">Select</option>
+                    <option value="">Select</option>
                     {NOTICE_PERIODS.map(period => (
-                      <option key={period} value={period} className="bg-slate-800">{period}</option>
+                      <option key={period} value={period}>{period}</option>
                     ))}
                   </select>
                 </div>
@@ -884,7 +897,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
 
               {/* Expected Salary */}
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Expected Salary (AED)</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5 uppercase tracking-wide">Expected Salary</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -894,14 +907,15 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                       setDetailsForm({ ...detailsForm, expected_salary: value })
                     }}
                     placeholder="15,000"
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:bg-white transition-all"
+                    style={{ '--tw-ring-color': '#2EB67D40' } as React.CSSProperties}
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm">AED</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">AED</span>
                 </div>
               </div>
 
               {/* Confirmation Checkbox */}
-              <div className="pt-2">
+              <div className="pt-3">
                 <label className="flex items-start gap-3 cursor-pointer group">
                   <div className="relative mt-0.5">
                     <input
@@ -910,11 +924,14 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                       onChange={(e) => setDetailsForm({ ...detailsForm, confirmed: e.target.checked })}
                       className="sr-only"
                     />
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                      detailsForm.confirmed 
-                        ? 'bg-cyan-500 border-cyan-500' 
-                        : 'border-slate-500 group-hover:border-slate-400'
-                    }`}>
+                    <div 
+                      className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                        detailsForm.confirmed 
+                          ? '' 
+                          : 'border-slate-300 group-hover:border-slate-400'
+                      }`}
+                      style={detailsForm.confirmed ? { backgroundColor: '#2EB67D', borderColor: '#2EB67D' } : {}}
+                    >
                       {detailsForm.confirmed && (
                         <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -922,7 +939,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                       )}
                     </div>
                   </div>
-                  <span className="text-sm text-slate-300 leading-tight">
+                  <span className="text-sm text-slate-600 leading-tight">
                     I confirm that the details provided are correct
                   </span>
                 </label>
@@ -930,10 +947,10 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-700/50 flex gap-3">
+            <div className="px-6 py-5 border-t border-slate-100 flex gap-3">
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="flex-1 px-4 py-3 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 rounded-xl font-medium transition-colors"
+                className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -942,9 +959,13 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                 disabled={!detailsForm.confirmed || savingDetails}
                 className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
                   detailsForm.confirmed && !savingDetails
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg shadow-cyan-500/25'
-                    : 'bg-slate-700/50 text-slate-500 cursor-not-allowed'
+                    ? 'text-white'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
+                style={detailsForm.confirmed && !savingDetails ? { 
+                  backgroundColor: '#2EB67D',
+                  boxShadow: '0 4px 14px rgba(46, 182, 125, 0.3)'
+                } : {}}
               >
                 {savingDetails ? (
                   <>
@@ -952,7 +973,12 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                     Saving...
                   </>
                 ) : (
-                  'Confirm & Save'
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Confirm & Save
+                  </>
                 )}
               </button>
             </div>

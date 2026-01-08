@@ -328,6 +328,9 @@ function App() {
   const [candidatesList, setCandidatesList] = useState<any[]>([])
   const [selectedCandidate, setSelectedCandidate] = useState<any | null>(null)
   const [showCandidateProfileModal, setShowCandidateProfileModal] = useState(false)
+  const [candidateSearchQuery, setCandidateSearchQuery] = useState('')
+  const [candidateStatusFilter, setCandidateStatusFilter] = useState('')
+  const [candidateSourceFilter, setCandidateSourceFilter] = useState('')
   const [showNewRequestModal, setShowNewRequestModal] = useState(false)
   const [newRequestForm, setNewRequestForm] = useState({
     position_title: '',
@@ -2799,12 +2802,18 @@ function App() {
                         <input
                           type="text"
                           placeholder="Search by name or email..."
+                          value={candidateSearchQuery}
+                          onChange={(e) => setCandidateSearchQuery(e.target.value)}
                           className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:ring-2 focus:ring-blue-500">
+                      <select 
+                        value={candidateStatusFilter}
+                        onChange={(e) => setCandidateStatusFilter(e.target.value)}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:ring-2 focus:ring-blue-500"
+                      >
                         <option value="">All Status</option>
                         <option value="applied">Applied</option>
                         <option value="screening">Screening</option>
@@ -2812,7 +2821,11 @@ function App() {
                         <option value="offer">Offer</option>
                         <option value="hired">Hired</option>
                       </select>
-                      <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:ring-2 focus:ring-blue-500">
+                      <select 
+                        value={candidateSourceFilter}
+                        onChange={(e) => setCandidateSourceFilter(e.target.value)}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:ring-2 focus:ring-blue-500"
+                      >
                         <option value="">All Sources</option>
                         <option value="LinkedIn">LinkedIn</option>
                         <option value="Indeed">Indeed</option>
@@ -2850,11 +2863,18 @@ function App() {
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {[...candidatesList]
+                          .filter((c: any) => {
+                            const searchLower = candidateSearchQuery.toLowerCase()
+                            const matchesSearch = !candidateSearchQuery || 
+                              c.full_name?.toLowerCase().includes(searchLower) ||
+                              c.email?.toLowerCase().includes(searchLower)
+                            const matchesStatus = !candidateStatusFilter || c.stage === candidateStatusFilter
+                            const matchesSource = !candidateSourceFilter || c.source === candidateSourceFilter
+                            return matchesSearch && matchesStatus && matchesSource
+                          })
                           .sort((a, b) => (b.ai_ranking || 0) - (a.ai_ranking || 0))
                           .map((candidate: any, index: number) => {
                           const position = recruitmentRequests.find((r: any) => r.id === candidate.recruitment_request_id)
-                          const aiRanking = candidate.ai_ranking || Math.floor(Math.random() * 30) + 70
-                          const skillsMatch = candidate.skills_match_score || Math.floor(Math.random() * 40) + 60
                           return (
                             <tr key={candidate.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => { setSelectedCandidate({...candidate, position: position}); setShowCandidateProfileModal(true); }}>
                               <td className="py-4 pr-2">
@@ -2887,27 +2907,35 @@ function App() {
                                 <p className="text-sm text-gray-700">{candidate.current_position || '-'}</p>
                               </td>
                               <td className="py-4">
-                                <div className="flex items-center gap-1">
-                                  <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                  </svg>
-                                  <span className="text-sm font-medium text-gray-700">{aiRanking}%</span>
-                                </div>
+                                {candidate.ai_ranking ? (
+                                  <div className="flex items-center gap-1">
+                                    <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-700">{candidate.ai_ranking}%</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-sm text-gray-400">-</span>
+                                )}
                               </td>
                               <td className="py-4">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div 
-                                      className="h-full bg-blue-500 rounded-full" 
-                                      style={{ width: `${skillsMatch}%` }}
-                                    />
+                                {candidate.skills_match_score ? (
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                      <div 
+                                        className="h-full bg-blue-500 rounded-full" 
+                                        style={{ width: `${candidate.skills_match_score}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-sm text-gray-600">{candidate.skills_match_score}%</span>
                                   </div>
-                                  <span className="text-sm text-gray-600">{skillsMatch}%</span>
-                                </div>
+                                ) : (
+                                  <span className="text-sm text-gray-400">-</span>
+                                )}
                               </td>
                               <td className="py-4">
                                 <span className="text-sm text-gray-700">
-                                  {candidate.education_level || "Bachelor's Degree"}
+                                  {candidate.education_level || '-'}
                                 </span>
                               </td>
                               <td className="py-4">
@@ -2931,7 +2959,7 @@ function App() {
                                 )}
                               </td>
                               <td className="py-4">
-                                <span className="text-sm text-gray-600">{candidate.source || 'LinkedIn'}</span>
+                                <span className="text-sm text-gray-600">{candidate.source || '-'}</span>
                               </td>
                             </tr>
                           )

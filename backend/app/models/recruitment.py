@@ -148,10 +148,13 @@ class Candidate(Base):
     technical_skills: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)  # {domain_knowledge: 4, ...}
     
     # Screening scores (Manager-only, for candidate ranking)
-    ai_ranking: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # AI-calculated match % (0-100)
+    ai_ranking: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Legacy field, use cv_scoring instead
+    cv_scoring: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # CV match % (0-100) - auto-generated on upload
     skills_match_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Core skills match % (0-100)
     education_level: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # PhD, Masters, Bachelors, Diploma, High School
     screening_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Position rank within position
+    resume_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)  # Link to uploaded CV
+    cv_scored_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)  # When CV was last scored
 
     # Status & stage
     status: Mapped[str] = mapped_column(String(50), default="applied", nullable=False)

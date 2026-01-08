@@ -2853,11 +2853,13 @@ function App() {
                           <th className="pb-3 font-medium w-16">Rank</th>
                           <th className="pb-3 font-medium">Name</th>
                           <th className="pb-3 font-medium">Current Position</th>
-                          <th className="pb-3 font-medium">AI Ranking</th>
+                          <th className="pb-3 font-medium">CV Scoring</th>
                           <th className="pb-3 font-medium">Core Skills Match</th>
                           <th className="pb-3 font-medium">Education</th>
                           <th className="pb-3 font-medium">Experience</th>
-                          <th className="pb-3 font-medium">Profile Link</th>
+                          <th className="pb-3 font-medium">Stage</th>
+                          <th className="pb-3 font-medium">LinkedIn</th>
+                          <th className="pb-3 font-medium">CV</th>
                           <th className="pb-3 font-medium">Source</th>
                         </tr>
                       </thead>
@@ -2872,9 +2874,10 @@ function App() {
                             const matchesSource = !candidateSourceFilter || c.source === candidateSourceFilter
                             return matchesSearch && matchesStatus && matchesSource
                           })
-                          .sort((a, b) => (b.ai_ranking || 0) - (a.ai_ranking || 0))
+                          .sort((a, b) => (b.cv_scoring || b.ai_ranking || 0) - (a.cv_scoring || a.ai_ranking || 0))
                           .map((candidate: any, index: number) => {
                           const position = recruitmentRequests.find((r: any) => r.id === candidate.recruitment_request_id)
+                          const cvScore = candidate.cv_scoring || candidate.ai_ranking
                           return (
                             <tr key={candidate.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => { setSelectedCandidate({...candidate, position: position}); setShowCandidateProfileModal(true); }}>
                               <td className="py-4 pr-2">
@@ -2888,31 +2891,19 @@ function App() {
                                   <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
                                     {candidate.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                                   </div>
-                                  <div>
-                                    <p className="font-medium text-gray-800 text-sm">{candidate.full_name}</p>
-                                    <span className={`px-1.5 py-0.5 text-xs rounded font-medium ${
-                                      candidate.stage === 'applied' ? 'bg-blue-100 text-blue-700' :
-                                      candidate.stage === 'screening' ? 'bg-yellow-100 text-yellow-700' :
-                                      candidate.stage === 'interview' ? 'bg-purple-100 text-purple-700' :
-                                      candidate.stage === 'offer' ? 'bg-green-100 text-green-700' :
-                                      candidate.stage === 'hired' ? 'bg-emerald-100 text-emerald-700' :
-                                      'bg-gray-100 text-gray-700'
-                                    }`}>
-                                      {candidate.stage === 'screening' ? 'Shortlisted' : candidate.stage?.charAt(0).toUpperCase() + candidate.stage?.slice(1)}
-                                    </span>
-                                  </div>
+                                  <p className="font-medium text-gray-800 text-sm">{candidate.full_name}</p>
                                 </div>
                               </td>
                               <td className="py-4">
                                 <p className="text-sm text-gray-700">{candidate.current_position || '-'}</p>
                               </td>
                               <td className="py-4">
-                                {candidate.ai_ranking ? (
+                                {cvScore ? (
                                   <div className="flex items-center gap-1">
                                     <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
-                                    <span className="text-sm font-medium text-gray-700">{candidate.ai_ranking}%</span>
+                                    <span className="text-sm font-medium text-gray-700">{cvScore}%</span>
                                   </div>
                                 ) : (
                                   <span className="text-sm text-gray-400">-</span>
@@ -2944,6 +2935,18 @@ function App() {
                                 </span>
                               </td>
                               <td className="py-4">
+                                <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                                  candidate.stage === 'applied' ? 'bg-blue-100 text-blue-700' :
+                                  candidate.stage === 'screening' ? 'bg-yellow-100 text-yellow-700' :
+                                  candidate.stage === 'interview' ? 'bg-purple-100 text-purple-700' :
+                                  candidate.stage === 'offer' ? 'bg-green-100 text-green-700' :
+                                  candidate.stage === 'hired' ? 'bg-emerald-100 text-emerald-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {candidate.stage === 'screening' ? 'Shortlisted' : candidate.stage?.charAt(0).toUpperCase() + candidate.stage?.slice(1)}
+                                </span>
+                              </td>
+                              <td className="py-4">
                                 {candidate.linkedin_url ? (
                                   <a 
                                     href={candidate.linkedin_url} 
@@ -2953,6 +2956,21 @@ function App() {
                                     className="inline-flex items-center px-3 py-1 bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 text-xs font-medium rounded-lg transition-colors"
                                   >
                                     LinkedIn
+                                  </a>
+                                ) : (
+                                  <span className="text-sm text-gray-400">-</span>
+                                )}
+                              </td>
+                              <td className="py-4">
+                                {candidate.resume_url ? (
+                                  <a 
+                                    href={candidate.resume_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="inline-flex items-center px-3 py-1 bg-gray-100 hover:bg-green-50 text-gray-600 hover:text-green-600 text-xs font-medium rounded-lg transition-colors"
+                                  >
+                                    View CV
                                   </a>
                                 ) : (
                                   <span className="text-sm text-gray-400">-</span>
@@ -2990,7 +3008,7 @@ function App() {
                     </div>
                     <span className="font-medium text-gray-700">Add Candidate</span>
                   </button>
-                  <button onClick={() => alert('Upload CV feature - AI-powered resume parsing coming soon')} className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                  <button onClick={() => alert('Upload CV feature - resume parsing coming soon')} className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
                     <div className="p-2 bg-green-500 rounded-lg">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />

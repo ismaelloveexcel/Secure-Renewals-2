@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",
+    "@types/qrcode.react": "^1.0.5",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },

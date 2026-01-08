@@ -18,6 +18,23 @@ class RelationType(str, enum.Enum):
     PARENT = "parent"
     OTHER = "other"
 
+class RenewalStatus(str, enum.Enum):
+    EXISTING = "existing"
+    ADDITION = "addition"
+    DELETION = "deletion"
+
+# DHA/DOH Validation Required Fields
+# These are mandatory for UAE-based policy validation
+DHA_DOH_VALIDATION_FIELDS = [
+    'passport_number',       # Passport-No
+    'gdrfa_file_number',     # Visa File No
+    'emirates_id_number',    # EID No
+    'uid_number',            # UID No
+    'nationality',           # Nationality
+    'dob',                   # DOB
+    'gender',                # Gender
+]
+
 MANDATORY_FIELDS = [
     'full_name',
     'dob',
@@ -34,6 +51,21 @@ MANDATORY_FIELDS_FOR_RENEWAL = [
     'emirates_id_number',
     'gdrfa_file_number',
     'passport_number',
+]
+
+# Fields that are tracked for amendments (purple highlighting)
+AMENDMENT_TRACKED_FIELDS = [
+    'full_name',
+    'first_name',
+    'second_name',
+    'family_name',
+    'marital_status',
+    'passport_number',
+    'gdrfa_file_number',
+    'emirates_id_number',
+    'nationality',
+    'dob',
+    'gender',
 ]
 
 class InsuranceCensusRecord(Base):
@@ -95,6 +127,18 @@ class InsuranceCensusRecord(Base):
     missing_fields = Column(JSON, nullable=True, default=list)
     completeness_pct = Column(Integer, nullable=True, default=0)
     
+    # DHA/DOH Validation fields tracking
+    dha_doh_missing_fields = Column(JSON, nullable=True, default=list)
+    dha_doh_valid = Column(Boolean, nullable=True, default=False)
+    
+    # Renewal status tracking
+    # 'existing' = existing member, 'addition' = new member to add, 'deletion' = member to remove
+    renewal_status = Column(String(20), nullable=True, default='existing')
+    renewal_effective_date = Column(String(50), nullable=True)  # e.g., "15-01-2025"
+    
+    # Amendment tracking - stores list of field names that were amended
+    amended_fields = Column(JSON, nullable=True, default=list)
+    
     import_batch_id = Column(String(50), nullable=True)
     import_filename = Column(String(255), nullable=True)
     imported_at = Column(DateTime, nullable=True)
@@ -106,6 +150,7 @@ class InsuranceCensusRecord(Base):
     employee = relationship("Employee", foreign_keys=[employee_id], backref="insurance_census_records")
 
     def calculate_completeness(self):
+        """Calculate completeness percentage and also check DHA/DOH validation."""
         all_mandatory = MANDATORY_FIELDS + MANDATORY_FIELDS_FOR_RENEWAL
         missing = []
         for field in all_mandatory:
@@ -117,7 +162,35 @@ class InsuranceCensusRecord(Base):
         total = len(all_mandatory)
         filled = total - len(missing)
         self.completeness_pct = int((filled / total) * 100) if total > 0 else 0
+        
+        # Also calculate DHA/DOH validation status
+        self.calculate_dha_doh_validation()
+        
         return self.missing_fields
+    
+    def calculate_dha_doh_validation(self):
+        """
+        Check DHA/DOH validation requirements for UAE-based policy.
+        Required fields: Passport-No, Visa File No, EID No, UDI No, Nationality, DOB, Gender
+        If any are incorrect/pending, validation fails and member will be excluded from renewal.
+        """
+        dha_missing = []
+        for field in DHA_DOH_VALIDATION_FIELDS:
+            val = getattr(self, field, None)
+            if not val or (isinstance(val, str) and not val.strip()):
+                dha_missing.append(field)
+        
+        self.dha_doh_missing_fields = dha_missing
+        self.dha_doh_valid = len(dha_missing) == 0
+        return self.dha_doh_valid
+    
+    def mark_field_as_amended(self, field_name: str):
+        """Mark a field as amended for purple highlighting."""
+        if field_name in AMENDMENT_TRACKED_FIELDS:
+            if not self.amended_fields:
+                self.amended_fields = []
+            if field_name not in self.amended_fields:
+                self.amended_fields = self.amended_fields + [field_name]
 
     def to_dict(self):
         return {
@@ -172,6 +245,11 @@ class InsuranceCensusRecord(Base):
             'weight': self.weight,
             'missing_fields': self.missing_fields or [],
             'completeness_pct': self.completeness_pct or 0,
+            'dha_doh_missing_fields': self.dha_doh_missing_fields or [],
+            'dha_doh_valid': self.dha_doh_valid or False,
+            'renewal_status': self.renewal_status or 'existing',
+            'renewal_effective_date': self.renewal_effective_date,
+            'amended_fields': self.amended_fields or [],
             'import_batch_id': self.import_batch_id,
             'import_filename': self.import_filename,
             'imported_at': self.imported_at.isoformat() if self.imported_at else None,

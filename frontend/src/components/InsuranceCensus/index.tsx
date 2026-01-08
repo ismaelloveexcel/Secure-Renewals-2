@@ -35,6 +35,12 @@ interface CensusRecord {
   missing_fields: string[]
   completeness_pct: number
   import_batch_id: string | null
+  // New fields for DHA/DOH validation and renewal tracking
+  dha_doh_missing_fields: string[]
+  dha_doh_valid: boolean
+  renewal_status: 'existing' | 'addition' | 'deletion'
+  renewal_effective_date: string | null
+  amended_fields: string[]
 }
 
 interface CensusSummary {
@@ -47,6 +53,18 @@ interface CensusSummary {
 
 const API_BASE = '/api'
 
+// DHA/DOH Validation Required Fields (for UAE-based policy)
+// If any of these are incorrect/pending, validation will fail
+const DHA_DOH_VALIDATION_FIELDS = [
+  'passport_number',       // Passport-No
+  'gdrfa_file_number',     // Visa File No
+  'emirates_id_number',    // EID No
+  'uid_number',            // UID No
+  'nationality',           // Nationality
+  'dob',                   // DOB
+  'gender',                // Gender
+]
+
 const MANDATORY_FIELDS = [
   'full_name', 'dob', 'gender', 'relation', 'staff_id', 'category',
   'effective_date', 'nationality', 'uid_number',
@@ -55,6 +73,13 @@ const MANDATORY_FIELDS_FOR_RENEWAL = [
   'emirates_id_number', 'gdrfa_file_number', 'passport_number',
 ]
 const ALL_MANDATORY = [...MANDATORY_FIELDS, ...MANDATORY_FIELDS_FOR_RENEWAL]
+
+// Fields tracked for amendments (purple highlighting)
+const AMENDMENT_TRACKED_FIELDS = [
+  'full_name', 'first_name', 'second_name', 'family_name',
+  'marital_status', 'passport_number', 'gdrfa_file_number',
+  'emirates_id_number', 'nationality', 'dob', 'gender',
+]
 
 const DISPLAY_COLUMNS = [
   { key: 'sr_no', label: 'SR No', width: '60px' },
@@ -67,11 +92,12 @@ const DISPLAY_COLUMNS = [
   { key: 'category', label: 'Category', width: '100px' },
   { key: 'emirates_id_number', label: 'Emirates ID', width: '160px' },
   { key: 'uid_number', label: 'UID', width: '140px' },
-  { key: 'gdrfa_file_number', label: 'GDRFA', width: '120px' },
+  { key: 'gdrfa_file_number', label: 'GDRFA/Visa File', width: '120px' },
   { key: 'passport_number', label: 'Passport', width: '120px' },
   { key: 'effective_date', label: 'Effective Date', width: '110px' },
   { key: 'mobile_no', label: 'Mobile', width: '120px' },
   { key: 'completeness_pct', label: 'Complete %', width: '90px' },
+  { key: 'renewal_status', label: 'Status', width: '80px' },
 ]
 
 interface InsuranceCensusProps {
@@ -86,6 +112,7 @@ export function InsuranceCensus({ token, onBack }: InsuranceCensusProps) {
   const [error, setError] = useState<string | null>(null)
   const [entityFilter, setEntityFilter] = useState<string>('all')
   const [insuranceTypeFilter, setInsuranceTypeFilter] = useState<string>('all')
+  const [renewalStatusFilter, setRenewalStatusFilter] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [editingCell, setEditingCell] = useState<{id: number, field: string} | null>(null)
   const [editValue, setEditValue] = useState('')
@@ -220,10 +247,13 @@ export function InsuranceCensus({ token, onBack }: InsuranceCensusProps) {
     const val = record[field as keyof CensusRecord]
     if (val === null || val === undefined) return ''
     if (typeof val === 'number') return val.toString()
+    if (typeof val === 'boolean') return val ? 'Yes' : 'No'
+    if (Array.isArray(val)) return val.join(', ')
     return val as string
   }
 
   const isMandatoryField = (field: string) => ALL_MANDATORY.includes(field)
+  const isDhaDohField = (field: string) => DHA_DOH_VALIDATION_FIELDS.includes(field)
 
   const isMissingMandatory = (record: CensusRecord, field: string): boolean => {
     if (!isMandatoryField(field)) return false
@@ -231,9 +261,49 @@ export function InsuranceCensus({ token, onBack }: InsuranceCensusProps) {
     return !val || val.trim() === ''
   }
 
+  // Check if field is missing for DHA/DOH validation
+  const isMissingDhaDoh = (record: CensusRecord, field: string): boolean => {
+    if (!isDhaDohField(field)) return false
+    return record.dha_doh_missing_fields?.includes(field) || false
+  }
+
+  // Check if field has been amended (for purple highlighting)
+  const isAmendedField = (record: CensusRecord, field: string): boolean => {
+    return record.amended_fields?.includes(field) || false
+  }
+
+  // Get row background style based on renewal status
+  const getRowStyle = (record: CensusRecord): React.CSSProperties => {
+    switch (record.renewal_status) {
+      case 'deletion':
+        return { backgroundColor: 'rgba(239, 68, 68, 0.15)' }  // Red - members to be deleted
+      case 'addition':
+        return { backgroundColor: 'rgba(34, 197, 94, 0.15)' }  // Green - new members to add
+      default:
+        return {}
+    }
+  }
+
+  // Get row class based on renewal status
+  const getRowClass = (record: CensusRecord): string => {
+    switch (record.renewal_status) {
+      case 'deletion':
+        return 'border-l-4 border-l-red-500'
+      case 'addition':
+        return 'border-l-4 border-l-green-500'
+      default:
+        return ''
+    }
+  }
+
   const getEntityColor = (entity: string) => {
     return entity === 'watergeneration' ? '#00B0F0' : '#00bf63'
   }
+
+  // Filter records based on renewal status
+  const filteredRecords = renewalStatusFilter === 'all' 
+    ? records 
+    : records.filter(r => r.renewal_status === renewalStatusFilter)
 
   if (loading && records.length === 0) {
     return (
@@ -346,6 +416,19 @@ export function InsuranceCensus({ token, onBack }: InsuranceCensusProps) {
               <option value="expats">Expats</option>
             </select>
           </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-slate-400">Status:</label>
+            <select
+              value={renewalStatusFilter}
+              onChange={(e) => setRenewalStatusFilter(e.target.value)}
+              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm"
+            >
+              <option value="all">All Status</option>
+              <option value="existing">Existing</option>
+              <option value="addition">🟢 Additions</option>
+              <option value="deletion">🔴 Deletions</option>
+            </select>
+          </div>
           <div className="flex-1 min-w-[200px]">
             <input
               type="text"
@@ -356,7 +439,7 @@ export function InsuranceCensus({ token, onBack }: InsuranceCensusProps) {
             />
           </div>
           <div className="text-sm text-slate-400">
-            Showing {records.length} records
+            Showing {filteredRecords.length} of {records.length} records
           </div>
         </div>
 
@@ -371,19 +454,29 @@ export function InsuranceCensus({ token, onBack }: InsuranceCensusProps) {
                   {DISPLAY_COLUMNS.map(col => (
                     <th
                       key={col.key}
-                      className={`px-2 py-3 text-left font-medium ${isMandatoryField(col.key) ? 'text-amber-400' : 'text-slate-300'}`}
+                      className={`px-2 py-3 text-left font-medium ${isDhaDohField(col.key) ? 'text-cyan-400' : isMandatoryField(col.key) ? 'text-amber-400' : 'text-slate-300'}`}
                       style={{ minWidth: col.width }}
                     >
                       {col.label}
-                      {isMandatoryField(col.key) && <span className="text-red-400 ml-1">*</span>}
+                      {isDhaDohField(col.key) && <span className="text-cyan-400 ml-1">◆</span>}
+                      {isMandatoryField(col.key) && !isDhaDohField(col.key) && <span className="text-red-400 ml-1">*</span>}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {records.map(record => (
-                  <tr key={record.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                    <td className="sticky left-0 bg-slate-900 px-2 py-2 z-10">
+                {filteredRecords.map(record => (
+                  <tr 
+                    key={record.id} 
+                    className={`border-b border-slate-800 hover:bg-slate-800/50 ${getRowClass(record)}`}
+                    style={getRowStyle(record)}
+                  >
+                    <td className="sticky left-0 px-2 py-2 z-10" style={{
+                      ...getRowStyle(record),
+                      backgroundColor: record.renewal_status === 'deletion' ? 'rgba(239, 68, 68, 0.15)' : 
+                                       record.renewal_status === 'addition' ? 'rgba(34, 197, 94, 0.15)' : 
+                                       'rgb(15, 23, 42)'
+                    }}>
                       <div className="flex flex-col gap-1">
                         <span
                           className="px-2 py-0.5 rounded text-xs font-medium text-white"
@@ -400,29 +493,65 @@ export function InsuranceCensus({ token, onBack }: InsuranceCensusProps) {
                       const isEditing = editingCell?.id === record.id && editingCell?.field === col.key
                       const cellValue = getCellValue(record, col.key)
                       const isMissing = isMissingMandatory(record, col.key)
+                      const isMissingDha = isMissingDhaDoh(record, col.key)
+                      const isAmended = isAmendedField(record, col.key)
                       const isPending = pendingChanges[record.id]?.[col.key] !== undefined
+
+                      // Renewal status column
+                      if (col.key === 'renewal_status') {
+                        return (
+                          <td key={col.key} className="px-2 py-2">
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              record.renewal_status === 'deletion' ? 'bg-red-500/30 text-red-400' :
+                              record.renewal_status === 'addition' ? 'bg-green-500/30 text-green-400' :
+                              'bg-slate-700 text-slate-400'
+                            }`}>
+                              {record.renewal_status === 'deletion' ? '🔴 Delete' :
+                               record.renewal_status === 'addition' ? '🟢 Add' : 'Existing'}
+                            </span>
+                          </td>
+                        )
+                      }
 
                       if (col.key === 'completeness_pct') {
                         const pct = record.completeness_pct
+                        const dhaDohValid = record.dha_doh_valid
                         return (
                           <td key={col.key} className="px-2 py-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-16 h-2 bg-slate-700 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full ${pct >= 80 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
-                                  style={{ width: `${pct}%` }}
-                                />
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <div className="w-16 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full ${pct >= 80 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs">{pct}%</span>
                               </div>
-                              <span className="text-xs">{pct}%</span>
+                              {!dhaDohValid && (
+                                <span className="text-xs text-red-400" title="DHA/DOH validation failed">⚠ DHA</span>
+                              )}
                             </div>
                           </td>
                         )
                       }
 
+                      // Determine cell background based on priority: amended (purple) > missing DHA (cyan warning) > missing mandatory (red) > pending (amber)
+                      let cellBgClass = ''
+                      if (isAmended) {
+                        cellBgClass = 'bg-purple-900/40'  // Purple for amendments
+                      } else if (isMissingDha) {
+                        cellBgClass = 'bg-cyan-900/30'    // Cyan for missing DHA/DOH fields
+                      } else if (isMissing) {
+                        cellBgClass = 'bg-red-900/30'     // Red for missing mandatory
+                      } else if (isPending) {
+                        cellBgClass = 'bg-amber-900/30'   // Amber for pending changes
+                      }
+
                       return (
                         <td
                           key={col.key}
-                          className={`px-2 py-2 cursor-pointer ${isMissing ? 'bg-red-900/30' : ''} ${isPending ? 'bg-amber-900/30' : ''}`}
+                          className={`px-2 py-2 cursor-pointer ${cellBgClass}`}
                           onClick={() => handleCellClick(record.id, col.key, record[col.key as keyof CensusRecord] as string | null)}
                         >
                           {isEditing ? (
@@ -436,8 +565,8 @@ export function InsuranceCensus({ token, onBack }: InsuranceCensusProps) {
                               className="w-full bg-slate-700 border border-blue-500 rounded px-2 py-1 text-sm focus:outline-none"
                             />
                           ) : (
-                            <span className={`${!cellValue ? 'text-slate-500 italic' : ''}`}>
-                              {cellValue || (isMissing ? 'Required' : '-')}
+                            <span className={`${!cellValue ? 'text-slate-500 italic' : ''} ${isAmended ? 'font-semibold' : ''}`}>
+                              {cellValue || (isMissing || isMissingDha ? 'Required' : '-')}
                             </span>
                           )}
                         </td>
@@ -450,8 +579,25 @@ export function InsuranceCensus({ token, onBack }: InsuranceCensusProps) {
           </div>
         </div>
 
-        <div className="mt-4 text-sm text-slate-400">
-          <p><span className="text-red-400">*</span> = Mandatory field | <span className="bg-red-900/30 px-2 py-0.5 rounded">Red cells</span> = Missing required data | <span className="bg-amber-900/30 px-2 py-0.5 rounded">Amber cells</span> = Pending changes</p>
+        {/* Legend */}
+        <div className="mt-4 space-y-2 text-sm text-slate-400">
+          <div className="flex flex-wrap gap-4">
+            <span><span className="text-cyan-400">◆</span> = DHA/DOH Validation Required</span>
+            <span><span className="text-red-400">*</span> = Other Mandatory Field</span>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <span><span className="inline-block w-4 h-3 bg-red-500/30 rounded mr-1"></span>Deletion (Red row)</span>
+            <span><span className="inline-block w-4 h-3 bg-green-500/30 rounded mr-1"></span>Addition (Green row)</span>
+            <span><span className="bg-purple-900/40 px-2 py-0.5 rounded">Purple cells</span> = Amended fields</span>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <span><span className="bg-red-900/30 px-2 py-0.5 rounded">Red cells</span> = Missing required data</span>
+            <span><span className="bg-cyan-900/30 px-2 py-0.5 rounded">Cyan cells</span> = Missing DHA/DOH fields</span>
+            <span><span className="bg-amber-900/30 px-2 py-0.5 rounded">Amber cells</span> = Pending changes</span>
+          </div>
+          <p className="text-xs mt-2 text-slate-500">
+            <strong>DHA/DOH Validation:</strong> Passport-No, Visa File No (GDRFA), EID No, UID No, Nationality, DOB, Gender - required for UAE-based policy renewal
+          </p>
         </div>
       </div>
     </div>

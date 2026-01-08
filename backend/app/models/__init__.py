@@ -11,7 +11,11 @@ from app.models.interview import InterviewSetup, InterviewSlot, PassMessage, Rec
 from app.models.performance import PerformanceCycle, PerformanceReview, PerformanceRating
 from app.models.activity_log import ActivityLog
 from app.models.nomination import EoyNomination, NOMINATION_STATUSES, ELIGIBLE_JOB_LEVELS
-from app.models.insurance_census import InsuranceCensusRecord, InsuranceCensusImportBatch, MANDATORY_FIELDS, MANDATORY_FIELDS_FOR_RENEWAL
+from app.models.insurance_census import (
+    InsuranceCensusRecord, InsuranceCensusImportBatch, 
+    MANDATORY_FIELDS, MANDATORY_FIELDS_FOR_RENEWAL,
+    DHA_DOH_VALIDATION_FIELDS, AMENDMENT_TRACKED_FIELDS, RenewalStatus
+)
 
 from app.models.renewal import Base, Renewal, RenewalAuditLog
 
@@ -27,5 +31,7 @@ __all__ = [
     "PerformanceCycle", "PerformanceReview", "PerformanceRating",
     "ActivityLog",
     "EoyNomination", "NOMINATION_STATUSES", "ELIGIBLE_JOB_LEVELS",
-    "InsuranceCensusRecord", "InsuranceCensusImportBatch", "MANDATORY_FIELDS", "MANDATORY_FIELDS_FOR_RENEWAL"
+    "InsuranceCensusRecord", "InsuranceCensusImportBatch", 
+    "MANDATORY_FIELDS", "MANDATORY_FIELDS_FOR_RENEWAL",
+    "DHA_DOH_VALIDATION_FIELDS", "AMENDMENT_TRACKED_FIELDS", "RenewalStatus"
 ]

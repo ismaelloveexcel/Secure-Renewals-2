@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_, and_
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
 import uuid
@@ -10,7 +10,11 @@ import msoffcrypto
 import pandas as pd
 
 from app.database import get_session
-from app.models import InsuranceCensusRecord, InsuranceCensusImportBatch, Employee, MANDATORY_FIELDS, MANDATORY_FIELDS_FOR_RENEWAL
+from app.models import (
+    InsuranceCensusRecord, InsuranceCensusImportBatch, Employee, 
+    MANDATORY_FIELDS, MANDATORY_FIELDS_FOR_RENEWAL,
+    DHA_DOH_VALIDATION_FIELDS, AMENDMENT_TRACKED_FIELDS
+)
 from app.auth.dependencies import require_role
 
 router = APIRouter(
@@ -20,6 +24,19 @@ router = APIRouter(
 )
 
 EXCEL_PASSWORD = "0001A"
+
+
+def apply_record_updates(record: InsuranceCensusRecord, update_data: Dict[str, Any]) -> None:
+    """
+    Apply updates to a census record, tracking amendments for fields in AMENDMENT_TRACKED_FIELDS.
+    """
+    for field, value in update_data.items():
+        if value is not None:
+            old_value = getattr(record, field, None)
+            if old_value != value and field in AMENDMENT_TRACKED_FIELDS:
+                record.mark_field_as_amended(field)
+            setattr(record, field, value)
+
 
 COLUMN_MAPPING = {
     'SR NO.': 'sr_no',
@@ -118,6 +135,9 @@ class CensusRecordUpdate(BaseModel):
     vip: Optional[str] = None
     height: Optional[str] = None
     weight: Optional[str] = None
+    # Renewal status and tracking
+    renewal_status: Optional[str] = None  # 'existing', 'addition', 'deletion'
+    renewal_effective_date: Optional[str] = None
 
 
 @router.get("")
@@ -167,6 +187,8 @@ async def list_census_records(
         "page_size": page_size,
         "total_pages": (total + page_size - 1) // page_size,
         "mandatory_fields": MANDATORY_FIELDS + MANDATORY_FIELDS_FOR_RENEWAL,
+        "dha_doh_validation_fields": DHA_DOH_VALIDATION_FIELDS,
+        "amendment_tracked_fields": AMENDMENT_TRACKED_FIELDS,
     }
 
 
@@ -244,8 +266,7 @@ async def update_census_record(
         raise HTTPException(status_code=404, detail="Record not found")
     
     update_data = data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(record, field, value)
+    apply_record_updates(record, update_data)
     
     record.updated_by = updated_by
     record.updated_at = datetime.utcnow()
@@ -283,6 +304,10 @@ class BatchUpdateItem(BaseModel):
     passport_number: Optional[str] = None
     mobile_no: Optional[str] = None
     sr_no: Optional[str] = None
+    marital_status: Optional[str] = None
+    # Renewal status tracking
+    renewal_status: Optional[str] = None  # 'existing', 'addition', 'deletion'
+    renewal_effective_date: Optional[str] = None
 
 
 class BatchUpdateRequest(BaseModel):
@@ -306,9 +331,7 @@ async def batch_update_census_records(
             continue
         
         update_data = item.model_dump(exclude_unset=True, exclude={"id"})
-        for field, value in update_data.items():
-            if value is not None:
-                setattr(record, field, value)
+        apply_record_updates(record, update_data)
         
         record.updated_by = updated_by
         record.updated_at = datetime.utcnow()

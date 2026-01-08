@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { getEntityHeaderColor, getEntityPatternSvg } from './entityTheme'
 
 interface PassHeaderProps {
   title: string
@@ -45,21 +46,20 @@ export function PassHeader({
 
   const passLabel = passTypeLabels[passType] || 'Pass'
 
-  // Determine background color based on entity (can be customized)
-  const headerBgColor = entityName?.toLowerCase().includes('agriculture') 
-    ? '#00bf63' 
-    : '#1800ad'
+  // Use centralized entity theming
+  const headerBgColor = getEntityHeaderColor(entityName)
+  const patternSvg = getEntityPatternSvg(entityName)
 
   return (
     <div 
       className="px-4 sm:px-5 pt-4 sm:pt-5 pb-3 flex-shrink-0 relative overflow-hidden"
       style={{ backgroundColor: headerBgColor }}
     >
-      {/* Subtle pattern overlay */}
+      {/* Subtle pattern overlay - uses entity-specific pattern */}
       <div 
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30L30 0z' fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+          backgroundImage: patternSvg,
           backgroundSize: '30px 30px'
         }}
       />

@@ -1,7 +1,9 @@
 """Business logic for recruitment operations."""
+import logging
 from datetime import datetime, date, timedelta
 from typing import List, Optional, Dict, Any
 from sqlalchemy import select, and_, func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.recruitment import (
@@ -17,6 +19,7 @@ from app.schemas.recruitment import (
     InterviewSlotsProvide, InterviewSlotConfirm
 )
 
+logger = logging.getLogger(__name__)
 
 class RecruitmentService:
     """Service for recruitment operations."""
@@ -770,7 +773,8 @@ class RecruitmentService:
                     success_count += 1
                 else:
                     failed_ids.append(candidate_id)
-            except Exception:
+            except SQLAlchemyError as e:
+                logger.warning(f"Database error updating candidate {candidate_id}: {e}")
                 failed_ids.append(candidate_id)
 
         await session.commit()
@@ -803,7 +807,8 @@ class RecruitmentService:
                     success_count += 1
                 else:
                     failed_ids.append(candidate_id)
-            except Exception:
+            except SQLAlchemyError as e:
+                logger.warning(f"Database error rejecting candidate {candidate_id}: {e}")
                 failed_ids.append(candidate_id)
 
         await session.commit()

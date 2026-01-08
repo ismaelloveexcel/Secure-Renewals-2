@@ -2789,81 +2789,79 @@ function App() {
                 </div>
               </div>
 
-              {/* Candidates Screening Table */}
+              {/* Candidates Screening Table - Improved Spacing */}
               {candidatesList.length > 0 && (
-                <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                   {/* Header with Search and Filters */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div className="flex-1 max-w-md">
-                      <div className="relative">
-                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        <input
-                          type="text"
-                          placeholder="Search by name or email..."
-                          value={candidateSearchQuery}
-                          onChange={(e) => setCandidateSearchQuery(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                  <div className="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-800">Candidate Screening</h2>
+                        <p className="text-sm text-gray-500 mt-1">{candidatesList.length} candidates in pipeline</p>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <select 
-                        value={candidateStatusFilter}
-                        onChange={(e) => setCandidateStatusFilter(e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">All Status</option>
-                        <option value="applied">Applied</option>
-                        <option value="screening">Screening</option>
-                        <option value="interview">Interview</option>
-                        <option value="offer">Offer</option>
-                        <option value="hired">Hired</option>
-                      </select>
-                      <select 
-                        value={candidateSourceFilter}
-                        onChange={(e) => setCandidateSourceFilter(e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">All Sources</option>
-                        <option value="LinkedIn">LinkedIn</option>
-                        <option value="Indeed">Indeed</option>
-                        <option value="Referral">Referral</option>
-                        <option value="Direct">Direct Application</option>
-                        <option value="Agency">Agency</option>
-                      </select>
-                      <button className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-                        </svg>
-                        Columns
-                      </button>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="relative">
+                          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                          <input
+                            type="text"
+                            placeholder="Search candidates..."
+                            value={candidateSearchQuery}
+                            onChange={(e) => setCandidateSearchQuery(e.target.value)}
+                            className="w-64 pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                          />
+                        </div>
+                        <select 
+                          value={candidateStatusFilter}
+                          onChange={(e) => setCandidateStatusFilter(e.target.value)}
+                          className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 focus:ring-2 focus:ring-blue-500 shadow-sm"
+                        >
+                          <option value="">All Stages</option>
+                          <option value="applied">Applied</option>
+                          <option value="screening">Screening</option>
+                          <option value="interview">Interview</option>
+                          <option value="offer">Offer</option>
+                          <option value="hired">Hired</option>
+                        </select>
+                        <select 
+                          value={candidateSourceFilter}
+                          onChange={(e) => setCandidateSourceFilter(e.target.value)}
+                          className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 focus:ring-2 focus:ring-blue-500 shadow-sm"
+                        >
+                          <option value="">All Sources</option>
+                          <option value="LinkedIn">LinkedIn</option>
+                          <option value="Indeed">Indeed</option>
+                          <option value="Referral">Referral</option>
+                          <option value="Direct">Direct Application</option>
+                          <option value="Agency">Agency</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Screening Table */}
+                  {/* Screening Table - Better Spacing */}
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="text-left text-sm text-gray-500 border-b border-gray-200">
-                          <th className="pb-3 pr-2 font-medium w-8">
-                            <input type="checkbox" className="rounded border-gray-300" />
+                        <tr className="bg-gray-50/80">
+                          <th className="py-4 px-3 text-left w-12">
+                            <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                           </th>
-                          <th className="pb-3 font-medium w-16">Rank</th>
-                          <th className="pb-3 font-medium">Name</th>
-                          <th className="pb-3 font-medium">Current Position</th>
-                          <th className="pb-3 font-medium">CV Scoring</th>
-                          <th className="pb-3 font-medium">Core Skills Match</th>
-                          <th className="pb-3 font-medium">Education</th>
-                          <th className="pb-3 font-medium">Experience</th>
-                          <th className="pb-3 font-medium">Stage</th>
-                          <th className="pb-3 font-medium">LinkedIn</th>
-                          <th className="pb-3 font-medium">CV</th>
-                          <th className="pb-3 font-medium">Source</th>
+                          <th className="py-4 px-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">Rank</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider min-w-[180px]">Name</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider min-w-[200px]">Current Position</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">CV Scoring</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-36">Skills Match</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">Education</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">Experience</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">Stage</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">LinkedIn</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">CV</th>
+                          <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-32">Source</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody>
                         {[...candidatesList]
                           .filter((c: any) => {
                             const searchLower = candidateSearchQuery.toLowerCase()
@@ -2879,104 +2877,120 @@ function App() {
                           const position = recruitmentRequests.find((r: any) => r.id === candidate.recruitment_request_id)
                           const cvScore = candidate.cv_scoring || candidate.ai_ranking
                           return (
-                            <tr key={candidate.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => { setSelectedCandidate({...candidate, position: position}); setShowCandidateProfileModal(true); }}>
-                              <td className="py-4 pr-2">
-                                <input type="checkbox" className="rounded border-gray-300" onClick={(e) => e.stopPropagation()} />
+                            <tr 
+                              key={candidate.id} 
+                              className="border-b border-gray-100 hover:bg-blue-50/50 cursor-pointer transition-colors group" 
+                              onClick={() => { setSelectedCandidate({...candidate, position: position}); setShowCandidateProfileModal(true); }}
+                            >
+                              <td className="py-5 px-3">
+                                <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" onClick={(e) => e.stopPropagation()} />
                               </td>
-                              <td className="py-4">
-                                <span className="text-sm font-medium text-gray-600">#{index + 1}</span>
+                              <td className="py-5 px-2">
+                                <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 group-hover:bg-white rounded-lg text-sm font-bold text-gray-600">#{index + 1}</span>
                               </td>
-                              <td className="py-4">
+                              <td className="py-5 px-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
+                                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md">
                                     {candidate.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                                   </div>
-                                  <p className="font-medium text-gray-800 text-sm">{candidate.full_name}</p>
+                                  <div>
+                                    <p className="font-semibold text-gray-800">{candidate.full_name}</p>
+                                    <p className="text-xs text-gray-500">{candidate.email}</p>
+                                  </div>
                                 </div>
                               </td>
-                              <td className="py-4">
-                                <p className="text-sm text-gray-700">{candidate.current_position || '-'}</p>
+                              <td className="py-5 px-4">
+                                <p className="text-sm text-gray-700 font-medium">{candidate.current_position || '-'}</p>
+                                <p className="text-xs text-gray-400">{candidate.current_company || ''}</p>
                               </td>
-                              <td className="py-4">
+                              <td className="py-5 px-4">
                                 {cvScore ? (
-                                  <div className="flex items-center gap-1">
-                                    <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                    <span className="text-sm font-medium text-gray-700">{cvScore}%</span>
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm ${
+                                      cvScore >= 80 ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
+                                      cvScore >= 60 ? 'bg-gradient-to-br from-blue-500 to-indigo-600' :
+                                      cvScore >= 40 ? 'bg-gradient-to-br from-yellow-500 to-orange-500' :
+                                      'bg-gradient-to-br from-gray-400 to-gray-500'
+                                    }`}>
+                                      {cvScore}
+                                    </div>
                                   </div>
                                 ) : (
                                   <span className="text-sm text-gray-400">-</span>
                                 )}
                               </td>
-                              <td className="py-4">
+                              <td className="py-5 px-4">
                                 {candidate.skills_match_score ? (
                                   <div className="flex items-center gap-2">
-                                    <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className="w-24 h-2.5 bg-gray-200 rounded-full overflow-hidden">
                                       <div 
-                                        className="h-full bg-blue-500 rounded-full" 
+                                        className={`h-full rounded-full ${
+                                          candidate.skills_match_score >= 80 ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
+                                          candidate.skills_match_score >= 60 ? 'bg-gradient-to-r from-blue-400 to-indigo-500' :
+                                          'bg-gradient-to-r from-yellow-400 to-orange-500'
+                                        }`}
                                         style={{ width: `${candidate.skills_match_score}%` }}
                                       />
                                     </div>
-                                    <span className="text-sm text-gray-600">{candidate.skills_match_score}%</span>
+                                    <span className="text-sm font-medium text-gray-600">{candidate.skills_match_score}%</span>
                                   </div>
                                 ) : (
                                   <span className="text-sm text-gray-400">-</span>
                                 )}
                               </td>
-                              <td className="py-4">
-                                <span className="text-sm text-gray-700">
-                                  {candidate.education_level || '-'}
+                              <td className="py-5 px-4">
+                                <span className="text-sm text-gray-700">{candidate.education_level || '-'}</span>
+                              </td>
+                              <td className="py-5 px-4">
+                                <span className="text-sm font-medium text-gray-700">
+                                  {candidate.years_experience ? `${candidate.years_experience}+ yrs` : '-'}
                                 </span>
                               </td>
-                              <td className="py-4">
-                                <span className="text-sm text-gray-700">
-                                  {candidate.years_experience ? `${candidate.years_experience}+ years` : '-'}
-                                </span>
-                              </td>
-                              <td className="py-4">
-                                <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                              <td className="py-5 px-4">
+                                <span className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg ${
                                   candidate.stage === 'applied' ? 'bg-blue-100 text-blue-700' :
-                                  candidate.stage === 'screening' ? 'bg-yellow-100 text-yellow-700' :
+                                  candidate.stage === 'screening' ? 'bg-amber-100 text-amber-700' :
                                   candidate.stage === 'interview' ? 'bg-purple-100 text-purple-700' :
                                   candidate.stage === 'offer' ? 'bg-green-100 text-green-700' :
                                   candidate.stage === 'hired' ? 'bg-emerald-100 text-emerald-700' :
                                   'bg-gray-100 text-gray-700'
                                 }`}>
-                                  {candidate.stage === 'screening' ? 'Shortlisted' : candidate.stage?.charAt(0).toUpperCase() + candidate.stage?.slice(1)}
+                                  {candidate.stage?.charAt(0).toUpperCase() + candidate.stage?.slice(1)}
                                 </span>
                               </td>
-                              <td className="py-4">
+                              <td className="py-5 px-4">
                                 {candidate.linkedin_url ? (
                                   <a 
                                     href={candidate.linkedin_url} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center px-3 py-1 bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 text-xs font-medium rounded-lg transition-colors"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-medium rounded-lg transition-colors"
                                   >
-                                    LinkedIn
+                                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                                    View
                                   </a>
                                 ) : (
                                   <span className="text-sm text-gray-400">-</span>
                                 )}
                               </td>
-                              <td className="py-4">
+                              <td className="py-5 px-4">
                                 {candidate.resume_url ? (
                                   <a 
                                     href={candidate.resume_url} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center px-3 py-1 bg-gray-100 hover:bg-green-50 text-gray-600 hover:text-green-600 text-xs font-medium rounded-lg transition-colors"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-medium rounded-lg transition-colors"
                                   >
-                                    View CV
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    View
                                   </a>
                                 ) : (
                                   <span className="text-sm text-gray-400">-</span>
                                 )}
                               </td>
-                              <td className="py-4">
+                              <td className="py-5 px-4">
                                 <span className="text-sm text-gray-600">{candidate.source || '-'}</span>
                               </td>
                             </tr>
@@ -2984,6 +2998,11 @@ function App() {
                         })}
                       </tbody>
                     </table>
+                  </div>
+                  
+                  {/* Table Footer */}
+                  <div className="px-8 py-4 bg-gray-50/50 border-t border-gray-100">
+                    <p className="text-sm text-gray-500">Click on a candidate row to view their full profile</p>
                   </div>
                 </div>
               )}
@@ -3177,242 +3196,346 @@ function App() {
             </div>
           )}
 
-          {/* Candidate Profile Modal */}
+          {/* Candidate Profile Modal - Premium Dark Blue Design */}
           {showCandidateProfileModal && selectedCandidate && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                {/* Header - Dynamic color based on entity */}
-                <div className={`text-white p-6 rounded-t-2xl ${
-                  selectedCandidate.entity === 'Baynunah Watergeneration Technologies SP LLC' ? '' :
-                  selectedCandidate.entity === 'Baynunah Agriculture LLC' ? '' :
-                  'bg-gradient-to-r from-slate-700 to-slate-800'
-                }`} style={{
-                  background: selectedCandidate.entity === 'Baynunah Watergeneration Technologies SP LLC' ? 'linear-gradient(to right, #00B0F0, #0090D0)' :
-                              selectedCandidate.entity === 'Baynunah Agriculture LLC' ? 'linear-gradient(to right, #92D050, #72B030)' :
-                              undefined
-                }}>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold">
-                        {selectedCandidate.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold">{selectedCandidate.full_name}</h2>
-                        <p className="text-slate-300">{selectedCandidate.current_position || selectedCandidate.position?.position_title || 'Position not specified'}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => { setShowCandidateProfileModal(false); setSelectedCandidate(null); }} className="text-white/80 hover:text-white">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: 'linear-gradient(135deg, #0a1628 0%, #1a2942 50%, #0d1f38 100%)' }}>
+                {/* Header */}
+                <div className="p-6 border-b border-white/10">
+                  <div className="flex items-center justify-between">
+                    <button 
+                      onClick={() => { setShowCandidateProfileModal(false); setSelectedCandidate(null); }} 
+                      className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                       </svg>
+                      <span className="text-sm font-medium">BACK TO LIST</span>
                     </button>
+                    <div className="flex items-center gap-3">
+                      <button className="p-2 text-slate-400 hover:text-white transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
+                      <button className="p-2 text-slate-400 hover:text-white transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </button>
+                      <button className="p-2 text-slate-400 hover:text-white transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                  {/* Badges Row */}
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <div className="bg-white/20 px-3 py-1.5 rounded-lg">
-                      <p className="text-xs text-slate-300">Recruitment Pass</p>
-                      <p className="text-sm font-mono font-bold">{selectedCandidate.pass_number}</p>
-                    </div>
-                    <div className="bg-white/20 px-3 py-1.5 rounded-lg">
-                      <p className="text-xs text-slate-300">Candidate ID</p>
-                      <p className="text-sm font-mono font-bold">{selectedCandidate.candidate_number}</p>
-                    </div>
-                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      selectedCandidate.stage === 'applied' ? 'bg-blue-500/80 text-white' :
-                      selectedCandidate.stage === 'screening' ? 'bg-yellow-500/80 text-white' :
-                      selectedCandidate.stage === 'interview' ? 'bg-purple-500/80 text-white' :
-                      selectedCandidate.stage === 'offer' ? 'bg-green-500/80 text-white' :
-                      selectedCandidate.stage === 'hired' ? 'bg-emerald-500/80 text-white' :
-                      'bg-gray-500/80 text-white'
-                    }`}>
-                      {selectedCandidate.stage?.charAt(0).toUpperCase() + selectedCandidate.stage?.slice(1)}
-                    </div>
-                    {selectedCandidate.source && (
-                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        selectedCandidate.source === 'LinkedIn' ? 'bg-blue-600 text-white' :
-                        selectedCandidate.source === 'Referral' ? 'bg-green-600 text-white' :
-                        selectedCandidate.source?.includes('Agency') ? 'bg-orange-600 text-white' :
-                        'bg-slate-500 text-white'
-                      }`}>
-                        {selectedCandidate.source}
+
+                  {/* Candidate Header Info */}
+                  <div className="mt-6 flex items-start justify-between">
+                    <div>
+                      <h1 className="text-3xl font-bold text-white">{selectedCandidate.full_name}</h1>
+                      <p className="text-lg text-cyan-400 mt-1">{selectedCandidate.current_position || selectedCandidate.position?.position_title || 'Position not specified'}</p>
+                      <div className="flex items-center gap-4 mt-3 text-slate-400 text-sm">
+                        <span className="flex items-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          {selectedCandidate.current_location || selectedCandidate.current_country || 'Location pending'}
+                        </span>
+                        {selectedCandidate.email && (
+                          <span className="flex items-center gap-1.5">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            {selectedCandidate.email}
+                          </span>
+                        )}
+                        {selectedCandidate.phone && (
+                          <span className="flex items-center gap-1.5">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            {selectedCandidate.phone}
+                          </span>
+                        )}
                       </div>
-                    )}
+                    </div>
+                    <div className="flex flex-col items-end gap-3">
+                      <span className={`px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wide ${
+                        selectedCandidate.stage === 'applied' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                        selectedCandidate.stage === 'screening' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                        selectedCandidate.stage === 'interview' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
+                        selectedCandidate.stage === 'offer' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                        selectedCandidate.stage === 'hired' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                        'bg-slate-500/20 text-slate-400 border border-slate-500/30'
+                      }`}>
+                        {selectedCandidate.stage === 'interview' ? 'Interview Stage' : selectedCandidate.stage?.toUpperCase()}
+                      </span>
+                      {/* Match Score */}
+                      {(selectedCandidate.cv_scoring || selectedCandidate.ai_ranking) && (
+                        <div className="flex items-center gap-3 bg-slate-800/50 rounded-xl px-4 py-3 border border-slate-700/50">
+                          <div className="text-right">
+                            <p className="text-3xl font-bold text-cyan-400">{selectedCandidate.cv_scoring || selectedCandidate.ai_ranking}%</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wide">Match Score</p>
+                          </div>
+                          <div className="w-12 h-12 bg-slate-700/50 rounded-lg flex items-center justify-center border border-slate-600/50">
+                            <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Content - Streamlined for hiring managers */}
-                <div className="p-6 space-y-4">
-                  {/* CV Section */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-gray-600">CV / Resume</h3>
-                      {selectedCandidate.resume_path ? (
-                        <a href={selectedCandidate.resume_path} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                          View CV
-                        </a>
-                      ) : (
-                        <span className="text-gray-500 text-sm">Pending upload</span>
-                      )}
-                    </div>
-                    {selectedCandidate.linkedin_url && (
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <a href={selectedCandidate.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm flex items-center gap-2">
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                          LinkedIn Profile
-                        </a>
+                {/* Content Grid */}
+                <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Left Column */}
+                  <div className="lg:col-span-2 space-y-6">
+                    {/* Personal Details Card */}
+                    <div className="bg-slate-800/40 rounded-xl p-5 border border-slate-700/50">
+                      <div className="flex items-center gap-2 mb-4">
+                        <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wide">Personal Details</h3>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Availability & Expectations */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="text-sm font-semibold text-gray-600 mb-3">Availability & Expectations</h3>
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                      <div>
-                        <p className="text-xs text-gray-400">Notice Period</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.notice_period_days ? `${selectedCandidate.notice_period_days} days` : 'Pending'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Earliest Start Date</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.availability_date || 'Pending'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Expected Salary</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.expected_salary ? `${selectedCandidate.salary_currency || 'AED'} ${Number(selectedCandidate.expected_salary).toLocaleString()}` : 'Pending'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Negotiable</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.salary_negotiable === true ? 'Yes' : selectedCandidate.salary_negotiable === false ? 'No' : 'Pending'}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Work Eligibility */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="text-sm font-semibold text-gray-600 mb-3">Work Eligibility</h3>
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                      <div>
-                        <p className="text-xs text-gray-400">Current Location</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.current_country ? `${selectedCandidate.current_location || ''}, ${selectedCandidate.current_country}`.replace(/^, /, '') : selectedCandidate.current_location || 'Pending'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Visa Status</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.visa_status || 'Pending'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Willing to Relocate</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.willing_to_relocate === true ? 'Yes' : selectedCandidate.willing_to_relocate === false ? 'No' : 'Pending'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Driving License</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.has_driving_license === true ? 'Yes' : selectedCandidate.has_driving_license === false ? 'No' : 'Pending'}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* References */}
-                  <div className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="text-sm font-semibold text-gray-600 mb-2">References</h3>
-                    <p className="text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded mb-3">
-                      References will only be contacted if candidate is finalised for the position.
-                    </p>
-                    <div className="space-y-3">
-                      {selectedCandidate.references_list?.length > 0 ? selectedCandidate.references_list.map((ref: any, i: number) => (
-                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
-                          <p className="font-medium text-gray-800">{ref.name}</p>
-                          <p className="text-sm text-gray-600">{ref.relationship} at {ref.company}</p>
-                          <p className="text-sm text-gray-500">{ref.email} • {ref.phone}</p>
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Nationality</p>
+                          <p className="text-white font-medium">{selectedCandidate.nationality || 'Pending'}</p>
                         </div>
-                      )) : (
-                        <div className="text-center py-4 text-gray-500">
-                          <p className="text-sm">No references provided yet</p>
-                          <p className="text-xs mt-1">Candidate will be asked to provide 2-3 professional references</p>
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Visa Status</p>
+                          <p className="text-white font-medium">{selectedCandidate.visa_status || 'Pending'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Willing to Relocate</p>
+                          <p className="text-white font-medium">{selectedCandidate.willing_to_relocate === true ? 'Yes' : selectedCandidate.willing_to_relocate === false ? 'No' : 'Pending'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Expected Salary</p>
+                          <p className="text-cyan-400 font-bold">{selectedCandidate.expected_salary ? `${selectedCandidate.salary_currency || 'AED'} ${Number(selectedCandidate.expected_salary).toLocaleString()}` : 'Pending'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Experience Summary Card */}
+                    <div className="bg-slate-800/40 rounded-xl p-5 border border-slate-700/50">
+                      <div className="flex items-center gap-2 mb-4">
+                        <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wide">Experience Summary</h3>
+                      </div>
+                      <div className="grid grid-cols-2 gap-6 mb-5">
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Total Experience</p>
+                          <p className="text-2xl font-bold text-white">{selectedCandidate.years_experience ? `${selectedCandidate.years_experience} Years` : 'Pending'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Notice Period</p>
+                          <p className="text-2xl font-bold text-white">{selectedCandidate.notice_period_days ? `${selectedCandidate.notice_period_days} Days` : 'Pending'}</p>
+                        </div>
+                      </div>
+                      <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700/30">
+                        <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Current Role</p>
+                        <p className="text-lg font-semibold text-white">{selectedCandidate.current_position || 'Not specified'}</p>
+                        <p className="text-cyan-400">{selectedCandidate.current_company || ''}</p>
+                      </div>
+                      {selectedCandidate.industry_function && (
+                        <div className="mt-4">
+                          <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Industry Background</p>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="px-3 py-1.5 bg-slate-700/50 text-slate-300 rounded-lg text-sm border border-slate-600/50">{selectedCandidate.industry_function}</span>
+                          </div>
                         </div>
                       )}
                     </div>
+
+                    {/* Top Skills & Education Row */}
+                    <div className="grid grid-cols-2 gap-6">
+                      {/* Top Skills */}
+                      <div className="bg-slate-800/40 rounded-xl p-5 border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-4">
+                          <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                          </svg>
+                          <h3 className="text-sm font-bold text-white uppercase tracking-wide">Top Skills</h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedCandidate.skills?.slice(0, 6).map((skill: string, i: number) => (
+                            <span key={i} className="px-3 py-1.5 bg-cyan-500/10 text-cyan-400 rounded-lg text-sm border border-cyan-500/20">{skill}</span>
+                          )) || (
+                            <p className="text-slate-500 text-sm">Skills pending</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Education */}
+                      <div className="bg-slate-800/40 rounded-xl p-5 border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-4">
+                          <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                          </svg>
+                          <h3 className="text-sm font-bold text-white uppercase tracking-wide">Education</h3>
+                        </div>
+                        <p className="text-lg font-semibold text-white">{selectedCandidate.education_level || 'Pending'}</p>
+                        {selectedCandidate.education_institution && (
+                          <>
+                            <p className="text-slate-400">{selectedCandidate.education_field || ''}</p>
+                            <p className="text-slate-500 text-sm mt-1">{selectedCandidate.education_institution}</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* HIRING MANAGER ONLY SECTIONS */}
-                  {user?.role === 'admin' || user?.role === 'hr' ? (
-                    <>
-                      {/* Soft Skills Evaluation */}
-                      <div className="border border-purple-200 rounded-lg p-4 bg-purple-50/30">
-                        <h3 className="text-sm font-semibold text-purple-700 mb-3">Soft Skills Evaluation</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                          {['Communication', 'Teamwork', 'Problem Solving', 'Leadership', 'Adaptability', 'Time Management'].map((skill) => (
-                            <div key={skill} className="flex items-center justify-between bg-white p-2 rounded">
-                              <span className="text-sm text-gray-700">{skill}</span>
+                  {/* Right Column - Behavioural Fit & Recommendation */}
+                  <div className="space-y-6">
+                    {/* Behavioural Fit */}
+                    {(user?.role === 'admin' || user?.role === 'hr') && (
+                      <div className="bg-slate-800/40 rounded-xl p-5 border border-slate-700/50">
+                        <div className="flex items-center gap-2 mb-4">
+                          <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                          </svg>
+                          <h3 className="text-sm font-bold text-white uppercase tracking-wide">Behavioural Fit</h3>
+                        </div>
+                        
+                        {/* Circular Progress */}
+                        <div className="flex justify-center mb-6">
+                          <div className="relative w-28 h-28">
+                            <svg className="w-28 h-28 transform -rotate-90">
+                              <circle cx="56" cy="56" r="48" stroke="#1e293b" strokeWidth="8" fill="none" />
+                              <circle 
+                                cx="56" cy="56" r="48" 
+                                stroke="#22d3ee" 
+                                strokeWidth="8" 
+                                fill="none" 
+                                strokeLinecap="round"
+                                strokeDasharray={`${(selectedCandidate.skills_match_score || 75) * 3.01} 301`}
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-2xl font-bold text-cyan-400">{selectedCandidate.skills_match_score || 75}%</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Skill Ratings */}
+                        <div className="space-y-3">
+                          {['Ownership', 'Accuracy', 'Calm Under Pressure', 'Teamwork', 'Communication'].map((skill, idx) => (
+                            <div key={skill} className="flex items-center justify-between">
+                              <span className="text-sm text-slate-400">{skill}</span>
                               <div className="flex gap-1">
-                                {[1,2,3,4,5].map((score) => (
-                                  <div key={score} className={`w-4 h-4 rounded-full ${score <= (selectedCandidate.soft_skills?.[skill.toLowerCase().replace(' ', '_')] || 0) ? 'bg-purple-500' : 'bg-gray-200'}`} />
+                                {[1,2,3,4,5].map((dot) => (
+                                  <div key={dot} className={`w-2.5 h-2.5 rounded-full ${dot <= (selectedCandidate.soft_skills?.[skill.toLowerCase().replace(/ /g, '_')] || 0) ? 'bg-cyan-400' : 'bg-slate-600'}`} />
                                 ))}
                               </div>
                             </div>
                           ))}
                         </div>
                         {!selectedCandidate.soft_skills && (
-                          <p className="text-xs text-gray-500 mt-2 text-center">Evaluation pending</p>
+                          <p className="text-xs text-slate-500 mt-3 text-center">Evaluation pending</p>
                         )}
-                      </div>
 
-                      {/* Technical Skills Evaluation */}
-                      <div className="border border-blue-200 rounded-lg p-4 bg-blue-50/30">
-                        <h3 className="text-sm font-semibold text-blue-700 mb-3">Technical Skills Evaluation</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                          {['Domain Knowledge', 'Technical Proficiency', 'Analytical Thinking', 'Tool Expertise', 'Industry Experience', 'Quality of Work'].map((skill) => (
-                            <div key={skill} className="flex items-center justify-between bg-white p-2 rounded">
-                              <span className="text-sm text-gray-700">{skill}</span>
-                              <div className="flex gap-1">
-                                {[1,2,3,4,5].map((score) => (
-                                  <div key={score} className={`w-4 h-4 rounded-full ${score <= (selectedCandidate.technical_skills?.[skill.toLowerCase().replace(/ /g, '_')] || 0) ? 'bg-blue-500' : 'bg-gray-200'}`} />
-                                ))}
-                              </div>
-                            </div>
-                          ))}
+                        {/* Key Strengths */}
+                        <div className="mt-5 pt-5 border-t border-slate-700/50">
+                          <p className="text-xs text-slate-500 uppercase tracking-wide mb-3">Key Strengths</p>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-xs border border-cyan-500/20">Collaborative</span>
+                            <span className="px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-xs border border-cyan-500/20">Detail-oriented</span>
+                            <span className="px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-xs border border-cyan-500/20">Strategic Thinker</span>
+                          </div>
                         </div>
-                        {!selectedCandidate.technical_skills && (
-                          <p className="text-xs text-gray-500 mt-2 text-center">Evaluation pending</p>
+                      </div>
+                    )}
+
+                    {/* Recommendation */}
+                    {(user?.role === 'admin' || user?.role === 'hr') && (
+                      <div className="bg-gradient-to-br from-emerald-900/40 to-green-900/20 rounded-xl p-5 border border-emerald-700/30">
+                        <div className="flex items-center gap-2 mb-3">
+                          <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <p className="text-xs text-emerald-400 uppercase tracking-wide font-bold">Recommendation</p>
+                        </div>
+                        <p className="text-3xl font-bold text-emerald-400 mb-3">
+                          {(selectedCandidate.cv_scoring || selectedCandidate.ai_ranking || 0) >= 70 ? 'Hire' : 
+                           (selectedCandidate.cv_scoring || selectedCandidate.ai_ranking || 0) >= 50 ? 'Consider' : 'Review'}
+                        </p>
+                        <p className="text-slate-400 text-sm leading-relaxed">
+                          {(selectedCandidate.cv_scoring || selectedCandidate.ai_ranking || 0) >= 70 
+                            ? `${selectedCandidate.full_name?.split(' ')[0]} is a strong candidate with excellent qualifications and cultural fit potential.`
+                            : `${selectedCandidate.full_name?.split(' ')[0]} shows potential but may need further evaluation.`
+                          }
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Quick Actions */}
+                    <div className="bg-slate-800/40 rounded-xl p-5 border border-slate-700/50">
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-4">Quick Actions</h3>
+                      <div className="space-y-3">
+                        {selectedCandidate.resume_path && (
+                          <a 
+                            href={selectedCandidate.resume_path} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 w-full px-4 py-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-colors border border-blue-500/20"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span className="font-medium">View CV</span>
+                          </a>
                         )}
+                        {selectedCandidate.linkedin_url && (
+                          <a 
+                            href={selectedCandidate.linkedin_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 w-full px-4 py-3 bg-slate-700/50 hover:bg-slate-700 text-white rounded-lg transition-colors border border-slate-600/50"
+                          >
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                            <span className="font-medium">LinkedIn Profile</span>
+                          </a>
+                        )}
+                        <button
+                          onClick={() => {
+                            setViewingCandidatePassId(selectedCandidate.id)
+                            setShowCandidateProfileModal(false)
+                            setSelectedCandidate(null)
+                            setActiveSection('candidate-pass')
+                          }}
+                          className="flex items-center gap-3 w-full px-4 py-3 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg transition-colors border border-cyan-500/20"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                          </svg>
+                          <span className="font-medium">View Candidate Pass</span>
+                        </button>
                       </div>
-
-                      {/* Recruiter Notes */}
-                      {(selectedCandidate.recruiter_notes || selectedCandidate.notes || selectedCandidate.interview_observations) && (
-                        <div className="border border-gray-200 rounded-lg p-4">
-                          <h3 className="text-sm font-semibold text-gray-600 mb-3">Internal Notes</h3>
-                          <p className="text-gray-700 text-sm whitespace-pre-wrap">{selectedCandidate.recruiter_notes || selectedCandidate.notes}</p>
-                          {selectedCandidate.interview_observations && (
-                            <div className="mt-3 pt-3 border-t">
-                              <p className="text-xs text-gray-400 mb-1">Interview Observations</p>
-                              <p className="text-gray-700 text-sm whitespace-pre-wrap">{selectedCandidate.interview_observations}</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  ) : null}
-
-                  {/* Actions */}
-                  <div className="flex justify-end gap-3 pt-4 border-t">
-                    <button
-                      onClick={() => {
-                        setViewingCandidatePassId(selectedCandidate.id)
-                        setShowCandidateProfileModal(false)
-                        setSelectedCandidate(null)
-                        setActiveSection('candidate-pass')
-                      }}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                      View Candidate Pass
-                    </button>
-                    <button
-                      onClick={() => { setShowCandidateProfileModal(false); setSelectedCandidate(null); }}
-                      className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
-                    >
-                      Close
-                    </button>
+                    </div>
                   </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 border-t border-slate-700/50 flex justify-end">
+                  <button
+                    onClick={() => { setShowCandidateProfileModal(false); setSelectedCandidate(null); }}
+                    className="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>

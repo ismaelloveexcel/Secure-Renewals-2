@@ -257,8 +257,6 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
 
   const renderHeader = () => (
     <div className="px-4 pt-4 pb-3 flex-shrink-0">
-      <p className="text-xs font-semibold text-slate-500 mb-3">Hiring Manager Pass</p>
-      
       {/* Premium Info Card */}
       <div className="bg-gradient-to-br from-white via-white to-slate-50 rounded-2xl border border-slate-100 shadow-lg p-4 relative overflow-hidden">
         {/* Subtle corner accent */}

@@ -2892,13 +2892,11 @@ function App() {
                                 <div className="flex items-center gap-3">
                                   <div>
                                     <p className="font-semibold text-gray-800">{candidate.full_name}</p>
-                                    <p className="text-xs text-gray-500">{candidate.email}</p>
                                   </div>
                                 </div>
                               </td>
                               <td className="py-5 px-4">
                                 <p className="text-sm text-gray-700 font-medium">{candidate.current_position || '-'}</p>
-                                <p className="text-xs text-gray-400">{candidate.current_company || ''}</p>
                               </td>
                               <td className="py-5 px-4">
                                 {cvScore ? (

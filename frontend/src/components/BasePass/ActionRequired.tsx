@@ -17,32 +17,21 @@ export function ActionRequired({ action, entityColor = '#00B0F0' }: ActionRequir
         <button
           onClick={action.onClick}
           disabled={action.loading}
-          className="w-full p-4 rounded-2xl border border-slate-100 bg-gradient-to-br from-white via-white to-slate-50 hover:shadow-lg transition-all duration-300 shadow-md flex items-center gap-3 text-left group disabled:opacity-60 relative overflow-hidden hover:-translate-y-0.5"
+          className="w-full p-4 rounded-2xl border border-slate-200 bg-white hover:shadow-lg transition-all duration-300 shadow-sm flex items-center gap-3 text-left group disabled:opacity-60 relative overflow-hidden"
         >
-          {/* Urgency indicator on left edge */}
+          {/* Subtle accent border on left edge - now gray */}
           <div 
-            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-            style={{ backgroundColor: entityColor }}
-          />
-          
-          {/* Subtle glow effect on hover */}
-          <div 
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
-            style={{ boxShadow: `inset 0 0 20px ${entityColor}08` }}
+            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-slate-200 group-hover:bg-slate-300 transition-colors"
           />
           
           <div 
-            className="relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105"
-            style={{ 
-              backgroundColor: `${entityColor}12`,
-              boxShadow: `0 4px 12px ${entityColor}15`
-            }}
+            className="relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 bg-slate-50 border border-slate-100"
           >
             <svg 
               className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-300" 
               fill="none" 
               viewBox="0 0 24 24" 
-              stroke={entityColor}
+              stroke="#64748b"
               strokeWidth={2.5}
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -56,8 +45,7 @@ export function ActionRequired({ action, entityColor = '#00B0F0' }: ActionRequir
           </div>
           {action.loading ? (
             <div 
-              className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"
-              style={{ borderColor: `${entityColor}40`, borderTopColor: 'transparent' }}
+              className="w-5 h-5 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin"
             ></div>
           ) : (
             <svg 
@@ -72,17 +60,17 @@ export function ActionRequired({ action, entityColor = '#00B0F0' }: ActionRequir
           )}
         </button>
       ) : (
-        <div className="p-4 rounded-2xl border border-slate-100 bg-gradient-to-br from-white to-slate-50 shadow-sm flex items-center gap-3 relative overflow-hidden">
-          {/* Success indicator */}
+        <div className="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3 relative overflow-hidden">
+          {/* Success indicator - kept subtle gray */}
           <div 
-            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-emerald-400"
+            className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-slate-200"
           />
           
           <div 
-            className="w-11 h-11 rounded-xl flex items-center justify-center bg-emerald-50"
+            className="w-11 h-11 rounded-xl flex items-center justify-center bg-slate-50 border border-slate-100"
           >
             <svg 
-              className="w-5 h-5 text-emerald-500" 
+              className="w-5 h-5 text-slate-400" 
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"

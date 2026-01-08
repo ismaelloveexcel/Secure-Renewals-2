@@ -10,7 +10,7 @@ externalPort = 3000
 
 [nix]
 channel = "stable-25_05"
-packages = ["libxcrypt", "postgresql"]
+packages = ["glibcLocales", "libxcrypt", "postgresql"]
 
 [workflows]
 runButton = "Project"

@@ -6,7 +6,7 @@ from io import StringIO
 from typing import List, Optional
 
 from fastapi import HTTPException, UploadFile, status
-from jose import jwt
+import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings

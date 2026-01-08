@@ -1,7 +1,8 @@
 from typing import Any, List, Optional
 
 from fastapi import Depends, Header, HTTPException, status
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import PyJWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,7 +30,7 @@ async def authenticate_token(authorization: Optional[str] = Header(default=None)
     try:
         claims = jwt.decode(token.strip(), settings.auth_secret_key, algorithms=["HS256"])
         return claims
-    except JWTError:
+    except PyJWTError:
         pass
     
     try:
@@ -54,7 +55,7 @@ def get_employee_id_from_token(authorization: Optional[str] = Header(default=Non
         if not employee_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         return employee_id
-    except JWTError:
+    except PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
 
 

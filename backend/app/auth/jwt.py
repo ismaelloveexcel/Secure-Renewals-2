@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 import httpx
 import jwt
-from jwt import PyJWKClient, PyJWK
+from jwt import PyJWK
 from jwt.exceptions import PyJWTError
 from fastapi import HTTPException, status
 
@@ -102,7 +102,7 @@ async def decode_jwt(token: str, settings: Settings | None = None) -> Dict[str, 
 
     algorithm = key_data.get("alg", "RS256")
     try:
-        signing_key = PyJWK.from_dict(key_data, algorithm=algorithm)
+        signing_key = PyJWK.from_dict(key_data)
         claims = jwt.decode(
             token,
             signing_key.key,

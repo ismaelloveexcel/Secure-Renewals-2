@@ -1,7 +1,8 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import PyJWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -34,7 +35,7 @@ async def get_current_employee_id(authorization: str = Header(...)) -> str:
                 detail="Invalid token",
             )
         return employee_id
-    except JWTError:
+    except PyJWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",

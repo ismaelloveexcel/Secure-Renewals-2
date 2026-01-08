@@ -20,6 +20,7 @@ from app.schemas.nomination import (
     VerifyManagerRequest, VerifyManagerResponse, NominationSubmitRequest,
     ManagerNominationStatus
 )
+from app.services.email_service import send_nomination_confirmation_email
 
 VERIFICATION_SECRET = os.environ.get("AUTH_SECRET_KEY", "nomination-verify-secret-key")
 TOKEN_EXPIRY_MINUTES = 15
@@ -412,6 +413,16 @@ async def submit_nomination_secure(
     # Commit all changes atomically
     await session.commit()
     await session.refresh(new_nomination)
+    
+    # Send confirmation email to manager (async, non-blocking)
+    if nominator and nominator.email:
+        await send_nomination_confirmation_email(
+            manager_email=nominator.email,
+            manager_name=nominator.name,
+            nominee_name=nominee.name,
+            nomination_year=year,
+            nomination_id=new_nomination.id
+        )
     
     return NominationResponse(
         id=new_nomination.id,

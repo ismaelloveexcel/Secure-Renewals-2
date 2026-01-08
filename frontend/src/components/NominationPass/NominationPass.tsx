@@ -28,7 +28,21 @@ interface NominationForm {
   impact_description: string
 }
 
-type Step = 'select-manager' | 'verify' | 'select-nominee' | 'form' | 'success'
+interface ExistingNomination {
+  id: number
+  nominee_name: string
+  nominee_job_title: string | null
+  status: string
+  created_at: string
+}
+
+interface ManagerNominationStatus {
+  has_nominated: boolean
+  nomination: ExistingNomination | null
+  can_nominate: boolean
+}
+
+type Step = 'select-manager' | 'verify' | 'already-nominated' | 'select-nominee' | 'form' | 'success'
 
 const API_BASE = '/api'
 const CURRENT_YEAR = new Date().getFullYear()
@@ -42,6 +56,7 @@ export function NominationPass() {
   const [verificationToken, setVerificationToken] = useState<string | null>(null)
   const [eligibleEmployees, setEligibleEmployees] = useState<EligibleEmployee[]>([])
   const [selectedNominee, setSelectedNominee] = useState<EligibleEmployee | null>(null)
+  const [existingNomination, setExistingNomination] = useState<ExistingNomination | null>(null)
   const [form, setForm] = useState<NominationForm>({
     nominee_id: null,
     justification: '',
@@ -70,9 +85,20 @@ export function NominationPass() {
     }
   }
 
+  const checkNominationStatus = async (managerId: number): Promise<ManagerNominationStatus | null> => {
+    try {
+      const res = await fetch(`${API_BASE}/nominations/pass/status/${managerId}?year=${CURRENT_YEAR}`)
+      if (!res.ok) return null
+      return await res.json()
+    } catch (err) {
+      return null
+    }
+  }
+
   const handleManagerSelect = (manager: Manager) => {
     setSelectedManager(manager)
     setVerificationEmail('')
+    setExistingNomination(null)
     setStep('verify')
   }
 
@@ -98,6 +124,15 @@ export function NominationPass() {
       
       const data = await res.json()
       setVerificationToken(data.token)
+      
+      // Check if manager has already submitted their one nomination
+      const status = await checkNominationStatus(selectedManager.id)
+      if (status && status.has_nominated && status.nomination) {
+        setExistingNomination(status.nomination)
+        setStep('already-nominated')
+        return
+      }
+      
       await fetchEligibleEmployees()
     } catch (err: any) {
       setError(err.message || 'Email or Employee ID does not match. Please try again.')
@@ -180,6 +215,7 @@ export function NominationPass() {
     setVerificationEmail('')
     setVerificationToken(null)
     setEligibleEmployees([])
+    setExistingNomination(null)
     setForm({ nominee_id: null, justification: '', achievements: '', impact_description: '' })
     setSubmittedNomination(null)
     setError(null)
@@ -212,21 +248,29 @@ export function NominationPass() {
 
         {/* Progress Indicator */}
         <div className="flex items-center justify-center gap-2 mb-6">
-          {['select-manager', 'verify', 'select-nominee', 'form', 'success'].map((s, i) => (
-            <div key={s} className="flex items-center">
-              <div 
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  step === s ? 'scale-125' : ''
-                }`}
-                style={{ 
-                  backgroundColor: ['select-manager', 'verify', 'select-nominee', 'form', 'success'].indexOf(step) >= i 
-                    ? GREEN_THEME 
-                    : '#e2e8f0'
-                }}
-              />
-              {i < 4 && <div className="w-8 h-0.5 bg-slate-300" />}
+          {step === 'already-nominated' ? (
+            // Show amber indicator for already nominated state
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full scale-125" style={{ backgroundColor: '#f59e0b' }} />
+              <span className="text-xs text-slate-500">Already Submitted</span>
             </div>
-          ))}
+          ) : (
+            ['select-manager', 'verify', 'select-nominee', 'form', 'success'].map((s, i) => (
+              <div key={s} className="flex items-center">
+                <div 
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    step === s ? 'scale-125' : ''
+                  }`}
+                  style={{ 
+                    backgroundColor: ['select-manager', 'verify', 'select-nominee', 'form', 'success'].indexOf(step) >= i 
+                      ? GREEN_THEME 
+                      : '#e2e8f0'
+                  }}
+                />
+                {i < 4 && <div className="w-8 h-0.5 bg-slate-300" />}
+              </div>
+            ))
+          )}
         </div>
 
         {error && (
@@ -311,6 +355,63 @@ export function NominationPass() {
                 {loading ? 'Verifying...' : 'Continue'}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Step: Already Nominated - Manager has already used their one nomination */}
+        {step === 'already-nominated' && existingNomination && (
+          <div className={`${neumorphicCard} p-6 text-center`}>
+            <div 
+              className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+              style={{ backgroundColor: '#fef3c720' }}
+            >
+              <svg className="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Nomination Already Submitted</h2>
+            <p className="text-sm text-slate-500 mb-4">
+              You have already submitted your nomination for {CURRENT_YEAR}. 
+              Only <span className="font-semibold text-slate-700">1 nomination per manager</span> is allowed.
+            </p>
+            
+            <div className={`${neumorphicInset} p-4 mb-6 text-left`}>
+              <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Your Nomination</p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Nominee:</span>
+                  <span className="font-medium text-slate-800">{existingNomination.nominee_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Position:</span>
+                  <span className="font-medium text-slate-800">{existingNomination.nominee_job_title || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Status:</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    existingNomination.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                    existingNomination.status === 'shortlisted' ? 'bg-blue-100 text-blue-700' :
+                    existingNomination.status === 'winner' ? 'bg-emerald-100 text-emerald-700' :
+                    'bg-gray-100 text-gray-600'
+                  }`}>
+                    {existingNomination.status === 'pending' ? 'Pending Review' : 
+                     existingNomination.status.replace('_', ' ').charAt(0).toUpperCase() + existingNomination.status.replace('_', ' ').slice(1)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Submitted:</span>
+                  <span className="font-medium text-slate-800">{new Date(existingNomination.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+            
+            <button
+              onClick={resetForm}
+              className={`${neumorphicButton} w-full py-3 text-sm font-medium text-slate-600`}
+            >
+              ← Back to Start
+            </button>
           </div>
         )}
 

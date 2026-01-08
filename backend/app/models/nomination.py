@@ -53,6 +53,7 @@ class EoyNomination(Base):
 
     __table_args__ = (
         UniqueConstraint("nominee_id", "nomination_year", name="uq_nominee_per_year"),
+        UniqueConstraint("nominator_id", "nomination_year", name="uq_nominator_per_year"),
     )
 
     nominee: Mapped["Employee"] = relationship("Employee", foreign_keys=[nominee_id])

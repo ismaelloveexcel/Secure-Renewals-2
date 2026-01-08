@@ -97,3 +97,10 @@ class NominationSubmitRequest(BaseModel):
     achievements: Optional[str] = Field(None, max_length=1500, description="Key achievements")
     impact_description: Optional[str] = Field(None, max_length=1500, description="Impact on team/organization")
     verification_token: str = Field(..., description="Token from identity verification step")
+
+
+class ManagerNominationStatus(BaseModel):
+    """Status of a manager's nomination for the year"""
+    has_nominated: bool = Field(..., description="Whether the manager has already submitted a nomination")
+    nomination: Optional[NominationResponse] = Field(None, description="The nomination if already submitted")
+    can_nominate: bool = Field(..., description="Whether the manager can still submit a nomination")

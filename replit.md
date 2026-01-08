@@ -89,12 +89,26 @@ Main tables with migrations managed by Alembic:
 5. Both parties see confirmed interview in calendar
 
 **Manager Candidate Screening** (Manager-Only):
-- Screening table with ranked candidates sorted by AI ranking score
-- Columns: Rank, Name, Current Position, AI Ranking, Core Skills Match, Education, Experience, Profile Link, Source
+- Screening table with ranked candidates sorted by CV scoring
+- Columns: Ranking, Name, Current Position, CV Scoring, Core Skills Match, Education, Experience, Stage, LinkedIn, CV, Source
 - Search and filter controls (Status filter, Source filter)
-- Evaluation scores (ai_ranking, skills_match_score) are STRICTLY manager-only and NOT visible to candidates
-- Database fields: ai_ranking (0-100%), skills_match_score (0-100%), education_level, screening_rank
+- Evaluation scores (cv_scoring, skills_match_score) are STRICTLY manager-only and NOT visible to candidates
+- Database fields: cv_scoring (0-100%), skills_match_score (0-100%), education_level, screening_rank, resume_url, cv_scored_at
 - Placeholder "-" shown when evaluation data not yet populated (no random fallbacks)
+
+**Automatic CV Scoring** (Manager-Only):
+- Triggered automatically when CV/resume is uploaded via `/api/recruitment/candidates/{id}/upload-cv`
+- Also triggered when creating candidate from resume via `/api/recruitment/candidates/from-resume`
+- Uses OpenAI gpt-4o-mini model via Replit AI Integrations (env: AI_INTEGRATIONS_OPENAI_BASE_URL, AI_INTEGRATIONS_OPENAI_API_KEY)
+- Supports PDF, DOCX, TXT file formats
+- Analyzes CV against job requirements and generates:
+  - cv_scoring: Overall match percentage (0-100%)
+  - skills_match_score: Core skills match percentage (0-100%)
+  - education_level: Extracted education (PhD, Master's, Bachelor's, etc.)
+  - years_experience: Estimated relevant experience
+  - current_position: Latest job title from CV
+- IMPORTANT: No "AI" terminology in UI - use "CV Scoring" instead
+- Service: `backend/app/services/cv_scoring_service.py`
 
 **Technical Implementation Notes**:
 - **Slot Collision Prevention**: Uses SELECT FOR UPDATE with atomic validation to prevent race conditions when multiple candidates book the same slot simultaneously. Returns HTTP 409 CONFLICT with user-friendly message.

@@ -23,6 +23,7 @@ from app.schemas.recruitment import (
 )
 from app.services.recruitment_service import recruitment_service
 from app.services.resume_parser import resume_parser_service
+from app.services.cv_scoring_service import score_candidate_cv
 
 router = APIRouter(prefix="/recruitment", tags=["recruitment"])
 
@@ -341,6 +342,91 @@ async def get_pipeline_counts(
     return await recruitment_service.get_pipeline_counts(session, recruitment_request_id)
 
 
+@router.post(
+    "/candidates/{candidate_id}/upload-cv",
+    summary="Upload CV and trigger scoring"
+)
+async def upload_candidate_cv(
+    candidate_id: int,
+    file: UploadFile = File(...),
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Upload a CV for an existing candidate and automatically score it.
+    
+    Supports: PDF, DOCX, TXT files.
+    
+    Automatically calculates:
+    - CV Scoring (overall match %)
+    - Core Skills Match %
+    - Education level
+    - Years of experience
+    
+    **Admin and HR only.**
+    """
+    # Get candidate and their recruitment request
+    candidate = await recruitment_service.get_candidate(session, candidate_id)
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    
+    # Get job details from recruitment request
+    request = await recruitment_service.get_request(session, candidate.recruitment_request_id)
+    if not request:
+        raise HTTPException(status_code=404, detail="Recruitment request not found")
+    
+    # Read file content
+    content = await file.read()
+    filename = file.filename or "resume.pdf"
+    
+    # Save CV to storage
+    resume_dir = Path("storage/resumes")
+    resume_dir.mkdir(parents=True, exist_ok=True)
+    resume_path = resume_dir / f"{candidate.candidate_number}_{filename}"
+    
+    with open(resume_path, 'wb') as f:
+        f.write(content)
+    
+    # Score the CV against job requirements
+    job_description = request.job_description or f"Position: {request.position_title}"
+    required_skills = request.required_skills if hasattr(request, 'required_skills') and request.required_skills else []
+    
+    scores = await score_candidate_cv(
+        candidate_id=candidate_id,
+        cv_content=content,
+        filename=filename,
+        job_title=request.position_title,
+        job_description=job_description,
+        required_skills=required_skills,
+        db_session=session
+    )
+    
+    if scores:
+        return {
+            "success": True,
+            "candidate_id": candidate_id,
+            "filename": filename,
+            "resume_path": str(resume_path),
+            "scores": {
+                "cv_scoring": scores["cv_scoring"],
+                "skills_match_score": scores["skills_match_score"],
+                "education_level": scores["education_level"],
+                "years_experience": scores["years_experience"],
+                "current_position": scores["current_position"]
+            }
+        }
+    else:
+        # CV saved but scoring failed
+        return {
+            "success": True,
+            "candidate_id": candidate_id,
+            "filename": filename,
+            "resume_path": str(resume_path),
+            "scores": None,
+            "message": "CV uploaded but automatic scoring could not be completed"
+        }
+
+
 # ============================================================================
 # AI RESUME PARSING
 # ============================================================================
@@ -483,7 +569,24 @@ async def create_candidate_from_resume(
             CandidateUpdate(notes=f"{candidate.notes or ''}\nResume: {resume_path}".strip())
         )
 
-        # Refresh to get updated data
+        # Get recruitment request for job details
+        request = await recruitment_service.get_request(session, recruitment_request_id)
+        if request:
+            # Automatically score the CV against job requirements
+            job_description = request.job_description or f"Position: {request.position_title}"
+            required_skills = request.required_skills if hasattr(request, 'required_skills') and request.required_skills else []
+            
+            await score_candidate_cv(
+                candidate_id=candidate.id,
+                cv_content=content,
+                filename=file.filename or "resume.pdf",
+                job_title=request.position_title,
+                job_description=job_description,
+                required_skills=required_skills,
+                db_session=session
+            )
+
+        # Refresh to get updated data including scores
         candidate = await recruitment_service.get_candidate(session, candidate.id)
 
         return candidate

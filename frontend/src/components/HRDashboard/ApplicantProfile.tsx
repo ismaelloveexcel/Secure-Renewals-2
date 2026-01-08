@@ -29,7 +29,7 @@
  *    - Offer readiness
  */
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 // CV-Extracted Data (System-controlled)
 interface CVExtractedData {

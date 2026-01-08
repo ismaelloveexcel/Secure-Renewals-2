@@ -10,7 +10,7 @@
  * - See key metrics for each position
  */
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { getEntityColor } from '../BasePass'
 
 interface RecruitmentPassSummary {

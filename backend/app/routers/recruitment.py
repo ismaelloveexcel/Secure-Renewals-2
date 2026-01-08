@@ -327,8 +327,8 @@ async def get_candidates_for_request(
             ).order_by(Assessment.created_at.desc())
         )
         assessment = assessment_result.scalar_one_or_none()
-        assessment_status = assessment.status if assessment else 'none'
-        assessment_score = assessment.score if assessment else None
+        assessment_status = getattr(assessment, 'status', None) if assessment else 'none'
+        assessment_score = getattr(assessment, 'score', None) if assessment else None
         
         # Determine interview status from candidate status
         interview_status = 'none'

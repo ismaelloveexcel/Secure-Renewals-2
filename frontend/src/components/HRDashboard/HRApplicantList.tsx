@@ -22,7 +22,7 @@
  * - All stage movements are HR/System triggered
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { getEntityColor } from '../BasePass'
 
 interface CandidateListItem {
@@ -30,6 +30,7 @@ interface CandidateListItem {
   candidate_number: string
   // Identity (from CV - auto)
   full_name: string
+  email?: string
   current_job_title?: string
   current_company?: string
   // Role Fit
@@ -80,6 +81,9 @@ const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
   hired: { bg: 'bg-green-100', text: 'text-green-700' },
   rejected: { bg: 'bg-red-100', text: 'text-red-700' }
 }
+
+// Sticky header offset (calculated from header height)
+const BULK_ACTIONS_TOP_OFFSET = 180
 
 export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRApplicantListProps) {
   const [candidates, setCandidates] = useState<CandidateListItem[]>([])
@@ -152,11 +156,12 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
       result = result.filter(c => c.assessment_status === filterAssessment)
     }
 
-    // Search filter (name, job title, company, position)
+    // Search filter (name, job title, company, position, email)
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       result = result.filter(c => 
         c.full_name.toLowerCase().includes(query) ||
+        (c.email?.toLowerCase() || '').includes(query) ||
         (c.current_job_title?.toLowerCase() || '').includes(query) ||
         (c.current_company?.toLowerCase() || '').includes(query) ||
         c.candidate_number.toLowerCase().includes(query) ||
@@ -319,7 +324,7 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
 
       {/* Bulk Actions Bar */}
       {showBulkActions && (
-        <div className="bg-purple-50 border-b border-purple-100 px-4 py-3 flex items-center justify-between sticky top-[180px] z-10">
+        <div className={`bg-purple-50 border-b border-purple-100 px-4 py-3 flex items-center justify-between sticky z-10`} style={{ top: `${BULK_ACTIONS_TOP_OFFSET}px` }}>
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-purple-700">
               {selectedCandidates.size} selected

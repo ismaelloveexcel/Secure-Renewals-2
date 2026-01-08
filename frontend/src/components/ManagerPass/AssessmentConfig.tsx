@@ -20,7 +20,7 @@
  * 4. Pass/Fail decision → Proceed to interview or reject
  */
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 
 interface AssessmentConfigProps {
   recruitmentRequestId: number
@@ -45,6 +45,7 @@ interface AssessmentConfigData {
   status: 'not_required' | 'required' | 'sent' | 'completed' | 'failed' | 'waived'
   // Details
   assessment_link?: string
+  template_id?: number
   notes?: string
   // Results (after completion)
   score?: number
@@ -61,13 +62,23 @@ interface AssessmentTemplate {
 }
 
 // Assessment status labels - LOCKED
-const STATUS_LABELS = {
+const STATUS_LABELS: Record<string, string> = {
   not_required: 'Not Required',
   required: 'Assessment Required',
   sent: 'Sent to Candidate',
   completed: 'Completed',
   failed: 'Failed',
   waived: 'Waived'
+}
+
+// Status styles
+const STATUS_STYLES: Record<string, string> = {
+  not_required: 'bg-slate-100 text-slate-500',
+  required: 'bg-amber-100 text-amber-700',
+  sent: 'bg-blue-100 text-blue-700',
+  completed: 'bg-emerald-100 text-emerald-700',
+  failed: 'bg-red-100 text-red-700',
+  waived: 'bg-slate-100 text-slate-600'
 }
 
 export function AssessmentConfig({
@@ -85,6 +96,7 @@ export function AssessmentConfig({
 }: AssessmentConfigProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [config, setConfig] = useState<AssessmentConfigData>({
     assessment_type: null,
     triggered_by: null,
@@ -110,7 +122,10 @@ export function AssessmentConfig({
   const fetchConfig = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${API_URL}/recruitment/requests/${recruitmentRequestId}/assessment-config`, {
+      const endpoint = candidateId 
+        ? `${API_URL}/recruitment/candidates/${candidateId}/assessment-config`
+        : `${API_URL}/recruitment/requests/${recruitmentRequestId}/assessment-config`
+      const response = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       if (response.ok) {
@@ -138,16 +153,31 @@ export function AssessmentConfig({
     }
   }
 
-  const handleTechnicalToggle = async (required: boolean) => {
-    const newConfig = {
+  const handleAssessmentTypeSelect = async (type: 'technical' | 'soft_skill' | 'combined') => {
+    if (readonly) return
+    setErrorMessage(null)
+    
+    // Validate who can trigger what
+    if (type === 'technical' && !canTriggerTechnical) {
+      setErrorMessage('Only managers can trigger technical assessments')
+      return
+    }
+    if ((type === 'soft_skill' || type === 'combined') && !canTriggerSoftSkill) {
+      setErrorMessage('Only HR can trigger soft skill or combined assessments')
+      return
+    }
+    
+    const newConfig: AssessmentConfigData = {
       ...config,
-      technical_required: required,
-      technical_status: required ? 'pending_generation' as const : 'not_required' as const
+      assessment_type: type,
+      triggered_by: viewMode,
+      linked_stage: currentStage,
+      status: 'required'
     }
     setConfig(newConfig)
 
-    if (required && jobDescription) {
-      // Trigger assessment generation
+    // For technical assessments, trigger auto-generation if job description available
+    if (type === 'technical' && jobDescription) {
       setGeneratingAssessment(true)
       try {
         const response = await fetch(`${API_URL}/recruitment/requests/${recruitmentRequestId}/generate-assessment`, {
@@ -166,8 +196,7 @@ export function AssessmentConfig({
           const data = await response.json()
           setConfig(prev => ({
             ...prev,
-            technical_status: 'pending_hr_review',
-            technical_assessment_link: data.assessment_link
+            assessment_link: data.assessment_link
           }))
         }
       } catch (err) {
@@ -178,25 +207,32 @@ export function AssessmentConfig({
     }
   }
 
-  const handleSoftSkillsToggle = (required: boolean) => {
-    setConfig(prev => ({
-      ...prev,
-      soft_skills_required: required,
-      soft_skills_status: required ? 'pending_hr_review' : 'not_required'
-    }))
+  const handleClearAssessment = () => {
+    if (readonly) return
+    setConfig({
+      assessment_type: null,
+      triggered_by: null,
+      linked_stage: currentStage,
+      status: 'not_required',
+      notes: ''
+    })
   }
 
   const handleTemplateSelect = (templateId: number) => {
+    if (readonly) return
     setConfig(prev => ({
       ...prev,
-      soft_skills_template_id: templateId
+      template_id: templateId
     }))
   }
 
   const saveConfig = async () => {
     try {
       setSaving(true)
-      const response = await fetch(`${API_URL}/recruitment/requests/${recruitmentRequestId}/assessment-config`, {
+      const endpoint = candidateId 
+        ? `${API_URL}/recruitment/candidates/${candidateId}/assessment-config`
+        : `${API_URL}/recruitment/requests/${recruitmentRequestId}/assessment-config`
+      const response = await fetch(endpoint, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -215,17 +251,10 @@ export function AssessmentConfig({
     }
   }
 
-  const getStatusBadge = (status: keyof typeof STATUS_LABELS) => {
-    const statusStyles = {
-      not_required: 'bg-slate-100 text-slate-500',
-      pending_generation: 'bg-amber-100 text-amber-700',
-      pending_hr_review: 'bg-purple-100 text-purple-700',
-      approved: 'bg-emerald-100 text-emerald-700',
-      sent_to_candidate: 'bg-blue-100 text-blue-700'
-    }
+  const getStatusBadge = (status: string) => {
     return (
-      <span className={`text-[9px] px-2 py-0.5 rounded-full font-semibold ${statusStyles[status]}`}>
-        {STATUS_LABELS[status]}
+      <span className={`text-[9px] px-2 py-0.5 rounded-full font-semibold ${STATUS_STYLES[status] || STATUS_STYLES.not_required}`}>
+        {STATUS_LABELS[status] || 'Unknown'}
       </span>
     )
   }
@@ -239,6 +268,8 @@ export function AssessmentConfig({
     )
   }
 
+  const isAssessmentRequired = config.assessment_type !== null
+
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden max-w-md w-full">
       {/* Header */}
@@ -247,6 +278,7 @@ export function AssessmentConfig({
           <div>
             <h3 className="text-base font-bold text-slate-800">Assessment Configuration</h3>
             <p className="text-xs text-slate-500 mt-0.5">{positionTitle}</p>
+            <p className="text-[10px] text-slate-400">Stage: {currentStage}</p>
           </div>
           {onClose && (
             <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
@@ -259,147 +291,194 @@ export function AssessmentConfig({
       </div>
 
       <div className="p-5 space-y-5">
-        {/* Technical Assessment */}
-        <div className="rounded-xl border border-slate-200 p-4">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${entityColor}15` }}>
-                <svg className="w-4 h-4" style={{ color: entityColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-800">Technical Assessment</p>
-                <p className="text-[10px] text-slate-400">Auto-generated from Job Description</p>
-              </div>
-            </div>
-            {getStatusBadge(config.technical_status)}
-          </div>
-
-          {/* Toggle */}
-          <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
-            <span className="text-xs text-slate-600">Required?</span>
-            <button
-              onClick={() => !readonly && handleTechnicalToggle(!config.technical_required)}
-              disabled={readonly || generatingAssessment}
-              className={`relative w-10 h-5 rounded-full transition-colors ${
-                config.technical_required ? '' : 'bg-slate-300'
-              } ${readonly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-              style={config.technical_required ? { backgroundColor: entityColor } : {}}
-            >
-              <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                config.technical_required ? 'translate-x-5' : ''
-              }`} />
-            </button>
-          </div>
-
-          {generatingAssessment && (
-            <div className="mt-3 flex items-center gap-2 p-2 bg-amber-50 rounded-lg">
-              <div className="w-4 h-4 border-2 border-amber-200 border-t-amber-600 rounded-full animate-spin" />
-              <span className="text-xs text-amber-700">Generating assessment from JD...</span>
-            </div>
-          )}
-
-          {config.technical_required && config.technical_status === 'pending_hr_review' && (
-            <div className="mt-3 p-2 bg-purple-50 rounded-lg">
-              <p className="text-[10px] text-purple-700">
-                <strong>Next:</strong> HR will review the generated assessment before it's sent to candidates.
-              </p>
-            </div>
-          )}
-
-          {config.technical_assessment_link && (
-            <div className="mt-3">
-              <a 
-                href={config.technical_assessment_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-medium hover:underline"
-                style={{ color: entityColor }}
+        {/* Error Message Display */}
+        {errorMessage && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
+            <svg className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-xs text-red-700">{errorMessage}</p>
+              <button 
+                onClick={() => setErrorMessage(null)} 
+                className="text-[10px] text-red-500 hover:text-red-700 mt-1"
               >
-                Preview Assessment →
-              </a>
+                Dismiss
+              </button>
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Current Status */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-slate-600">Current Status:</span>
+          {getStatusBadge(config.status)}
         </div>
 
-        {/* Soft Skills Assessment */}
-        <div className="rounded-xl border border-slate-200 p-4">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-50">
-                <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-800">Soft Skills Assessment</p>
-                <p className="text-[10px] text-slate-400">Uses HR-defined template</p>
-              </div>
-            </div>
-            {getStatusBadge(config.soft_skills_status)}
+        {/* Assessment Type Selection */}
+        {!isAssessmentRequired ? (
+          <div className="space-y-3">
+            <p className="text-xs font-medium text-slate-700">Select Assessment Type:</p>
+            
+            {/* Technical Assessment - Manager Only */}
+            {canTriggerTechnical && (
+              <button
+                onClick={() => handleAssessmentTypeSelect('technical')}
+                disabled={readonly || generatingAssessment}
+                className="w-full p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${entityColor}15` }}>
+                    <svg className="w-5 h-5" style={{ color: entityColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Technical Assessment</p>
+                    <p className="text-[10px] text-slate-500">Manager-triggered • Tests role competence</p>
+                  </div>
+                </div>
+              </button>
+            )}
+
+            {/* Soft Skill Assessment - HR Only */}
+            {canTriggerSoftSkill && (
+              <button
+                onClick={() => handleAssessmentTypeSelect('soft_skill')}
+                disabled={readonly}
+                className="w-full p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-emerald-50">
+                    <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Soft Skill Assessment</p>
+                    <p className="text-[10px] text-slate-500">HR-triggered • Tests culture & behavior</p>
+                  </div>
+                </div>
+              </button>
+            )}
+
+            {/* Combined Assessment - HR Only */}
+            {canTriggerCombined && (
+              <button
+                onClick={() => handleAssessmentTypeSelect('combined')}
+                disabled={readonly}
+                className="w-full p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-purple-50">
+                    <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Combined Assessment</p>
+                    <p className="text-[10px] text-slate-500">HR + Manager • For senior/critical roles</p>
+                  </div>
+                </div>
+              </button>
+            )}
           </div>
-
-          {/* Toggle */}
-          <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
-            <span className="text-xs text-slate-600">Required?</span>
-            <button
-              onClick={() => !readonly && handleSoftSkillsToggle(!config.soft_skills_required)}
-              disabled={readonly}
-              className={`relative w-10 h-5 rounded-full transition-colors ${
-                config.soft_skills_required ? 'bg-emerald-500' : 'bg-slate-300'
-              } ${readonly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-            >
-              <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                config.soft_skills_required ? 'translate-x-5' : ''
-              }`} />
-            </button>
-          </div>
-
-          {/* Template Selection */}
-          {config.soft_skills_required && templates.length > 0 && (
-            <div className="mt-3">
-              <p className="text-[10px] text-slate-500 mb-2">Select Template:</p>
-              <div className="space-y-1.5">
-                {templates.filter(t => t.type === 'soft_skills').map(template => (
-                  <button
-                    key={template.id}
-                    onClick={() => !readonly && handleTemplateSelect(template.id)}
-                    disabled={readonly}
-                    className={`w-full p-2 rounded-lg text-left transition-colors ${
-                      config.soft_skills_template_id === template.id
-                        ? 'bg-emerald-50 border-2 border-emerald-500'
-                        : 'bg-white border border-slate-200 hover:border-slate-300'
-                    } ${readonly ? 'opacity-50' : ''}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-700">{template.name}</span>
-                      <span className="text-[9px] text-slate-400">{template.duration_minutes} min</span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5">{template.description}</p>
-                    {template.is_default && (
-                      <span className="inline-block mt-1 text-[8px] px-1.5 py-0.5 bg-emerald-100 text-emerald-600 rounded font-medium">
-                        Default
-                      </span>
-                    )}
-                  </button>
-                ))}
+        ) : (
+          /* Assessment Selected - Show Details */
+          <div className="rounded-xl border border-slate-200 p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" 
+                  style={{ 
+                    backgroundColor: config.assessment_type === 'technical' ? `${entityColor}15` :
+                      config.assessment_type === 'soft_skill' ? '#ecfdf5' : '#f3e8ff'
+                  }}>
+                  <svg className="w-4 h-4" 
+                    style={{ 
+                      color: config.assessment_type === 'technical' ? entityColor :
+                        config.assessment_type === 'soft_skill' ? '#059669' : '#9333ea'
+                    }} 
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800 capitalize">
+                    {config.assessment_type?.replace('_', ' ')} Assessment
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    Triggered by: {config.triggered_by?.toUpperCase()}
+                  </p>
+                </div>
               </div>
+              {!readonly && config.status === 'required' && (
+                <button
+                  onClick={handleClearAssessment}
+                  className="text-xs text-red-500 hover:text-red-700"
+                >
+                  Remove
+                </button>
+              )}
             </div>
-          )}
 
-          {config.soft_skills_required && templates.filter(t => t.type === 'soft_skills').length === 0 && (
-            <div className="mt-3 p-2 bg-amber-50 rounded-lg">
-              <p className="text-[10px] text-amber-700">
-                No soft skills templates available. HR will create templates in the portal.
-              </p>
-            </div>
-          )}
-        </div>
+            {generatingAssessment && (
+              <div className="flex items-center gap-2 p-2 bg-amber-50 rounded-lg mb-3">
+                <div className="w-4 h-4 border-2 border-amber-200 border-t-amber-600 rounded-full animate-spin" />
+                <span className="text-xs text-amber-700">Generating assessment...</span>
+              </div>
+            )}
+
+            {config.assessment_link && (
+              <div className="mb-3">
+                <a 
+                  href={config.assessment_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-medium hover:underline"
+                  style={{ color: entityColor }}
+                >
+                  Preview Assessment →
+                </a>
+              </div>
+            )}
+
+            {/* Template Selection for Soft Skills */}
+            {config.assessment_type === 'soft_skill' && templates.filter(t => t.type === 'soft_skill').length > 0 && (
+              <div className="pt-3 border-t border-slate-100">
+                <p className="text-[10px] text-slate-500 mb-2">Select Template:</p>
+                <div className="space-y-1.5">
+                  {templates.filter(t => t.type === 'soft_skill').map(template => (
+                    <button
+                      key={template.id}
+                      onClick={() => handleTemplateSelect(template.id)}
+                      disabled={readonly}
+                      className={`w-full p-2 rounded-lg text-left transition-colors ${
+                        config.template_id === template.id
+                          ? 'bg-emerald-50 border-2 border-emerald-500'
+                          : 'bg-white border border-slate-200 hover:border-slate-300'
+                      } ${readonly ? 'opacity-50' : ''}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-slate-700">{template.name}</span>
+                        <span className="text-[9px] text-slate-400">{template.duration_minutes} min</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5">{template.description}</p>
+                      {template.is_default && (
+                        <span className="inline-block mt-1 text-[8px] px-1.5 py-0.5 bg-emerald-100 text-emerald-600 rounded font-medium">
+                          Default
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Notes */}
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1.5">Notes for HR</label>
+          <label className="block text-xs font-medium text-slate-600 mb-1.5">Notes</label>
           <textarea
             value={config.notes || ''}
             onChange={(e) => !readonly && setConfig(prev => ({ ...prev, notes: e.target.value }))}
@@ -419,8 +498,9 @@ export function AssessmentConfig({
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-[10px] text-slate-500 leading-relaxed">
-              <strong>How it works:</strong> Once you enable assessments, HR will review and approve them 
-              before sending to candidates. Candidates will see "Assessment Pending" in their next actions.
+              <strong>Role-based control:</strong> Manager triggers technical assessments. 
+              HR triggers soft skill assessments. Combined assessments require both. 
+              Candidate sees only "Assessment in Progress" - no type labels exposed.
             </p>
           </div>
         </div>

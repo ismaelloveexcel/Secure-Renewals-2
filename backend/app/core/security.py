@@ -45,7 +45,7 @@ def require_role(allowed: Optional[List[str]] = None):
                         employee = result.scalar_one_or_none()
                         if employee and employee.is_active:
                             role = employee.role
-                except JWTError:
+                except PyJWTError:
                     pass
         
         if not role:

@@ -64,8 +64,8 @@ def _decode_dev_token(token: str, settings: Settings) -> Dict[str, Any]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid development token")
 
     try:
-        return jwt.get_unverified_claims(token)
-    except JWTError:
+        return jwt.decode(token, options={"verify_signature": False})
+    except PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Malformed development token")
 
 
@@ -79,7 +79,7 @@ async def decode_jwt(token: str, settings: Settings | None = None) -> Dict[str, 
 
     try:
         unverified_header = jwt.get_unverified_header(token)
-    except JWTError:
+    except PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token header")
 
     kid = unverified_header.get("kid")
@@ -89,7 +89,6 @@ async def decode_jwt(token: str, settings: Settings | None = None) -> Dict[str, 
 
     key_data = jwks.get(kid)
     if key_data is None:
-        # clear cache and try once more to handle rotation
         _JWKS_FETCHED_AT = None
         jwks = await _fetch_jwks(settings)
         key_data = jwks.get(kid)
@@ -99,17 +98,15 @@ async def decode_jwt(token: str, settings: Settings | None = None) -> Dict[str, 
 
     algorithm = key_data.get("alg", "RS256")
     try:
-        signing_key = jwk.construct(key_data, algorithm=algorithm)
-        public_key = signing_key.to_pem().decode("utf-8")
+        signing_key = PyJWK.from_dict(key_data, algorithm=algorithm)
         claims = jwt.decode(
             token,
-            public_key,
+            signing_key.key,
             algorithms=[algorithm],
             audience=settings.auth_audience,
             issuer=settings.auth_issuer,
-            options={"verify_at_hash": False},
         )
-    except JWTError as exc:
+    except PyJWTError as exc:
         logger.warning("Token validation failed", exc_info=exc)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token validation failed")
 

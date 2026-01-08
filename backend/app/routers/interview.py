@@ -13,7 +13,8 @@ from app.schemas.interview import (
     SlotBookingRequest, SlotConfirmRequest,
     PassMessageCreate, PassMessageResponse,
     RecruitmentDocumentCreate, RecruitmentDocumentResponse,
-    CandidatePassData, ManagerPassData
+    CandidatePassData, ManagerPassData,
+    FeedbackCreate, FeedbackResponse, CandidateListItem
 )
 
 router = APIRouter(prefix="/interview", tags=["Interview Scheduling"])
@@ -167,3 +168,22 @@ async def get_manager_pass(
 ):
     """Get manager pass data."""
     return await interview_service.get_manager_pass_data(session, recruitment_request_id, manager_id)
+
+
+@router.post("/feedback", response_model=FeedbackResponse)
+async def submit_feedback(
+    data: FeedbackCreate,
+    session: AsyncSession = Depends(get_session)
+):
+    """Submit feedback about recruitment process. Accessible via pass token."""
+    return await interview_service.submit_feedback(session, data)
+
+
+@router.get("/feedback/{recruitment_request_id}", response_model=List[FeedbackResponse])
+async def get_feedback(
+    recruitment_request_id: int,
+    session: AsyncSession = Depends(get_session),
+    _: str = Depends(require_role(["admin", "hr"]))
+):
+    """Get all feedback for a recruitment request."""
+    return await interview_service.get_feedback(session, recruitment_request_id)

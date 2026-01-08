@@ -76,6 +76,15 @@ interface ManagerPassProps {
   onBack?: () => void
 }
 
+interface CandidateListItem {
+  id: number
+  candidate_number: string
+  full_name: string
+  stage: string
+  status: string
+  email: string
+}
+
 const MANAGER_TABS: PassTab[] = [
   { id: 'home', label: 'Home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
   { id: 'documents', label: 'Documents', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
@@ -90,6 +99,13 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
   const [activeTab, setActiveTab] = useState<ActiveTab>('home')
   const [showInterviewSetup, setShowInterviewSetup] = useState(false)
   const [showQrModal, setShowQrModal] = useState(false)
+  const [showCandidatesList, setShowCandidatesList] = useState(false)
+  const [candidates, setCandidates] = useState<CandidateListItem[]>([])
+  const [loadingCandidates, setLoadingCandidates] = useState(false)
+  const [feedbackRating, setFeedbackRating] = useState(0)
+  const [feedbackText, setFeedbackText] = useState('')
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
   const [setupForm, setSetupForm] = useState({
     technical_assessment_required: false,
     interview_format: 'online',
@@ -198,6 +214,54 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
     }
   }
 
+  const fetchCandidates = async () => {
+    try {
+      setLoadingCandidates(true)
+      const response = await fetch(`${API_URL}/recruitment/requests/${recruitmentRequestId}/candidates`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (!response.ok) throw new Error('Failed to load candidates')
+      const data = await response.json()
+      setCandidates(data)
+    } catch (err) {
+      console.error('Failed to load candidates:', err)
+    } finally {
+      setLoadingCandidates(false)
+    }
+  }
+
+  const handleQrClick = async () => {
+    await fetchCandidates()
+    setShowCandidatesList(true)
+  }
+
+  const submitFeedback = async () => {
+    if (feedbackRating === 0) return
+    try {
+      setFeedbackSubmitting(true)
+      const response = await fetch(`${API_URL}/interview/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          recruitment_request_id: recruitmentRequestId,
+          manager_id: managerId,
+          rating: feedbackRating,
+          feedback_text: feedbackText,
+          feedback_type: 'manager_experience'
+        })
+      })
+      if (!response.ok) throw new Error('Failed to submit feedback')
+      setFeedbackSubmitted(true)
+    } catch (err) {
+      alert('Failed to submit feedback. Please try again.')
+    } finally {
+      setFeedbackSubmitting(false)
+    }
+  }
+
   const getActionRequired = () => {
     if (!passData) return null
     
@@ -278,9 +342,12 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
         </div>
       </div>
       
-      {/* Info Card - overlapping the header */}
+      {/* Info Card - overlapping the header with glassmorphism */}
       <div className="px-4 -mt-3">
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-lg p-4 relative overflow-hidden">
+        <div 
+          className="rounded-2xl border border-white/20 shadow-lg p-4 relative overflow-hidden backdrop-blur-sm"
+          style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+        >
           <div className="flex items-start gap-3">
             {/* Left: Info */}
             <div className="flex-1 min-w-0">
@@ -293,26 +360,27 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
               <p className="text-sm font-medium text-slate-600">{passData.department}</p>
             </div>
             
-            {/* Right: QR Code */}
+            {/* Right: QR Code - Click to view applicants */}
             <div 
-              onClick={() => setShowQrModal(true)}
-              className="flex-shrink-0 relative p-2 bg-white rounded-xl cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group border border-slate-100"
+              onClick={handleQrClick}
+              className="flex-shrink-0 relative p-2 bg-white/80 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group border border-white/30"
             >
               <QRCodeSVG 
                 value={getPassUrl()} 
                 size={60}
                 level="H"
-                fgColor={entityColor}
+                fgColor="#1800ad"
               />
+              <p className="text-[7px] text-center text-slate-400 mt-1">View Applicants</p>
             </div>
           </div>
           
           {/* Stage/Status Row */}
-          <div className="flex gap-6 mt-4 pt-3 border-t border-slate-100">
+          <div className="flex gap-6 mt-4 pt-3 border-t border-slate-200/50">
             <div className="flex items-center gap-2">
               <div 
                 className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: entityColor }}
+                style={{ backgroundColor: '#1800ad' }}
               />
               <div>
                 <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Stage</p>
@@ -334,7 +402,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
           
           {/* Active Badge - Positioned in card */}
           <div className="absolute top-3 right-3">
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-full">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50/80 rounded-full">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[9px] font-bold text-emerald-600 uppercase">Active</span>
             </div>
@@ -382,15 +450,24 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             <div>
               <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Pipeline Overview</p>
               <div className="grid grid-cols-3 gap-2">
-                <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-center">
+                <div 
+                  className="p-3 rounded-xl border border-white/30 shadow-sm text-center backdrop-blur-sm"
+                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+                >
                   <p className="text-lg font-bold text-slate-800">{passData.total_candidates || 0}</p>
                   <p className="text-[9px] text-slate-400">Total</p>
                 </div>
-                <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-center">
-                  <p className="text-lg font-bold" style={{ color: entityColor }}>{passData.pipeline_stats['interview'] || 0}</p>
+                <div 
+                  className="p-3 rounded-xl border border-white/30 shadow-sm text-center backdrop-blur-sm"
+                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+                >
+                  <p className="text-lg font-bold" style={{ color: '#1800ad' }}>{passData.pipeline_stats['interview'] || 0}</p>
                   <p className="text-[9px] text-slate-400">Interview</p>
                 </div>
-                <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm text-center">
+                <div 
+                  className="p-3 rounded-xl border border-white/30 shadow-sm text-center backdrop-blur-sm"
+                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+                >
                   <p className="text-lg font-bold text-emerald-600">{passData.pipeline_stats['offer'] || 0}</p>
                   <p className="text-[9px] text-slate-400">Offer</p>
                 </div>
@@ -398,14 +475,17 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             </div>
 
             {/* Quick Status Card */}
-            <div className="p-3 rounded-xl bg-white border border-slate-100 shadow-sm">
+            <div 
+              className="p-3 rounded-xl border border-white/30 shadow-sm backdrop-blur-sm"
+              style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div 
                     className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: `${entityColor}15` }}
+                    style={{ backgroundColor: 'rgba(24, 0, 173, 0.1)' }}
                   >
-                    <svg className="w-4 h-4" style={{ color: entityColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4 h-4" style={{ color: '#1800ad' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -416,7 +496,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
                 </div>
                 <span 
                   className="text-[9px] px-2 py-1 rounded-full font-semibold"
-                  style={{ backgroundColor: `${entityColor}15`, color: entityColor }}
+                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.1)', color: '#1800ad' }}
                 >
                   {passData.position_status}
                 </span>
@@ -438,17 +518,22 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-slate-800">Documents</h3>
-                <p className="text-[10px] text-slate-400">Recruitment documents</p>
+                <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Documents</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="rounded-xl bg-white p-4 border border-slate-100 shadow-sm">
+              <div 
+                className="rounded-xl p-4 border border-white/30 shadow-sm backdrop-blur-sm"
+                style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-xl bg-slate-50 p-2.5">
-                      <svg className="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div 
+                      className="rounded-xl p-2.5 border border-white/30"
+                      style={{ backgroundColor: 'rgba(24, 0, 173, 0.08)' }}
+                    >
+                      <svg className="h-5 w-5" style={{ color: '#1800ad' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
@@ -467,11 +552,17 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
                 </div>
               </div>
 
-              <div className="rounded-xl bg-white p-4 border border-slate-100 shadow-sm">
+              <div 
+                className="rounded-xl p-4 border border-white/30 shadow-sm backdrop-blur-sm"
+                style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-xl bg-slate-50 p-2.5">
-                      <svg className="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div 
+                      className="rounded-xl p-2.5 border border-white/30"
+                      style={{ backgroundColor: 'rgba(24, 0, 173, 0.08)' }}
+                    >
+                      <svg className="h-5 w-5" style={{ color: '#1800ad' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
                     </div>
@@ -759,43 +850,111 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
 
       case 'engage':
         return (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-slate-800">Contact HR</h3>
-                <p className="text-[10px] text-slate-400">Get support from HR team</p>
+          <div className="space-y-4">
+            {/* Contact HR Section */}
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Contact HR</p>
+              <div className="grid grid-cols-2 gap-3">
+                <a 
+                  href={`https://wa.me/${passData.hr_whatsapp?.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/30 hover:shadow-md transition-all backdrop-blur-sm"
+                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+                >
+                  <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-700">WhatsApp</span>
+                </a>
+                
+                <a 
+                  href={`mailto:${passData.hr_email}`}
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/30 hover:shadow-md transition-all backdrop-blur-sm"
+                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#1800ad' }}>
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-700">Email</span>
+                </a>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <a 
-                href={`https://wa.me/${passData.hr_whatsapp?.replace(/\D/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 transition-colors"
+            {/* Feedback Section */}
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Feedback & Suggestions</p>
+              <div 
+                className="rounded-xl p-4 border border-white/30 backdrop-blur-sm"
+                style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
               >
-                <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                </div>
-                <span className="text-xs font-semibold text-emerald-700">WhatsApp</span>
-              </a>
-              
-              <a 
-                href={`mailto:${passData.hr_email}`}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors"
-              >
-                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                  </svg>
-                </div>
-                <span className="text-xs font-semibold text-blue-700">Email</span>
-              </a>
+                {feedbackSubmitted ? (
+                  <div className="text-center py-4">
+                    <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-800">Thank you!</p>
+                    <p className="text-[11px] text-slate-500">Your feedback helps us improve</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xs font-medium text-slate-700 mb-3">How is your experience with the recruitment process?</p>
+                    
+                    {/* Star Rating */}
+                    <div className="flex gap-1 mb-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => setFeedbackRating(star)}
+                          className="p-1 transition-transform hover:scale-110"
+                        >
+                          <svg 
+                            className={`w-7 h-7 ${star <= feedbackRating ? 'text-amber-400' : 'text-slate-200'}`} 
+                            fill={star <= feedbackRating ? 'currentColor' : 'none'} 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor" 
+                            strokeWidth={1.5}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Feedback Text */}
+                    <textarea
+                      value={feedbackText}
+                      onChange={(e) => setFeedbackText(e.target.value)}
+                      placeholder="Share your suggestions or feedback..."
+                      className="w-full p-3 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1800ad]/20 focus:border-[#1800ad] resize-none bg-white/80"
+                      rows={3}
+                    />
+
+                    {/* Submit Button */}
+                    <button
+                      onClick={submitFeedback}
+                      disabled={feedbackRating === 0 || feedbackSubmitting}
+                      className="w-full mt-3 py-2.5 rounded-lg text-xs font-semibold text-white transition-all disabled:opacity-50"
+                      style={{ backgroundColor: '#1800ad' }}
+                    >
+                      {feedbackSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="rounded-xl bg-slate-50 p-4">
+            {/* HR Contact Info */}
+            <div 
+              className="rounded-xl p-4 border border-white/30 backdrop-blur-sm"
+              style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+            >
               <p className="text-xs font-medium text-slate-700 mb-1">HR Contact</p>
               <p className="text-[11px] text-slate-500">{passData.hr_email}</p>
               {passData.hr_whatsapp && (
@@ -826,6 +985,82 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
         {renderContent()}
       </BasePassContainer>
 
+      {/* Candidates List Modal */}
+      {showCandidatesList && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowCandidatesList(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Applicants</h3>
+                <p className="text-[11px] text-slate-500">{passData.position_title}</p>
+              </div>
+              <button
+                onClick={() => setShowCandidatesList(false)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4">
+              {loadingCandidates ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-8 h-8 border-2 border-slate-200 border-t-[#1800ad] rounded-full animate-spin"></div>
+                </div>
+              ) : candidates.length === 0 ? (
+                <div className="text-center py-8">
+                  <svg className="w-12 h-12 text-slate-200 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <p className="text-sm text-slate-500">No applicants yet</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {candidates.map((candidate) => (
+                    <div 
+                      key={candidate.id} 
+                      className="p-3 rounded-xl border border-white/30 backdrop-blur-sm"
+                      style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-slate-800 truncate">{candidate.full_name}</p>
+                          <p className="text-[10px] text-slate-400 font-mono">{candidate.candidate_number}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span 
+                            className="text-[9px] px-2 py-1 rounded-full font-semibold capitalize"
+                            style={{ 
+                              backgroundColor: candidate.stage === 'offer' ? '#dcfce7' : 
+                                             candidate.stage === 'interview' ? 'rgba(24, 0, 173, 0.1)' : 
+                                             '#f1f5f9',
+                              color: candidate.stage === 'offer' ? '#166534' : 
+                                    candidate.stage === 'interview' ? '#1800ad' : 
+                                    '#64748b'
+                            }}
+                          >
+                            {candidate.stage}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">{candidate.email}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* QR Modal */}
       {showQrModal && (
         <div 
@@ -837,12 +1072,12 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold text-slate-800 mb-4">Manager Pass QR</h3>
-            <div className="inline-block p-4 bg-white rounded-xl border-2 mb-4" style={{ borderColor: entityColor }}>
+            <div className="inline-block p-4 bg-white rounded-xl border-2 mb-4" style={{ borderColor: '#1800ad' }}>
               <QRCodeSVG 
                 value={getPassUrl()} 
                 size={200}
                 level="H"
-                fgColor={entityColor}
+                fgColor="#1800ad"
               />
             </div>
             <p className="text-sm text-slate-500 mb-4">Scan to access manager pass</p>

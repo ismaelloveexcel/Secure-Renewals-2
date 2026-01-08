@@ -120,3 +120,23 @@ class RecruitmentDocument(Base):
     
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class PassFeedback(Base):
+    """Feedback from managers or candidates about recruitment process."""
+    
+    __tablename__ = "pass_feedback"
+    
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    recruitment_request_id: Mapped[int] = mapped_column(Integer, ForeignKey("recruitment_requests.id", ondelete="CASCADE"), nullable=False)
+    
+    # Who submitted
+    manager_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    candidate_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("candidates.id"), nullable=True)
+    
+    # Feedback
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5 stars
+    feedback_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    feedback_type: Mapped[str] = mapped_column(String(50), default="general")  # manager_experience, candidate_experience, general
+    
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -619,5 +619,40 @@ class InterviewService:
         logs = result.scalars().all()
         return [ActivityLogResponse.model_validate(l) for l in logs]
 
+    async def submit_feedback(
+        self, session: AsyncSession, data
+    ):
+        """Submit feedback about recruitment process."""
+        from app.models.interview import PassFeedback
+        from app.schemas.interview import FeedbackResponse
+        
+        feedback = PassFeedback(
+            recruitment_request_id=data.recruitment_request_id,
+            manager_id=data.manager_id,
+            candidate_id=data.candidate_id,
+            rating=data.rating,
+            feedback_text=data.feedback_text,
+            feedback_type=data.feedback_type
+        )
+        session.add(feedback)
+        await session.commit()
+        await session.refresh(feedback)
+        return FeedbackResponse.model_validate(feedback)
+
+    async def get_feedback(
+        self, session: AsyncSession, recruitment_request_id: int
+    ):
+        """Get all feedback for a recruitment request."""
+        from app.models.interview import PassFeedback
+        from app.schemas.interview import FeedbackResponse
+        
+        result = await session.execute(
+            select(PassFeedback).where(
+                PassFeedback.recruitment_request_id == recruitment_request_id
+            ).order_by(PassFeedback.created_at.desc())
+        )
+        feedback_list = result.scalars().all()
+        return [FeedbackResponse.model_validate(f) for f in feedback_list]
+
 
 interview_service = InterviewService()

@@ -247,3 +247,39 @@ class ManagerPassData(BaseModel):
     # Contact
     hr_whatsapp: str = "+971564966546"
     hr_email: str = "HR@baynunah.ae"
+
+
+class FeedbackCreate(BaseModel):
+    """Create feedback from manager or candidate."""
+    recruitment_request_id: int
+    manager_id: Optional[str] = None
+    candidate_id: Optional[int] = None
+    rating: int = Field(..., ge=1, le=5)
+    feedback_text: Optional[str] = None
+    feedback_type: str = Field(default="general", description="manager_experience, candidate_experience, general")
+
+
+class FeedbackResponse(BaseModel):
+    """Response for feedback."""
+    id: int
+    recruitment_request_id: int
+    manager_id: Optional[str] = None
+    candidate_id: Optional[int] = None
+    rating: int
+    feedback_text: Optional[str] = None
+    feedback_type: str
+    created_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CandidateListItem(BaseModel):
+    """Simple candidate item for list view."""
+    id: int
+    candidate_number: str
+    full_name: str
+    stage: str
+    status: str
+    email: str
+    
+    model_config = ConfigDict(from_attributes=True)

@@ -191,6 +191,41 @@ async def approve_recruitment_request(
 # CANDIDATES
 # ============================================================================
 
+@router.get(
+    "/requests/{request_id}/candidates",
+    response_model=List[dict],
+    summary="Get candidates for a recruitment request"
+)
+async def get_candidates_for_request(
+    request_id: int,
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Get list of candidates for a specific recruitment request.
+    Used by manager pass to view applicants. Accessible via pass token.
+    """
+    from app.models.recruitment import Candidate
+    from sqlalchemy import select
+    
+    result = await session.execute(
+        select(Candidate).where(
+            Candidate.recruitment_request_id == request_id
+        ).order_by(Candidate.created_at.desc())
+    )
+    candidates = result.scalars().all()
+    return [
+        {
+            "id": c.id,
+            "candidate_number": c.candidate_number,
+            "full_name": c.full_name,
+            "stage": c.stage,
+            "status": c.status,
+            "email": c.email or ""
+        }
+        for c in candidates
+    ]
+
+
 @router.post(
     "/candidates",
     response_model=CandidateResponse,

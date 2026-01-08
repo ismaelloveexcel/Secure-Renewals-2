@@ -146,6 +146,26 @@ Main tables with migrations managed by Alembic:
 - Access: Admin and HR roles only via Quick Access button on home page
 - API: `/api/insurance-census` endpoints with JWT authentication
 
+**Employee of the Year Nomination System**:
+- Shared nomination link accessible at `/nomination-pass` (no authentication required)
+- Green neumorphic design (#22c55e theme) with 5-step progress indicator
+- Multi-step flow:
+  1. Manager selects their name from list of eligible managers
+  2. Manager verifies identity via email or Employee ID
+  3. Manager views eligible direct reports (Officer level or below only)
+  4. Manager fills nomination form (min 50 character justification)
+  5. Success confirmation with nomination summary
+- Security: Token-based verification system
+  - POST `/api/nominations/pass/verify` validates email/employee ID, returns 15-min token
+  - POST `/api/nominations/pass/submit` requires valid token (single-use, invalidated after submission)
+  - No legacy unsecured endpoints exist
+- Eligibility: Only employees at Officer, Coordinator, Skilled Labour, or Non Skilled Labour levels can be nominated
+- Duplicate prevention: One nomination per employee per year (unique constraint on nominee_id + nomination_year)
+- Database table: `eoy_nominations` with status workflow (pending → shortlisted → winner/not_selected)
+- Line manager relationships stored in `employees` table (line_manager_id, line_manager_name, line_manager_email)
+- Components: `frontend/src/components/NominationPass/NominationPass.tsx`
+- API Routes: `backend/app/routers/nominations.py`
+
 ### Development Setup
 
 - Backend runs on port 5001 (uvicorn)

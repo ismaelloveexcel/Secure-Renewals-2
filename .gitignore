@@ -55,6 +55,10 @@ npm-debug.log*
 frontend/dist/
 frontend/.vite/
 
+# Backend build artifacts (generated from frontend build)
+backend/static/assets/*.js
+backend/static/assets/*.css
+
 # Backend
 backend/.env
 __pypackages__/

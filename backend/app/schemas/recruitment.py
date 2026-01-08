@@ -21,6 +21,13 @@ class RecruitmentRequestBase(BaseModel):
     expected_start_date: Optional[date] = None
     salary_range_min: Optional[float] = Field(None, ge=0)
     salary_range_max: Optional[float] = Field(None, ge=0)
+    # Enhanced fields from JSON analysis
+    location: Optional[str] = Field(None, max_length=100, description="Work location: Abu Dhabi HQ, Dubai Office, Remote, Hybrid")
+    experience_min: Optional[int] = Field(None, ge=0, description="Minimum years of experience")
+    experience_max: Optional[int] = Field(None, ge=0, description="Maximum years of experience")
+    education_level: Optional[str] = Field(None, description="Required education: High School, Diploma, Bachelors, Masters, PhD")
+    benefits: Optional[List[str]] = Field(None, description="List of benefits/perks")
+    reporting_to: Optional[str] = Field(None, max_length=200, description="Position reports to")
 
 
 class RecruitmentRequestCreate(RecruitmentRequestBase):
@@ -44,6 +51,13 @@ class RecruitmentRequestUpdate(BaseModel):
     salary_range_min: Optional[float] = Field(None, ge=0)
     salary_range_max: Optional[float] = Field(None, ge=0)
     status: Optional[str] = None
+    # Enhanced fields from JSON analysis
+    location: Optional[str] = None
+    experience_min: Optional[int] = Field(None, ge=0)
+    experience_max: Optional[int] = Field(None, ge=0)
+    education_level: Optional[str] = None
+    benefits: Optional[List[str]] = None
+    reporting_to: Optional[str] = None
 
 
 class RecruitmentRequestResponse(RecruitmentRequestBase):
@@ -408,3 +422,178 @@ class RecruitmentMetrics(BaseModel):
     # SLA tracking
     overdue_requests: int
     requests_by_priority: Dict[str, int]
+
+
+# Assessment Schemas (from JSON analysis)
+class AssessmentBase(BaseModel):
+    """Base schema for candidate assessments."""
+    candidate_id: int
+    recruitment_request_id: int
+    assessment_type: str = Field(..., description="soft-skills, technical, cognitive, personality")
+    label: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    assessment_link: Optional[str] = Field(None, max_length=500)
+    platform: Optional[str] = Field(None, max_length=100)
+    is_required: bool = True
+
+
+# Valid assessment statuses
+ASSESSMENT_STATUSES = ["pending", "in_progress", "completed", "expired"]
+
+
+class AssessmentCreate(AssessmentBase):
+    """Schema for creating an assessment."""
+    pass
+
+
+class AssessmentUpdate(BaseModel):
+    """Schema for updating an assessment."""
+    status: Optional[str] = Field(None, description="Status: pending, in_progress, completed, expired")
+    score: Optional[int] = Field(None, ge=0, le=100)
+    passed: Optional[bool] = None
+    result_details: Optional[Dict[str, Any]] = None
+
+
+class AssessmentResponse(AssessmentBase):
+    """Response schema for assessment."""
+    id: int
+    status: str
+    score: Optional[int] = None
+    passed: Optional[bool] = None
+    result_details: Optional[Dict[str, Any]] = None
+    sent_at: Optional[datetime] = None
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# Valid offer statuses
+OFFER_STATUSES = ["draft", "pending_approval", "approved", "sent", "accepted", "declined", "expired", "withdrawn"]
+
+# Offer Schemas (from JSON analysis)
+class OfferBase(BaseModel):
+    """Base schema for job offers."""
+    candidate_id: int
+    recruitment_request_id: int
+    position_title: str = Field(..., min_length=1, max_length=200)
+    department: str = Field(..., min_length=1, max_length=100)
+    reporting_to: Optional[str] = Field(None, max_length=200)
+    base_salary: float = Field(..., ge=0)
+    housing_allowance: Optional[float] = Field(None, ge=0)
+    transport_allowance: Optional[float] = Field(None, ge=0)
+    other_allowances: Optional[float] = Field(None, ge=0)
+    currency: str = Field(default="AED", max_length=10)
+    start_date: Optional[date] = None
+    contract_type: str = Field(default="Permanent")
+    probation_period_months: int = Field(default=6, ge=0)
+    working_hours: Optional[str] = Field(None, max_length=100)
+    annual_leave_days: int = Field(default=30, ge=0)
+    benefits: Optional[List[str]] = None
+    special_conditions: Optional[str] = None
+    expires_at: Optional[datetime] = None
+
+
+class OfferCreate(OfferBase):
+    """Schema for creating an offer."""
+    pass
+
+
+class OfferUpdate(BaseModel):
+    """Schema for updating an offer."""
+    position_title: Optional[str] = Field(None, min_length=1, max_length=200)
+    base_salary: Optional[float] = Field(None, ge=0)
+    housing_allowance: Optional[float] = Field(None, ge=0)
+    transport_allowance: Optional[float] = Field(None, ge=0)
+    other_allowances: Optional[float] = Field(None, ge=0)
+    start_date: Optional[date] = None
+    benefits: Optional[List[str]] = None
+    special_conditions: Optional[str] = None
+    status: Optional[str] = None
+    expires_at: Optional[datetime] = None
+
+
+class OfferResponse(OfferBase):
+    """Response schema for offer."""
+    id: int
+    offer_number: str
+    total_package: Optional[float] = None
+    status: str
+    approved_by: Optional[str] = None
+    approved_at: Optional[datetime] = None
+    sent_at: Optional[datetime] = None
+    responded_at: Optional[datetime] = None
+    decline_reason: Optional[str] = None
+    offer_letter_path: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# NextStep Schema (from JSON analysis)
+class NextStepBase(BaseModel):
+    """Base schema for candidate next step."""
+    candidate_id: int
+    recruitment_request_id: int
+    label: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    instructions: Optional[str] = None
+    scheduled_date: Optional[date] = None
+    scheduled_time: Optional[str] = Field(None, max_length=50)
+    location: Optional[str] = Field(None, max_length=200)
+    meeting_link: Optional[str] = Field(None, max_length=500)
+
+
+class NextStepCreate(NextStepBase):
+    """Schema for creating a next step."""
+    pass
+
+
+class NextStepResponse(NextStepBase):
+    """Response schema for next step."""
+    id: int
+    status: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# Reference Data Schemas (enhanced from JSON)
+class LocationInfo(BaseModel):
+    """Schema for work location info."""
+    key: str
+    name: str
+
+
+class EducationLevelInfo(BaseModel):
+    """Schema for education level info."""
+    key: str
+    name: str
+
+
+class CandidateSourceInfo(BaseModel):
+    """Schema for candidate source info."""
+    key: str
+    name: str
+
+
+class NoticePeriodInfo(BaseModel):
+    """Schema for notice period info."""
+    key: str
+    name: str
+    days: int
+
+
+class AIScoringCriteria(BaseModel):
+    """Schema for AI scoring criteria."""
+    skills_match: int = Field(30, description="Weight for skills match")
+    experience_match: int = Field(25, description="Weight for experience match")
+    education_match: int = Field(15, description="Weight for education match")
+    salary_fit: int = Field(15, description="Weight for salary fit")
+    culture_fit: int = Field(15, description="Weight for culture fit")

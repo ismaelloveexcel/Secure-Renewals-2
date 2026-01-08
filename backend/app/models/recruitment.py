@@ -51,6 +51,14 @@ class RecruitmentRequest(Base):
     required_skills: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # List of required skills for CV scoring
     priority: Mapped[str] = mapped_column(String(20), default="normal", nullable=False)  # low, normal, high, urgent
     expected_start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    
+    # Enhanced position specs (from JSON analysis)
+    location: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # Abu Dhabi HQ, Dubai Office, Remote, Hybrid
+    experience_min: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Minimum years experience
+    experience_max: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Maximum years experience
+    education_level: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # High School, Diploma, Bachelors, Masters, PhD
+    benefits: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # List of benefits/perks
+    reporting_to: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)  # Position reports to
 
     # Salary
     salary_range_min: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), nullable=True)
@@ -158,6 +166,12 @@ class Candidate(Base):
     screening_rank: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Position rank within position
     resume_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)  # Link to uploaded CV
     cv_scored_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)  # When CV was last scored
+    
+    # Enhanced AI scoring (from JSON analysis)
+    ai_score_breakdown: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)  # {skills_match: 30, experience_match: 25, education_match: 15, salary_fit: 15, culture_fit: 15}
+    hr_rating: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # HR rating 1-5
+    manager_rating: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # Hiring manager rating 1-5
+    last_activity_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)  # Last activity timestamp
 
     # Status & stage
     status: Mapped[str] = mapped_column(String(50), default="applied", nullable=False)
@@ -302,7 +316,8 @@ RECRUITMENT_STAGES = [
     {"key": "rejected", "name": "Rejected", "order": 99},
 ]
 
-# Interview types
+# Interview types - Categories of interviews (used for interview_type field)
+# These describe WHAT kind of interview it is
 INTERVIEW_TYPES = [
     {"key": "phone_screen", "name": "Phone Screening"},
     {"key": "technical", "name": "Technical Interview"},
@@ -310,6 +325,17 @@ INTERVIEW_TYPES = [
     {"key": "manager", "name": "Hiring Manager Interview"},
     {"key": "panel", "name": "Panel Interview"},
     {"key": "final", "name": "Final Interview"},
+]
+
+# Interview rounds - Ordered sequence of interview stages in the process
+# These describe WHEN in the process the interview occurs (order matters)
+INTERVIEW_ROUNDS = [
+    {"key": "hr_screening", "name": "HR Screening", "order": 1},
+    {"key": "technical_1", "name": "Technical Round 1", "order": 2},
+    {"key": "technical_2", "name": "Technical Round 2", "order": 3},
+    {"key": "panel", "name": "Panel Interview", "order": 4},
+    {"key": "final", "name": "Final Interview", "order": 5},
+    {"key": "ceo", "name": "CEO Interview", "order": 6},
 ]
 
 # Employment types
@@ -320,3 +346,175 @@ EMPLOYMENT_TYPES = [
     {"key": "internship", "name": "Internship"},
     {"key": "temporary", "name": "Temporary"},
 ]
+
+# Work locations
+WORK_LOCATIONS = [
+    {"key": "abu_dhabi_hq", "name": "Abu Dhabi HQ"},
+    {"key": "dubai_office", "name": "Dubai Office"},
+    {"key": "al_ain", "name": "Al Ain"},
+    {"key": "remote", "name": "Remote"},
+    {"key": "hybrid", "name": "Hybrid"},
+]
+
+# Education levels
+EDUCATION_LEVELS = [
+    {"key": "high_school", "name": "High School"},
+    {"key": "diploma", "name": "Diploma"},
+    {"key": "bachelors", "name": "Bachelor's Degree"},
+    {"key": "masters", "name": "Master's Degree"},
+    {"key": "phd", "name": "PhD"},
+]
+
+# Candidate sources
+CANDIDATE_SOURCES = [
+    {"key": "linkedin", "name": "LinkedIn"},
+    {"key": "indeed", "name": "Indeed"},
+    {"key": "bayt", "name": "Bayt"},
+    {"key": "gulftalent", "name": "GulfTalent"},
+    {"key": "company_website", "name": "Company Website"},
+    {"key": "referral", "name": "Referral"},
+    {"key": "agency", "name": "Agency"},
+    {"key": "walk_in", "name": "Walk-in"},
+    {"key": "other", "name": "Other"},
+]
+
+# Notice periods
+NOTICE_PERIODS = [
+    {"key": "immediate", "name": "Immediate", "days": 0},
+    {"key": "1_week", "name": "1 Week", "days": 7},
+    {"key": "2_weeks", "name": "2 Weeks", "days": 14},
+    {"key": "1_month", "name": "1 Month", "days": 30},
+    {"key": "2_months", "name": "2 Months", "days": 60},
+    {"key": "3_months", "name": "3 Months", "days": 90},
+]
+
+# AI scoring criteria weights
+AI_SCORING_CRITERIA = {
+    "skills_match": {"weight": 30, "label": "Skills Match"},
+    "experience_match": {"weight": 25, "label": "Experience Match"},
+    "education_match": {"weight": 15, "label": "Education Match"},
+    "salary_fit": {"weight": 15, "label": "Salary Fit"},
+    "culture_fit": {"weight": 15, "label": "Culture Fit"},
+}
+
+
+class Assessment(Base):
+    """Candidate assessments (technical, soft-skills, etc.)."""
+    
+    __tablename__ = "assessments"
+    
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    candidate_id: Mapped[int] = mapped_column(ForeignKey("candidates.id", ondelete="CASCADE"), nullable=False)
+    recruitment_request_id: Mapped[int] = mapped_column(ForeignKey("recruitment_requests.id", ondelete="CASCADE"), nullable=False)
+    
+    # Assessment details
+    assessment_type: Mapped[str] = mapped_column(String(50), nullable=False)  # soft-skills, technical, cognitive, personality
+    label: Mapped[str] = mapped_column(String(200), nullable=False)  # "Soft Skills Assessment"
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Assessment link/platform
+    assessment_link: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    platform: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # Internal, HackerRank, Codility, etc.
+    
+    # Status
+    is_required: Mapped[bool] = mapped_column(Boolean, default=True)
+    status: Mapped[str] = mapped_column(String(50), default="pending")  # pending, in_progress, completed, expired
+    
+    # Results
+    score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # 0-100
+    passed: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    result_details: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)  # Detailed breakdown
+    
+    # Timing
+    sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    
+    # Audit
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class Offer(Base):
+    """Job offer for candidates."""
+    
+    __tablename__ = "offers"
+    
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    offer_number: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
+    
+    # Links
+    candidate_id: Mapped[int] = mapped_column(ForeignKey("candidates.id", ondelete="CASCADE"), nullable=False)
+    recruitment_request_id: Mapped[int] = mapped_column(ForeignKey("recruitment_requests.id", ondelete="CASCADE"), nullable=False)
+    
+    # Position details
+    position_title: Mapped[str] = mapped_column(String(200), nullable=False)
+    department: Mapped[str] = mapped_column(String(100), nullable=False)
+    reporting_to: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    
+    # Compensation package
+    base_salary: Mapped[float] = mapped_column(DECIMAL(10, 2), nullable=False)
+    housing_allowance: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), nullable=True)
+    transport_allowance: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), nullable=True)
+    other_allowances: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), nullable=True)
+    total_package: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), nullable=True)  # Computed
+    currency: Mapped[str] = mapped_column(String(10), default="AED")
+    
+    # Employment terms
+    start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    contract_type: Mapped[str] = mapped_column(String(50), default="Permanent")  # Permanent, Fixed Term, Probation
+    probation_period_months: Mapped[int] = mapped_column(Integer, default=6)
+    working_hours: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # "8:00 AM - 5:00 PM"
+    annual_leave_days: Mapped[int] = mapped_column(Integer, default=30)
+    
+    # Benefits and conditions
+    benefits: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # List of benefits
+    special_conditions: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Status and approvals
+    status: Mapped[str] = mapped_column(String(50), default="draft")  # draft, pending_approval, approved, sent, accepted, declined, expired, withdrawn
+    approved_by: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    
+    # Offer lifecycle
+    sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    responded_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    decline_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Document
+    offer_letter_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    
+    # Audit
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class NextStep(Base):
+    """Next step/action for candidate."""
+    
+    __tablename__ = "next_steps"
+    
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    candidate_id: Mapped[int] = mapped_column(ForeignKey("candidates.id", ondelete="CASCADE"), nullable=False)
+    recruitment_request_id: Mapped[int] = mapped_column(ForeignKey("recruitment_requests.id", ondelete="CASCADE"), nullable=False)
+    
+    # Step details
+    label: Mapped[str] = mapped_column(String(200), nullable=False)  # "Final Interview"
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    instructions: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Special instructions for candidate
+    
+    # Scheduling
+    scheduled_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    scheduled_time: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # "10:00 AM"
+    location: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    meeting_link: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    
+    # Status
+    status: Mapped[str] = mapped_column(String(50), default="pending")  # pending, in_progress, completed, cancelled
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    
+    # Audit
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

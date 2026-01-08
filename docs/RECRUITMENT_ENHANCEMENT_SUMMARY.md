@@ -238,6 +238,94 @@ Comprehensive metrics including conversion rates, SLA tracking, and pipeline sta
 
 ---
 
+## Phase 2: Enhanced Features (from JSON Analysis)
+
+### New Model Fields Added
+
+#### RecruitmentRequest
+- `location` - Work location (Abu Dhabi HQ, Dubai Office, Remote, Hybrid)
+- `experience_min/max` - Experience range in years
+- `education_level` - Required education level
+- `benefits` - Position benefits as tags
+- `reporting_to` - Position reports to
+
+#### Candidate
+- `ai_score_breakdown` - Detailed AI scoring breakdown (skills, experience, education, salary, culture fit)
+- `hr_rating` - HR rating (1-5)
+- `manager_rating` - Hiring manager rating (1-5)
+- `last_activity_at` - Last activity timestamp
+
+### New Models
+
+#### Assessment
+Tracks candidate assessments (soft-skills, technical, cognitive, personality):
+- Links to candidate and recruitment request
+- Tracks status, score, pass/fail
+- Supports external assessment platforms
+
+#### Offer
+Comprehensive offer management:
+- Full compensation package (base, housing, transport, other allowances)
+- Employment terms (contract type, probation, working hours, leave)
+- Benefits and special conditions
+- Approval workflow and response tracking
+
+#### NextStep
+Structured next action for candidates:
+- Label, description, instructions
+- Scheduling details (date, time, location, meeting link)
+- Status tracking
+
+### New Reference Data Constants
+- `INTERVIEW_ROUNDS` - Named interview rounds (HR Screening, Technical 1/2, Panel, Final, CEO)
+- `WORK_LOCATIONS` - Standard work locations
+- `EDUCATION_LEVELS` - Education requirements
+- `CANDIDATE_SOURCES` - Application sources (LinkedIn, Indeed, Bayt, GulfTalent, etc.)
+- `NOTICE_PERIODS` - Standard notice periods with days
+- `AI_SCORING_CRITERIA` - Weighted scoring criteria
+
+---
+
+## Manager Pass Flip Feature
+
+The Manager Pass now supports flipping to show recruitment metrics on the back:
+
+### Front (Unchanged)
+- All existing functionality remains
+- New flip button added to header (chart icon)
+
+### Back Panel (Metrics)
+Shows key recruitment metrics:
+1. **Days Since Request Raised** - Counter based on request creation date
+2. **Applications Received** - Total candidate count
+3. **Application Sources** - Agency/Direct/Referral breakdown with progress bars
+4. **Candidates Shortlisted** - Number in screening+ stages
+5. **Candidates Interviewed** - Completed interviews only
+
+### Usage
+- Click the chart icon in the header to flip to metrics
+- Click "Tap to flip back" or the flip button to return to front
+
+### Component
+```tsx
+import { PassMetricsBack } from '../ManagerPass'
+
+<PassMetricsBack
+  metrics={{
+    daysSinceRequest: 15,
+    applicationsReceived: 45,
+    applicationSources: { agency: 10, direct: 25, referral: 10 },
+    candidatesShortlisted: 12,
+    candidatesInterviewed: 5
+  }}
+  positionTitle="Senior Developer"
+  requestNumber="RR-2026-001"
+  onFlip={() => setIsFlipped(false)}
+/>
+```
+
+---
+
 ## Migration Notes
 
 No database migrations required for the new fields as they are nullable. The system will work with existing data - new features will simply not be available until the fields are populated.

@@ -12,6 +12,8 @@ import {
   getStatusLabel
 } from '../BasePass'
 import type { ActivityItem } from '../BasePass'
+import { PassMetricsBack } from './PassMetricsBack'
+import type { RecruitmentMetrics } from './PassMetricsBack'
 
 interface ManagerPassData {
   pass_id: string
@@ -38,6 +40,13 @@ interface ManagerPassData {
   hr_whatsapp: string
   hr_email: string
   activity_history?: ActivityItem[]
+  // Enhanced metrics for back panel
+  request_created_at?: string
+  application_sources?: {
+    agency: number
+    direct: number
+    referral: number
+  }
 }
 
 interface RecruitmentDocument {
@@ -106,6 +115,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
   const [feedbackText, setFeedbackText] = useState('')
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
+  const [isFlipped, setIsFlipped] = useState(false)
   const [setupForm, setSetupForm] = useState({
     technical_assessment_required: false,
     interview_format: 'online',
@@ -136,6 +146,57 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
   const getPassUrl = () => {
     if (!passData) return ''
     return `${window.location.origin}/manager-pass/${recruitmentRequestId}?token=${passData.pass_token}`
+  }
+
+  // Calculate metrics for the back panel
+  const getMetrics = (): RecruitmentMetrics => {
+    if (!passData) {
+      return {
+        daysSinceRequest: 0,
+        applicationsReceived: 0,
+        applicationSources: { agency: 0, direct: 0, referral: 0 },
+        candidatesShortlisted: 0,
+        candidatesInterviewed: 0
+      }
+    }
+
+    // Calculate days since request was raised
+    const requestDate = passData.request_created_at 
+      ? new Date(passData.request_created_at) 
+      : new Date()
+    const today = new Date()
+    const daysSinceRequest = Math.floor((today.getTime() - requestDate.getTime()) / (1000 * 60 * 60 * 24))
+
+    // Default source distribution percentages (used when actual source data is unavailable)
+    const DEFAULT_AGENCY_RATIO = 0.3
+    const DEFAULT_DIRECT_RATIO = 0.5
+    // Referral ratio is the remainder
+
+    // Get application sources from passData or estimate from pipeline
+    const applicationSources = passData.application_sources || {
+      agency: Math.floor(passData.total_candidates * DEFAULT_AGENCY_RATIO),
+      direct: Math.floor(passData.total_candidates * DEFAULT_DIRECT_RATIO),
+      referral: passData.total_candidates - 
+                Math.floor(passData.total_candidates * DEFAULT_AGENCY_RATIO) - 
+                Math.floor(passData.total_candidates * DEFAULT_DIRECT_RATIO)
+    }
+
+    // Calculate shortlisted (screening + interview + offer + hired)
+    const candidatesShortlisted = (passData.pipeline_stats['screening'] || 0) +
+                                   (passData.pipeline_stats['interview'] || 0) +
+                                   (passData.pipeline_stats['offer'] || 0) +
+                                   (passData.pipeline_stats['hired'] || 0)
+
+    // Interviewed = completed interviews only
+    const candidatesInterviewed = passData.confirmed_interviews.filter(i => i.candidate_confirmed).length
+
+    return {
+      daysSinceRequest: Math.max(0, daysSinceRequest),
+      applicationsReceived: passData.total_candidates,
+      applicationSources,
+      candidatesShortlisted,
+      candidatesInterviewed
+    }
   }
 
   useEffect(() => {
@@ -332,13 +393,25 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             <p className="text-xs font-bold uppercase tracking-wider text-white">Hiring Manager Pass</p>
           </div>
           
-          {/* Right: Logo */}
-          <img 
-            src="/assets/logo-white.png" 
-            alt="Baynunah" 
-            className="h-5 opacity-90"
-            style={{ filter: 'brightness(0) invert(1)' }}
-          />
+          {/* Right: Flip Button + Logo */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsFlipped(true)}
+              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              aria-label="View metrics"
+              title="View recruitment metrics"
+            >
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </button>
+            <img 
+              src="/assets/logo-white.png" 
+              alt="Baynunah" 
+              className="h-5 opacity-90"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
+          </div>
         </div>
       </div>
       
@@ -971,19 +1044,43 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
 
   return (
     <>
-      <BasePassContainer
-        entityColor={entityColor}
-        entityName={getEntityName()}
-        passType="manager"
-        header={renderHeader()}
-        journey={renderJourney()}
-        actionRequired={renderActionRequired()}
-        tabs={MANAGER_TABS}
-        activeTab={activeTab}
-        onTabChange={(tabId) => setActiveTab(tabId as ActiveTab)}
-      >
-        {renderContent()}
-      </BasePassContainer>
+      {/* Flip Container */}
+      <div className="relative w-full h-full [perspective:1000px]">
+        <div 
+          className={`relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] ${
+            isFlipped ? '[transform:rotateY(180deg)]' : ''
+          }`}
+        >
+          {/* Front Side - Original Pass */}
+          <div className="absolute inset-0 [backface-visibility:hidden]">
+            <BasePassContainer
+              entityColor={entityColor}
+              entityName={getEntityName()}
+              passType="manager"
+              header={renderHeader()}
+              journey={renderJourney()}
+              actionRequired={renderActionRequired()}
+              tabs={MANAGER_TABS}
+              activeTab={activeTab}
+              onTabChange={(tabId) => setActiveTab(tabId as ActiveTab)}
+            >
+              {renderContent()}
+            </BasePassContainer>
+          </div>
+          
+          {/* Back Side - Metrics Panel */}
+          <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden">
+              <PassMetricsBack
+                metrics={getMetrics()}
+                positionTitle={passData.position_title}
+                requestNumber={passData.recruitment_request_number}
+                onFlip={() => setIsFlipped(false)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Candidates List Modal */}
       {showCandidatesList && (

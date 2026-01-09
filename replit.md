@@ -168,15 +168,23 @@ Main tables with migrations managed by Alembic:
 
 **EOY Admin Panel** (Admin → EOY Award tab):
 - Header with year, status badge (OPEN/CLOSED), and toggle button
-- Four tabs: Overview, Managers, Nominations, Settings
+- Five tabs: Overview, Managers, Nominations, Report, Settings
 - **Overview tab**: Statistics cards (Total Managers, Submitted, Pending, Shortlisted), nomination link copy button, send invitations button
 - **Managers tab**: Track manager submission progress with columns (Manager, Department, Status, Nominee, Date)
-- **Nominations tab**: Review all nominations with shortlist/select winner actions
+- **Nominations tab**: Review all nominations with shortlist/select winner actions, click to view details with edit capability
+- **Report tab**: Management selection report for final decision-making
+  - Statistics summary (total nominations, pending, shortlisted, winners)
+  - Sortable table with nominee details: Department, Function, Job Title, Years of Service, Status
+  - Expandable justification section for shortlisted/winner nominations
+  - Ranked by status (winners first, then shortlisted, then pending)
 - **Settings tab**: Configure deadline, email subject, email body template
+- **Edit Nominations**: HR/Admin can edit nomination content (justification, achievements, impact description) via detail modal
 - API endpoints:
   - GET/PUT `/api/nominations/admin/settings` - nomination period configuration
   - GET `/api/nominations/admin/manager-progress` - manager submission tracking
   - POST `/api/nominations/{id}/review` - shortlist/select winner actions
+  - GET `/api/nominations/admin/report` - management selection report data
+  - PATCH `/api/nominations/{id}/content` - edit nomination content (HR/Admin only, requires auth)
 - Components: `frontend/src/components/EOYAdminPanel/EOYAdminPanel.tsx`
 - Model: `backend/app/models/nomination_settings.py`
 

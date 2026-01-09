@@ -74,6 +74,23 @@ class AttendanceRecord(Base):
     offset_hours_earned: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2), nullable=True)
     offset_day_reference: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
+    # Exceptional overtime handling (override employee's default overtime_type for specific days)
+    # Used when an N/A or Offset employee should get paid overtime exceptionally
+    exceptional_overtime: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    exceptional_overtime_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    exceptional_overtime_approved_by: Mapped[Optional[int]] = mapped_column(ForeignKey("employees.id"), nullable=True)
+    
+    # Paid overtime calculation (for employees with overtime_type = "Paid" or exceptional_overtime = True)
+    # Article 19: 125% for regular overtime, 150% for night/holiday overtime
+    overtime_rate: Mapped[Optional[Decimal]] = mapped_column(Numeric(4, 2), nullable=True)  # 1.25 or 1.50
+    overtime_amount: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)  # Calculated pay
+    is_night_overtime: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)  # 9 PM - 4 AM
+    is_holiday_overtime: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)  # Public holiday
+    
+    # Meal/Food allowance tracking
+    food_allowance_eligible: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    food_allowance_amount: Mapped[Optional[Decimal]] = mapped_column(Numeric(8, 2), nullable=True)
+    
     # Break time tracking
     break_start: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     break_end: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -122,6 +139,7 @@ class AttendanceRecord(Base):
     employee = relationship("Employee", foreign_keys=[employee_id], backref="attendance_records")
     wfh_approver = relationship("Employee", foreign_keys=[wfh_approved_by])
     overtime_approver = relationship("Employee", foreign_keys=[overtime_approved_by])
+    exceptional_overtime_approver = relationship("Employee", foreign_keys=[exceptional_overtime_approved_by])
     manual_entry_approver = relationship("Employee", foreign_keys=[manual_entry_by])
     correction_approver = relationship("Employee", foreign_keys=[correction_approved_by])
 

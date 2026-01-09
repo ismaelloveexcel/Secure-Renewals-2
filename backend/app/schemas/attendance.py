@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from pydantic import BaseModel, Field
 
 
@@ -78,6 +78,17 @@ class AttendanceResponse(BaseModel):
     # Offset tracking
     offset_hours_earned: Optional[Decimal] = None
     offset_day_reference: Optional[str] = None
+    # Exceptional overtime (override for specific days)
+    exceptional_overtime: bool = False
+    exceptional_overtime_reason: Optional[str] = None
+    # Paid overtime calculation
+    overtime_rate: Optional[Decimal] = None  # 1.25 or 1.50
+    overtime_amount: Optional[Decimal] = None  # Calculated amount in AED
+    is_night_overtime: bool = False
+    is_holiday_overtime: bool = False
+    # Food/Meal allowance
+    food_allowance_eligible: bool = False
+    food_allowance_amount: Optional[Decimal] = None
     break_start: Optional[datetime] = None
     break_end: Optional[datetime] = None
     break_duration_minutes: Optional[int] = None
@@ -126,8 +137,17 @@ class AttendanceSummary(BaseModel):
     total_hours: Decimal
     regular_hours: Decimal
     overtime_hours: Decimal
-    # Offset tracking
+    # Offset tracking (for Offset overtime policy employees)
     offset_hours_balance: Decimal = Decimal("0")
+    offset_hours_earned: Decimal = Decimal("0")
+    offset_days_equivalent: Decimal = Decimal("0")  # offset_hours_earned / 8
+    # Paid overtime tracking (for Paid overtime policy employees)
+    paid_overtime_hours: Decimal = Decimal("0")
+    paid_overtime_amount: Decimal = Decimal("0")  # Total calculated pay
+    exceptional_overtime_days: int = 0  # Days with exceptional overtime
+    # Food allowance tracking
+    food_allowance_days: int = 0
+    total_food_allowance: Decimal = Decimal("0")
     average_clock_in: Optional[str] = None
     average_clock_out: Optional[str] = None
     # UAE compliance summary
@@ -157,6 +177,63 @@ class OvertimeApprovalRequest(BaseModel):
     approved: bool
     hours: Optional[Decimal] = None
     notes: Optional[str] = None
+
+
+class ExceptionalOvertimeRequest(BaseModel):
+    """Request to mark a specific day as paid overtime (for employees normally not eligible).
+    
+    Used when an employee with N/A or Offset overtime policy should get paid overtime
+    for a specific day due to exceptional circumstances.
+    """
+    exceptional_overtime: bool = Field(True, description="Mark this day as paid overtime")
+    reason: str = Field(..., description="Reason for exceptional overtime")
+    is_night_overtime: bool = Field(False, description="Is this night overtime (9 PM - 4 AM)? 150% rate")
+    is_holiday_overtime: bool = Field(False, description="Is this holiday overtime? 150% rate")
+
+
+class OffsetDayRecord(BaseModel):
+    """Individual offset day record."""
+    attendance_date: date
+    hours_earned: Decimal
+    hours_used: Decimal = Decimal("0")
+    reference: Optional[str] = None  # e.g., "Used on 2026-01-15"
+    status: str = "available"  # available, used, expired
+
+
+class OffsetBalanceSummary(BaseModel):
+    """Summary of offset hours balance for an employee."""
+    employee_id: int
+    employee_name: str
+    total_offset_hours_earned: Decimal = Decimal("0")  # Total offset hours accumulated
+    total_offset_hours_used: Decimal = Decimal("0")  # Hours used as time-off
+    offset_hours_balance: Decimal = Decimal("0")  # Available balance
+    offset_days_balance: Decimal = Decimal("0")  # Balance converted to days (balance / 8)
+    records: List[OffsetDayRecord] = []  # Detailed breakdown
+
+
+class PaidOvertimeRecord(BaseModel):
+    """Individual paid overtime record."""
+    attendance_date: date
+    overtime_hours: Decimal
+    rate: Decimal  # 1.25 or 1.50
+    amount: Decimal  # hours * hourly_rate * rate
+    is_exceptional: bool = False  # Was this an exceptional override?
+    notes: Optional[str] = None
+
+
+class PaidOvertimeSummary(BaseModel):
+    """Summary of paid overtime for payroll."""
+    employee_id: int
+    employee_name: str
+    period_start: date
+    period_end: date
+    total_overtime_hours: Decimal = Decimal("0")
+    regular_overtime_hours: Decimal = Decimal("0")  # 125% rate
+    night_overtime_hours: Decimal = Decimal("0")  # 150% rate
+    holiday_overtime_hours: Decimal = Decimal("0")  # 150% rate
+    total_overtime_amount: Decimal = Decimal("0")  # Total calculated pay
+    hourly_rate: Optional[Decimal] = None  # Base hourly rate from salary
+    records: List[PaidOvertimeRecord] = []
 
 
 class CorrectionApprovalRequest(BaseModel):

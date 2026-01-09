@@ -75,8 +75,31 @@ For employees with `overtime_type = "Offset"`:
 - Overtime hours are tracked as offset balance
 - Can be used for time-off later
 - Separate field: `offset_hours_earned`
+- New endpoint: `/attendance/offset-balance/{id}` to view balance
+- Balance shows: total earned, total used, available balance, days equivalent
 
-### 4. UAE Compliance Flags
+### 4. Paid Overtime Calculation
+For employees with `overtime_type = "Paid"`:
+- Overtime is calculated based on UAE Labor Law rates
+- **125%** for regular overtime (daytime)
+- **150%** for night overtime (9 PM - 4 AM) or holidays
+- Hourly rate calculated from: `(Basic Salary / 30 days) / 8 hours`
+- New endpoint: `/attendance/paid-overtime-summary/{id}` for payroll
+
+### 5. Food/Meal Allowance Tracking
+Each attendance record can track:
+- `food_allowance_eligible`: Is employee eligible for food allowance today?
+- `food_allowance_amount`: Amount of food allowance for this day
+
+### 6. Exceptional Overtime Override
+For employees with N/A or Offset policy who need paid overtime exceptionally:
+- New endpoint: `/attendance/{id}/exceptional-overtime`
+- Allows HR to mark specific days as paid overtime
+- Requires reason for the exception
+- Can specify if night or holiday overtime (150% rate)
+- Calculates overtime amount based on employee's hourly rate
+
+### 7. UAE Compliance Flags
 Each attendance record now includes:
 - `is_ramadan_hours`: Was this a Ramadan working day?
 - `is_rest_day`: Is this employee's designated rest day?
@@ -100,6 +123,9 @@ Dashboard now shows:
 | `/attendance/manual-entry` | POST | Create manual attendance entry (HR) |
 | `/attendance/{id}/request-correction` | POST | Request attendance correction |
 | `/attendance/{id}/approve-correction` | POST | Approve/reject correction (HR) |
+| `/attendance/{id}/exceptional-overtime` | POST | Mark as exceptional paid overtime (HR) |
+| `/attendance/offset-balance/{id}` | GET | Get offset hours balance for employee |
+| `/attendance/paid-overtime-summary/{id}` | GET | Get paid overtime summary for payroll |
 
 ### Enhanced Endpoints
 
@@ -155,14 +181,27 @@ WORK_TYPES = [
 | `correction_approved` | BOOLEAN | Correction approval status |
 | `correction_approved_by` | INTEGER (FK) | Who approved correction |
 | `correction_approved_at` | TIMESTAMP | When correction approved |
+| `exceptional_overtime` | BOOLEAN | Override for paid OT on specific day |
+| `exceptional_overtime_reason` | TEXT | Reason for exceptional OT |
+| `exceptional_overtime_approved_by` | INTEGER (FK) | Who approved exception |
+| `overtime_rate` | NUMERIC(4,2) | Rate multiplier (1.25 or 1.50) |
+| `overtime_amount` | NUMERIC(10,2) | Calculated OT pay amount |
+| `is_night_overtime` | BOOLEAN | Night hours (9 PM - 4 AM) |
+| `is_holiday_overtime` | BOOLEAN | Public holiday work |
+| `food_allowance_eligible` | BOOLEAN | Eligible for food allowance |
+| `food_allowance_amount` | NUMERIC(8,2) | Food allowance amount |
 
-## Migration
+## Migrations
 
-Run migration `20260109_0019_enhance_attendance_uae_compliance.py`:
+Run migrations in order:
 
 ```bash
 cd backend
-alembic upgrade head
+# Migration 1: Core attendance enhancements
+alembic upgrade 20260109_0019
+
+# Migration 2: Food allowance and exceptional overtime
+alembic upgrade 20260109_0020
 ```
 
 ## Example: Hours Calculation

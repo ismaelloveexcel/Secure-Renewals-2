@@ -16,14 +16,17 @@ from app.models.attendance import (
     STANDARD_WORK_HOURS_5_DAY, STANDARD_WORK_HOURS_6_DAY,
     MAX_OVERTIME_HOURS_PER_DAY, MAX_WEEKLY_HOURS,
     RAMADAN_WORK_HOURS, GRACE_PERIOD_MINUTES, 
-    FRIDAY_WORK_HOURS
+    FRIDAY_WORK_HOURS,
+    OVERTIME_RATE_REGULAR, OVERTIME_RATE_NIGHT, OVERTIME_RATE_HOLIDAY
 )
 from app.models.system_settings import SystemSetting
 from app.schemas.attendance import (
     ClockInRequest, ClockOutRequest, BreakRequest,
     AttendanceResponse, AttendanceDashboard, EmployeeWorkSettings,
     WFHApprovalRequest, OvertimeApprovalRequest, TodayAttendanceStatus,
-    ManualAttendanceRequest, AttendanceCorrectionRequest, CorrectionApprovalRequest
+    ManualAttendanceRequest, AttendanceCorrectionRequest, CorrectionApprovalRequest,
+    ExceptionalOvertimeRequest, OffsetBalanceSummary, OffsetDayRecord,
+    PaidOvertimeSummary, PaidOvertimeRecord
 )
 
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
@@ -250,6 +253,17 @@ def build_response(record: AttendanceRecord, employee_name: str) -> AttendanceRe
         overtime_approved=record.overtime_approved,
         offset_hours_earned=record.offset_hours_earned,
         offset_day_reference=record.offset_day_reference,
+        # Exceptional overtime (for N/A/Offset employees getting paid OT)
+        exceptional_overtime=record.exceptional_overtime,
+        exceptional_overtime_reason=record.exceptional_overtime_reason,
+        # Paid overtime calculation
+        overtime_rate=record.overtime_rate,
+        overtime_amount=record.overtime_amount,
+        is_night_overtime=record.is_night_overtime,
+        is_holiday_overtime=record.is_holiday_overtime,
+        # Food allowance
+        food_allowance_eligible=record.food_allowance_eligible,
+        food_allowance_amount=record.food_allowance_amount,
         break_start=record.break_start,
         break_end=record.break_end,
         break_duration_minutes=record.break_duration_minutes,
@@ -1126,3 +1140,249 @@ async def approve_overtime(
     await session.refresh(record)
     
     return build_response(record, emp_name)
+
+
+@router.post("/{record_id}/exceptional-overtime", response_model=AttendanceResponse)
+async def set_exceptional_overtime(
+    record_id: int,
+    request: ExceptionalOvertimeRequest,
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Mark a specific day as paid overtime for an employee who is normally not eligible.
+    
+    Use this for exceptional cases where an employee with N/A or Offset overtime policy
+    should receive paid overtime for a specific day (e.g., urgent project, emergency work).
+    
+    This allows HR to override the employee's default overtime policy on a per-day basis.
+    """
+    if current_user.role not in ["admin", "hr"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    result = await session.execute(
+        select(AttendanceRecord, Employee.name, Employee.basic_salary).join(
+            Employee, AttendanceRecord.employee_id == Employee.id
+        ).where(AttendanceRecord.id == record_id)
+    )
+    row = result.first()
+    
+    if not row:
+        raise HTTPException(status_code=404, detail="Record not found")
+    
+    record, emp_name, basic_salary = row
+    
+    if not record.overtime_hours or record.overtime_hours <= 0:
+        raise HTTPException(status_code=400, detail="No overtime hours to mark as exceptional")
+    
+    now = datetime.now(timezone.utc)
+    
+    # Mark as exceptional overtime
+    record.exceptional_overtime = request.exceptional_overtime
+    record.exceptional_overtime_reason = request.reason
+    record.exceptional_overtime_approved_by = current_user.id
+    record.is_night_overtime = request.is_night_overtime
+    record.is_holiday_overtime = request.is_holiday_overtime
+    
+    # Calculate overtime rate based on type
+    if request.is_night_overtime or request.is_holiday_overtime:
+        record.overtime_rate = OVERTIME_RATE_HOLIDAY  # 1.50 (150%)
+    else:
+        record.overtime_rate = OVERTIME_RATE_REGULAR  # 1.25 (125%)
+    
+    # Calculate overtime amount if basic salary is available
+    if basic_salary and record.overtime_hours:
+        # Hourly rate = (Basic Salary / 30 days) / 8 hours
+        hourly_rate = (basic_salary / Decimal("30")) / Decimal("8")
+        record.overtime_amount = record.overtime_hours * hourly_rate * record.overtime_rate
+    
+    record.notes = (record.notes or "") + f"\n[Exceptional Overtime: {request.reason}]"
+    
+    await session.commit()
+    await session.refresh(record)
+    
+    return build_response(record, emp_name)
+
+
+@router.get("/offset-balance/{employee_id}", response_model=OffsetBalanceSummary)
+async def get_offset_balance(
+    employee_id: int,
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Get the offset hours balance for an employee.
+    
+    For employees with overtime_type = "Offset", this returns:
+    - Total offset hours earned from overtime
+    - Total offset hours used as time-off
+    - Available balance (earned - used)
+    - Balance converted to days (balance / 8 hours)
+    """
+    # Check if admin/HR or the employee themselves
+    if current_user.role not in ["admin", "hr"] and current_user.id != employee_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get employee
+    emp_result = await session.execute(
+        select(Employee).where(Employee.id == employee_id)
+    )
+    employee = emp_result.scalar_one_or_none()
+    
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Get all attendance records with offset hours
+    records_result = await session.execute(
+        select(AttendanceRecord).where(
+            and_(
+                AttendanceRecord.employee_id == employee_id,
+                AttendanceRecord.offset_hours_earned > 0
+            )
+        ).order_by(AttendanceRecord.attendance_date.desc())
+    )
+    records = records_result.scalars().all()
+    
+    total_earned = Decimal("0")
+    total_used = Decimal("0")
+    offset_records = []
+    
+    for record in records:
+        earned = record.offset_hours_earned or Decimal("0")
+        total_earned += earned
+        
+        # Check if offset was used (referenced in offset_day_reference)
+        used = Decimal("0")
+        status = "available"
+        if record.offset_day_reference and "Used" in record.offset_day_reference:
+            used = earned
+            total_used += used
+            status = "used"
+        
+        offset_records.append(OffsetDayRecord(
+            attendance_date=record.attendance_date,
+            hours_earned=earned,
+            hours_used=used,
+            reference=record.offset_day_reference,
+            status=status
+        ))
+    
+    balance = total_earned - total_used
+    days_balance = balance / Decimal("8")  # Convert to days
+    
+    return OffsetBalanceSummary(
+        employee_id=employee_id,
+        employee_name=employee.name,
+        total_offset_hours_earned=total_earned,
+        total_offset_hours_used=total_used,
+        offset_hours_balance=balance,
+        offset_days_balance=days_balance.quantize(Decimal("0.01")),
+        records=offset_records
+    )
+
+
+@router.get("/paid-overtime-summary/{employee_id}", response_model=PaidOvertimeSummary)
+async def get_paid_overtime_summary(
+    employee_id: int,
+    start_date: date = Query(..., description="Period start date"),
+    end_date: date = Query(..., description="Period end date"),
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Get paid overtime summary for an employee for payroll purposes.
+    
+    For employees with overtime_type = "Paid" or with exceptional overtime days,
+    this returns:
+    - Total overtime hours broken down by rate (125% vs 150%)
+    - Calculated overtime amounts
+    - Individual records for review
+    """
+    # Check if admin/HR or the employee themselves
+    if current_user.role not in ["admin", "hr"] and current_user.id != employee_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get employee with basic salary
+    emp_result = await session.execute(
+        select(Employee).where(Employee.id == employee_id)
+    )
+    employee = emp_result.scalar_one_or_none()
+    
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Get attendance records with overtime in the period
+    # Include records where: employee has Paid policy OR exceptional_overtime is True
+    records_result = await session.execute(
+        select(AttendanceRecord).where(
+            and_(
+                AttendanceRecord.employee_id == employee_id,
+                AttendanceRecord.attendance_date >= start_date,
+                AttendanceRecord.attendance_date <= end_date,
+                AttendanceRecord.overtime_hours > 0,
+                AttendanceRecord.overtime_approved == True
+            )
+        ).order_by(AttendanceRecord.attendance_date)
+    )
+    records = records_result.scalars().all()
+    
+    # Calculate hourly rate from basic salary
+    hourly_rate = None
+    if employee.basic_salary:
+        hourly_rate = (employee.basic_salary / Decimal("30")) / Decimal("8")
+    
+    # Check employee's overtime policy once outside the loop
+    overtime_policy = (employee.overtime_type or "N/A").upper()
+    is_paid_policy = overtime_policy == "PAID"
+    
+    total_overtime_hours = Decimal("0")
+    regular_overtime_hours = Decimal("0")
+    night_overtime_hours = Decimal("0")
+    holiday_overtime_hours = Decimal("0")
+    total_amount = Decimal("0")
+    overtime_records = []
+    
+    for record in records:
+        # Only include if employee has Paid policy or this is exceptional overtime
+        if not is_paid_policy and not record.exceptional_overtime:
+            continue
+        
+        hours = record.overtime_hours or Decimal("0")
+        total_overtime_hours += hours
+        
+        # Determine rate
+        if record.is_night_overtime or record.is_holiday_overtime:
+            rate = OVERTIME_RATE_HOLIDAY  # 1.50
+            if record.is_night_overtime:
+                night_overtime_hours += hours
+            else:
+                holiday_overtime_hours += hours
+        else:
+            rate = OVERTIME_RATE_REGULAR  # 1.25
+            regular_overtime_hours += hours
+        
+        # Calculate amount
+        amount = Decimal("0")
+        if hourly_rate:
+            amount = hours * hourly_rate * rate
+            total_amount += amount
+        
+        overtime_records.append(PaidOvertimeRecord(
+            attendance_date=record.attendance_date,
+            overtime_hours=hours,
+            rate=rate,
+            amount=amount,
+            is_exceptional=record.exceptional_overtime,
+            notes=record.exceptional_overtime_reason if record.exceptional_overtime else None
+        ))
+    
+    return PaidOvertimeSummary(
+        employee_id=employee_id,
+        employee_name=employee.name,
+        period_start=start_date,
+        period_end=end_date,
+        total_overtime_hours=total_overtime_hours,
+        regular_overtime_hours=regular_overtime_hours,
+        night_overtime_hours=night_overtime_hours,
+        holiday_overtime_hours=holiday_overtime_hours,
+        total_overtime_amount=total_amount,
+        hourly_rate=hourly_rate,
+        records=overtime_records
+    )

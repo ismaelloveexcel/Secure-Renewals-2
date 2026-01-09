@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 revision = '20260108_0017'
-down_revision = '20260108_0016_add_insurance_census_tables'
+down_revision = '20260108_0016'
 branch_labels = None
 depends_on = None
 

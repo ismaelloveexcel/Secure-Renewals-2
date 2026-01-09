@@ -51,7 +51,7 @@ waitForPort = 5001
 
 [deployment]
 build = ["sh", "-c", "cd frontend && npm run build"]
-run = ["sh", "-c", "cd backend && uv run uvicorn app.main:app --host 0.0.0.0 --port 5000"]
+run = ["sh", "-c", "cd backend && ./start.sh"]
 deploymentTarget = "cloudrun"
 
 [agent]

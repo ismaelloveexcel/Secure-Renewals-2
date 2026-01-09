@@ -3,11 +3,22 @@ from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
+ACHIEVEMENT_CATEGORIES = [
+    "Teamwork",
+    "Innovation",
+    "Customer Service",
+    "Leadership",
+    "Problem Solving",
+    "Excellence",
+]
+
+
 class NominationCreate(BaseModel):
     nominee_id: int = Field(..., description="Employee ID of the nominee")
     justification: str = Field(..., min_length=50, max_length=2000, description="Why this employee deserves the award")
     achievements: Optional[str] = Field(None, max_length=1500, description="Key achievements")
     impact_description: Optional[str] = Field(None, max_length=1500, description="Impact on team/organization")
+    achievement_categories: Optional[List[str]] = Field(None, description="Selected achievement categories")
 
 
 class NominationResponse(BaseModel):
@@ -22,6 +33,8 @@ class NominationResponse(BaseModel):
     justification: str
     achievements: Optional[str]
     impact_description: Optional[str]
+    achievement_categories: Optional[List[str]] = None
+    supporting_evidence_paths: Optional[List[str]] = None
     status: str
     reviewed_by: Optional[int]
     reviewer_name: Optional[str]
@@ -132,6 +145,7 @@ class NominationSubmitRequest(BaseModel):
     justification: str = Field(..., min_length=50, max_length=2000, description="Why this employee deserves the award")
     achievements: Optional[str] = Field(None, max_length=1500, description="Key achievements")
     impact_description: Optional[str] = Field(None, max_length=1500, description="Impact on team/organization")
+    achievement_categories: Optional[List[str]] = Field(None, description="Selected achievement categories")
     verification_token: str = Field(..., description="Token from identity verification step")
 
 
@@ -209,3 +223,12 @@ class SendInvitationsResponse(BaseModel):
     emails_sent: int
     failed_count: int
     message: str
+
+
+class PublicNominationInfo(BaseModel):
+    """Public info about nomination period for the pass"""
+    year: int
+    is_open: bool
+    deadline: Optional[datetime] = None
+    announcement_message: Optional[str] = None
+    achievement_categories: List[str] = ACHIEVEMENT_CATEGORIES

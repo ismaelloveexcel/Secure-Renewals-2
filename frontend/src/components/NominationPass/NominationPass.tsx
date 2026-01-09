@@ -27,6 +27,15 @@ interface NominationForm {
   justification: string
   achievements: string
   impact_description: string
+  achievement_categories: string[]
+}
+
+interface NominationInfo {
+  year: number
+  is_open: boolean
+  deadline: string | null
+  announcement_message: string | null
+  achievement_categories: string[]
 }
 
 interface ExistingNomination {
@@ -62,16 +71,61 @@ export function NominationPass() {
     nominee_id: null,
     justification: '',
     achievements: '',
-    impact_description: ''
+    impact_description: '',
+    achievement_categories: []
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submittedNomination, setSubmittedNomination] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<'home' | 'status'>('home')
+  const [nominationInfo, setNominationInfo] = useState<NominationInfo | null>(null)
+  const [countdown, setCountdown] = useState<{ days: number; hours: number; minutes: number } | null>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
     fetchManagers()
+    fetchNominationInfo()
   }, [])
+
+  useEffect(() => {
+    if (nominationInfo?.deadline) {
+      const updateCountdown = () => {
+        const now = new Date().getTime()
+        const deadline = new Date(nominationInfo.deadline!).getTime()
+        const diff = deadline - now
+        if (diff > 0) {
+          setCountdown({
+            days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+            minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+          })
+        } else {
+          setCountdown(null)
+        }
+      }
+      updateCountdown()
+      const interval = setInterval(updateCountdown, 60000)
+      return () => clearInterval(interval)
+    }
+  }, [nominationInfo?.deadline])
+
+  useEffect(() => {
+    setIsAnimating(true)
+    const timer = setTimeout(() => setIsAnimating(false), 300)
+    return () => clearTimeout(timer)
+  }, [step])
+
+  const fetchNominationInfo = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/nominations/pass/info?year=${CURRENT_YEAR}`)
+      if (res.ok) {
+        const data = await res.json()
+        setNominationInfo(data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch nomination info')
+    }
+  }
 
   const fetchManagers = async () => {
     setLoading(true)
@@ -184,6 +238,7 @@ export function NominationPass() {
           justification: form.justification,
           achievements: form.achievements || null,
           impact_description: form.impact_description || null,
+          achievement_categories: form.achievement_categories.length > 0 ? form.achievement_categories : null,
           verification_token: verificationToken
         })
       })
@@ -304,8 +359,23 @@ export function NominationPass() {
             <div className="flex justify-between mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-100">
               <div className="flex-1 flex flex-col justify-between py-0.5">
                 <div>
-                  <h2 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">Employee of the Year</h2>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
+                    </svg>
+                    <h2 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">Employee of the Year</h2>
+                  </div>
                   <p className="text-xs sm:text-sm text-gray-500">{selectedManager?.department || <span className="font-bold">Year {CURRENT_YEAR}</span>}</p>
+                  {countdown && (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <svg className="w-3.5 h-3.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-[10px] sm:text-xs text-orange-600 font-medium">
+                        {countdown.days}d {countdown.hours}h {countdown.minutes}m remaining
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Stage & Status Row */}
@@ -413,8 +483,15 @@ export function NominationPass() {
               </div>
             )}
 
-            {/* Step Content */}
-            <div className="min-h-0 flex-1">
+            {/* Step Content with Animated Transitions */}
+            <div 
+              className="min-h-0 flex-1"
+              style={{
+                opacity: isAnimating ? 0 : 1,
+                transform: isAnimating ? 'translateY(10px)' : 'translateY(0)',
+                transition: 'opacity 0.3s ease-out, transform 0.3s ease-out'
+              }}
+            >
               {/* Step: Select Manager */}
               {step === 'select-manager' && (
                 <div>
@@ -618,6 +695,43 @@ export function NominationPass() {
                   
                   <div className="space-y-3">
                     <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center gap-1.5">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
+                        </svg>
+                        Achievement Categories
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(nominationInfo?.achievement_categories || ['Teamwork', 'Innovation', 'Customer Service', 'Leadership', 'Problem Solving', 'Excellence']).map((category) => (
+                          <label
+                            key={category}
+                            className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${
+                              form.achievement_categories.includes(category)
+                                ? 'border-opacity-50 bg-opacity-5'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            style={form.achievement_categories.includes(category) ? { borderColor: THEME_COLOR, backgroundColor: `${THEME_COLOR}10` } : {}}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={form.achievement_categories.includes(category)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setForm({ ...form, achievement_categories: [...form.achievement_categories, category] })
+                                } else {
+                                  setForm({ ...form, achievement_categories: form.achievement_categories.filter(c => c !== category) })
+                                }
+                              }}
+                              className="w-3.5 h-3.5 rounded"
+                              style={{ accentColor: THEME_COLOR }}
+                            />
+                            <span className="text-xs text-gray-700">{category}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1.5">
                         Why does this employee deserve the award? *
                       </label>
@@ -668,37 +782,56 @@ export function NominationPass() {
 
               {/* Step: Success */}
               {step === 'success' && submittedNomination && (
-                <div className="text-center">
-                  <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center bg-green-100">
-                    <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                <div className="text-center animate-fade-in">
+                  <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-amber-100 to-yellow-200 shadow-lg animate-bounce-slow">
+                    <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
                     </svg>
                   </div>
                   
-                  <h3 className="text-base font-bold text-gray-900 mb-2">Nomination Submitted!</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Nomination Submitted!</h3>
                   <p className="text-sm text-gray-500 mb-4">
-                    Thank you for nominating <span className="font-semibold text-gray-700">{submittedNomination.nominee_name}</span>.
+                    Thank you for nominating <span className="font-semibold text-gray-700">{submittedNomination.nominee_name}</span> for Employee of the Year {CURRENT_YEAR}.
                   </p>
                   
-                  <div className="bg-gray-50 rounded-xl p-4 mb-4 text-left">
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Summary</p>
-                    <div className="space-y-1.5 text-sm">
-                      <div className="flex justify-between">
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 mb-4 text-left border border-gray-100 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
+                      </svg>
+                      <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Nomination Summary</p>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between py-1.5 border-b border-gray-100">
                         <span className="text-gray-500">Nominee:</span>
-                        <span className="font-medium text-gray-900">{submittedNomination.nominee_name}</span>
+                        <span className="font-semibold text-gray-900">{submittedNomination.nominee_name}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between py-1.5 border-b border-gray-100">
                         <span className="text-gray-500">Position:</span>
                         <span className="font-medium text-gray-900">{submittedNomination.nominee_job_title}</span>
                       </div>
-                      <div className="flex justify-between items-center">
+                      {submittedNomination.achievement_categories?.length > 0 && (
+                        <div className="py-1.5 border-b border-gray-100">
+                          <span className="text-gray-500 text-xs">Categories:</span>
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {submittedNomination.achievement_categories.map((cat: string) => (
+                              <span key={cat} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700">
+                                {cat}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center pt-1">
                         <span className="text-gray-500">Status:</span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
                           Submitted
                         </span>
                       </div>
                     </div>
                   </div>
+                  
+                  <p className="text-xs text-gray-400 mb-4">A confirmation email has been sent to your inbox.</p>
                   
                   <button
                     onClick={resetForm}

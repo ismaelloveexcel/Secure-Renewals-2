@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func, UniqueConstraint, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.renewal import Base
@@ -38,6 +38,8 @@ class EoyNomination(Base):
     justification: Mapped[str] = mapped_column(Text, nullable=False)
     achievements: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     impact_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    achievement_categories: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True, default=list)
+    supporting_evidence_paths: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True, default=list)
     status: Mapped[str] = mapped_column(String(30), default="pending", nullable=False)
 
     reviewed_by: Mapped[Optional[int]] = mapped_column(ForeignKey("employees.id"), nullable=True)

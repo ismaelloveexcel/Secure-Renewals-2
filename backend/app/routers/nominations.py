@@ -20,7 +20,7 @@ from app.schemas.nomination import (
     VerifyManagerRequest, VerifyManagerResponse, NominationSubmitRequest,
     ManagerNominationStatus, NominationSettingsResponse, NominationSettingsUpdate,
     ManagerProgress, ManagerProgressResponse, SendInvitationsRequest, SendInvitationsResponse,
-    NominationReportEntry, ManagementReportResponse
+    NominationReportEntry, ManagementReportResponse, PublicNominationInfo, ACHIEVEMENT_CATEGORIES
 )
 from app.models.nomination_settings import NominationSettings
 from app.services.email_service import send_nomination_confirmation_email
@@ -379,6 +379,8 @@ async def submit_nomination_secure(
         justification=request.justification,
         achievements=request.achievements,
         impact_description=request.impact_description,
+        achievement_categories=request.achievement_categories or [],
+        supporting_evidence_paths=[],
         status="pending"
     )
     
@@ -441,12 +443,49 @@ async def submit_nomination_secure(
         justification=new_nomination.justification,
         achievements=new_nomination.achievements,
         impact_description=new_nomination.impact_description,
+        achievement_categories=new_nomination.achievement_categories,
+        supporting_evidence_paths=new_nomination.supporting_evidence_paths,
         status=new_nomination.status,
         reviewed_by=None,
         reviewer_name=None,
         reviewed_at=None,
         review_notes=None,
         created_at=new_nomination.created_at
+    )
+
+
+@router.get(
+    "/pass/info",
+    response_model=PublicNominationInfo,
+    summary="Get public nomination info including deadline",
+)
+async def get_public_nomination_info(
+    year: int = Query(default=None),
+    session: AsyncSession = Depends(get_session),
+):
+    """Get public nomination period info for the nomination pass"""
+    if year is None:
+        year = 2025  # Nomination for 2025 performance
+    
+    settings_stmt = select(NominationSettings).where(NominationSettings.year == year)
+    settings_result = await session.execute(settings_stmt)
+    settings = settings_result.scalar_one_or_none()
+    
+    if settings:
+        return PublicNominationInfo(
+            year=year,
+            is_open=settings.is_open,
+            deadline=settings.end_date,
+            announcement_message=settings.announcement_message,
+            achievement_categories=ACHIEVEMENT_CATEGORIES
+        )
+    
+    return PublicNominationInfo(
+        year=year,
+        is_open=True,
+        deadline=None,
+        announcement_message=None,
+        achievement_categories=ACHIEVEMENT_CATEGORIES
     )
 
 

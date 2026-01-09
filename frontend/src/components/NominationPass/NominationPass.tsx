@@ -263,15 +263,6 @@ export function NominationPass() {
       <div className="w-full max-w-md">
         {/* Pass Card Container */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Company Logo */}
-          <div className="bg-white px-5 py-4 flex justify-center border-b border-gray-100">
-            <img 
-              src="/baynunah-logo.png" 
-              alt="Baynunah" 
-              className="h-10 object-contain"
-            />
-          </div>
-          
           {/* Header */}
           <div 
             className="px-5 py-5 text-white"
@@ -294,10 +285,22 @@ export function NominationPass() {
           {/* Main Card Content */}
           <div className="p-5">
             {/* Info Section with QR */}
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-100">
               <div className="flex-1">
-                <h2 className="text-lg font-bold text-gray-900 leading-tight">Employee of the Year</h2>
-                <p className="text-sm text-gray-600">{selectedManager?.department || 'Year 2025'}</p>
+                <h2 className="text-lg font-bold text-gray-900 leading-tight mb-1">Employee of the Year</h2>
+                <p className="text-sm text-gray-600 mb-3">{selectedManager?.department || 'Year 2025'}</p>
+                
+                {/* Stage & Status Row - aligned with QR */}
+                <div className="flex items-center gap-4">
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Stage</p>
+                    <p className="text-xs font-semibold" style={{ color: THEME_COLOR }}>{getStepLabel()}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Status</p>
+                    <p className="text-xs font-semibold text-gray-700">{step === 'success' ? 'Complete' : 'In Progress'}</p>
+                  </div>
+                </div>
               </div>
               <div className="flex flex-col items-end gap-2">
                 <span 
@@ -314,18 +317,6 @@ export function NominationPass() {
                     fgColor={THEME_COLOR}
                   />
                 </div>
-              </div>
-            </div>
-
-            {/* Stage & Status Row */}
-            <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100">
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide">Stage</p>
-                <p className="text-xs font-semibold" style={{ color: THEME_COLOR }}>{getStepLabel()}</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide">Status</p>
-                <p className="text-xs font-semibold text-gray-700">{step === 'success' ? 'Complete' : 'In Progress'}</p>
               </div>
             </div>
 

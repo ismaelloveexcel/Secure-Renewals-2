@@ -54,18 +54,47 @@ The attendance module is now linked to the following Employee Master fields:
 
 ## New Features
 
-### 1. Work Location Tracking
-```python
-# Clock-in now captures work location
+### 1. Work Location Dropdown (Enhanced)
+Work Location is now a locked dropdown with the following values:
+- **Head Office** - Default office location
+- **KEZAD** - Khalifa Industrial Zone
+- **Safario** - Manufacturing site
+- **Sites** - Various project sites (requires remarks)
+- **Meeting** - External meeting (requires remarks)
+- **Event** - Company event (requires remarks)
+- **Work From Home** - WFH (requires remarks + approval confirmation)
+
+```json
+// Clock-in request with new work location dropdown
 {
-    "work_type": "office",
-    "work_location": "Kezad",  # From employee master or override
+    "work_location": "Sites",
+    "location_remarks": "ADNOC Client Site",
+    "wfh_approval_confirmed": false,
     "latitude": 24.4539,
     "longitude": 54.3773
 }
 ```
 
-### 2. Manual Entry/Correction Workflow
+**Validation Rules:**
+- `location_remarks` is **required** for: Sites, Meeting, Event, Work From Home
+- `wfh_approval_confirmed` defaults to `false` - employee must set to `true` to confirm they have Line Manager approval
+
+### 2. Manager Daily Summary (10:00 AM Email)
+New endpoint to generate manager's team attendance summary:
+```
+GET /attendance/manager-daily-summary/{manager_id}
+```
+
+Returns a table format for email:
+| Employee | Status         | Work Location  | Last Update | Remarks      |
+| -------- | -------------- | -------------- | ----------- | ------------ |
+| Ali      | Present        | Head Office    | 08:42       | —            |
+| Sara     | Present        | Sites          | 09:10       | ADNOC        |
+| Omar     | Present        | Work From Home | 08:30       | Approved     |
+| Lina     | On Leave       | —              | —           | Annual Leave |
+| Khaled   | Not Checked In | —              | —           | —            |
+
+### 3. Manual Entry/Correction Workflow
 - HR/Admin can create manual attendance entries
 - Employees can request corrections to their records
 - All corrections require HR approval

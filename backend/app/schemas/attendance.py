@@ -6,12 +6,21 @@ from pydantic import BaseModel, Field
 
 class ClockInRequest(BaseModel):
     """Request for clocking in."""
-    work_type: str = Field(default="office", description="Type of work: office, wfh, field, client_site, business_travel")
-    work_location: Optional[str] = Field(default=None, description="Work location override (Head Office, Kezad, Sites, etc.)")
+    work_location: str = Field(
+        default="Head Office", 
+        description="Work location (dropdown): Head Office, KEZAD, Safario, Sites, Meeting, Event, Work From Home"
+    )
+    location_remarks: Optional[str] = Field(
+        default=None, 
+        description="Details/remarks (required for Sites, Meeting, Event, Work From Home)"
+    )
+    wfh_approval_confirmed: bool = Field(
+        default=False,
+        description="WFH Approval Confirmed? (Yes/No) - Employee confirms they have Line Manager approval"
+    )
     latitude: Optional[Decimal] = Field(default=None, description="GPS latitude")
     longitude: Optional[Decimal] = Field(default=None, description="GPS longitude")
     address: Optional[str] = Field(default=None, description="Location address")
-    wfh_reason: Optional[str] = Field(default=None, description="Reason for WFH")
     notes: Optional[str] = Field(default=None, description="Additional notes")
 
 
@@ -65,7 +74,10 @@ class AttendanceResponse(BaseModel):
     clock_out_longitude: Optional[Decimal] = None
     clock_out_address: Optional[str] = None
     work_type: str
+    # Work location (dropdown values)
     work_location: Optional[str] = None
+    location_remarks: Optional[str] = None  # Details for Sites, Meeting, Event, WFH
+    wfh_approval_confirmed: bool = False  # Employee confirms WFH approval
     wfh_reason: Optional[str] = None
     wfh_approved: Optional[bool] = None
     wfh_approved_by: Optional[int] = None
@@ -266,6 +278,8 @@ class TodayAttendanceStatus(BaseModel):
     break_start_time: Optional[datetime] = None
     work_type: Optional[str] = None
     work_location: Optional[str] = None
+    location_remarks: Optional[str] = None
+    wfh_approval_confirmed: bool = False
     # Employee work settings
     employee_work_schedule: Optional[str] = None
     employee_overtime_policy: Optional[str] = None
@@ -276,6 +290,28 @@ class TodayAttendanceStatus(BaseModel):
     can_start_break: bool
     can_end_break: bool
     message: str
+
+
+class ManagerDailySummaryRow(BaseModel):
+    """Single row for manager daily attendance summary email."""
+    employee_name: str
+    status: str  # Present, On Leave, Not Checked In
+    work_location: Optional[str] = None
+    last_update: Optional[str] = None  # Time of last action (e.g., "08:42")
+    remarks: Optional[str] = None  # location_remarks or leave type
+
+
+class ManagerDailySummary(BaseModel):
+    """Daily attendance summary for manager email (sent at 10:00 AM)."""
+    manager_id: int
+    manager_name: str
+    summary_date: date
+    team_size: int
+    present_count: int
+    on_leave_count: int
+    not_checked_in_count: int
+    wfh_count: int
+    employees: List[ManagerDailySummaryRow] = []
 
 
 class AttendanceDashboard(BaseModel):
@@ -289,12 +325,14 @@ class AttendanceDashboard(BaseModel):
     pending_overtime_approvals: int
     pending_corrections: int = 0
     on_leave_today: int
-    # By location breakdown
+    # By location breakdown (updated to match new WORK_LOCATIONS)
     at_head_office: int = 0
     at_kezad: int = 0
+    at_safario: int = 0
     at_sites: int = 0
-    on_client_site: int = 0
-    on_business_travel: int = 0
+    at_meeting: int = 0
+    at_event: int = 0
+    at_wfh: int = 0  # Work From Home
     # UAE compliance alerts
     exceeding_daily_limits: int = 0
     exceeding_overtime_limits: int = 0

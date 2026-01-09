@@ -17,7 +17,8 @@ from app.models.attendance import (
     MAX_OVERTIME_HOURS_PER_DAY, MAX_WEEKLY_HOURS,
     RAMADAN_WORK_HOURS, GRACE_PERIOD_MINUTES, 
     FRIDAY_WORK_HOURS,
-    OVERTIME_RATE_REGULAR, OVERTIME_RATE_NIGHT, OVERTIME_RATE_HOLIDAY
+    OVERTIME_RATE_REGULAR, OVERTIME_RATE_NIGHT, OVERTIME_RATE_HOLIDAY,
+    WORK_LOCATIONS, WORK_LOCATIONS_REQUIRE_REMARKS
 )
 from app.models.system_settings import SystemSetting
 from app.schemas.attendance import (
@@ -26,7 +27,8 @@ from app.schemas.attendance import (
     WFHApprovalRequest, OvertimeApprovalRequest, TodayAttendanceStatus,
     ManualAttendanceRequest, AttendanceCorrectionRequest, CorrectionApprovalRequest,
     ExceptionalOvertimeRequest, OffsetBalanceSummary, OffsetDayRecord,
-    PaidOvertimeSummary, PaidOvertimeRecord
+    PaidOvertimeSummary, PaidOvertimeRecord,
+    ManagerDailySummary, ManagerDailySummaryRow
 )
 
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
@@ -250,6 +252,8 @@ def build_response(record: AttendanceRecord, employee_name: str) -> AttendanceRe
         clock_out_address=record.clock_out_address,
         work_type=record.work_type,
         work_location=record.work_location,
+        location_remarks=record.location_remarks,
+        wfh_approval_confirmed=record.wfh_approval_confirmed,
         wfh_reason=record.wfh_reason,
         wfh_approved=record.wfh_approved,
         wfh_approved_by=record.wfh_approved_by,
@@ -361,6 +365,8 @@ async def get_today_status(
             break_start_time=None,
             work_type=None,
             work_location=current_user.location,
+            location_remarks=None,
+            wfh_approval_confirmed=False,
             employee_work_schedule=work_settings.work_schedule,
             employee_overtime_policy=work_settings.overtime_type,
             standard_hours_today=standard_hours_today,
@@ -398,6 +404,8 @@ async def get_today_status(
         break_start_time=record.break_start,
         work_type=record.work_type,
         work_location=record.work_location or current_user.location,
+        location_remarks=record.location_remarks,
+        wfh_approval_confirmed=record.wfh_approval_confirmed,
         employee_work_schedule=work_settings.work_schedule,
         employee_overtime_policy=work_settings.overtime_type,
         standard_hours_today=standard_hours_today,
@@ -416,18 +424,39 @@ async def clock_in(
     current_user: Employee = Depends(get_current_employee),
     session: AsyncSession = Depends(get_session)
 ):
-    """Clock in for the day with employee work settings integration.
+    """Clock in for the day with work location dropdown.
     
-    Work settings from Employee master are automatically applied:
-    - Work location defaults to employee.location (Head Office, KEZAD, Sites)
-    - Can be overridden in request for field work, client site, or business travel
+    Work Location dropdown values (locked):
+    - Head Office, KEZAD, Safario, Sites, Meeting, Event, Work From Home
+    
+    For Sites, Meeting, Event, Work From Home:
+    - location_remarks field is required
+    
+    For Work From Home:
+    - wfh_approval_confirmed should be True if employee has obtained Line Manager approval
     """
     # Check if attendance feature is enabled
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
     
+    # Validate work location is in allowed list
+    work_location = request.work_location or current_user.location or "Head Office"
+    if work_location not in WORK_LOCATIONS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid work location. Must be one of: {', '.join(WORK_LOCATIONS)}"
+        )
+    
+    # Validate remarks are provided for locations that require them
+    if work_location in WORK_LOCATIONS_REQUIRE_REMARKS:
+        if not request.location_remarks or not request.location_remarks.strip():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Details/Remarks are required for work location: {work_location}"
+            )
+    
     # Validate WFH request if feature is disabled
-    if request.work_type == "wfh":
+    if work_location == "Work From Home":
         if not await check_feature_enabled(session, "feature_attendance_wfh"):
             raise HTTPException(status_code=403, detail="WFH feature is disabled")
     
@@ -448,9 +477,6 @@ async def clock_in(
     if existing and existing.clock_in:
         raise HTTPException(status_code=400, detail="Already clocked in today")
     
-    # Get work location - use from request or default to employee's location from master
-    work_location = request.work_location or current_user.location
-    
     # Check if late (after 8:15 AM - using UTC for now, assuming UAE timezone UTC+4)
     # Standard start time is 8:00 AM UAE (04:00 UTC)
     uae_hour = (now.hour + 4) % 24  # Convert UTC to UAE time
@@ -466,6 +492,14 @@ async def clock_in(
     # Determine status
     att_status = "late" if is_late else "present"
     
+    # Determine work_type based on work_location
+    if work_location == "Work From Home":
+        work_type = "wfh"
+    elif work_location in ["Sites", "Meeting", "Event"]:
+        work_type = "field"
+    else:
+        work_type = "office"
+    
     # Store GPS coordinates if GPS feature is enabled
     gps_enabled = await check_feature_enabled(session, "feature_attendance_gps")
     lat = request.latitude if gps_enabled else None
@@ -479,10 +513,11 @@ async def clock_in(
         clock_in_latitude=lat,
         clock_in_longitude=lng,
         clock_in_address=addr,
-        work_type=request.work_type,
+        work_type=work_type,
         work_location=work_location,
-        wfh_reason=request.wfh_reason if request.work_type == "wfh" else None,
-        wfh_approved=None if request.work_type == "wfh" else None,
+        location_remarks=request.location_remarks,
+        wfh_approval_confirmed=request.wfh_approval_confirmed if work_location == "Work From Home" else False,
+        # wfh_reason is kept for backward compatibility but location_remarks is primary
         status=att_status,
         is_late=is_late,
         late_minutes=late_minutes,
@@ -988,16 +1023,18 @@ async def get_dashboard(
     records = today_records.scalars().all()
     
     clocked_in = sum(1 for r in records if r.clock_in)
-    wfh = sum(1 for r in records if r.work_type == "wfh")
+    wfh = sum(1 for r in records if r.work_location == "Work From Home")
     late = sum(1 for r in records if r.is_late)
     on_leave = sum(1 for r in records if r.status == "on-leave")
     
-    # Location breakdown
-    at_head_office = sum(1 for r in records if r.work_location and "head" in r.work_location.lower())
-    at_kezad = sum(1 for r in records if r.work_location and "kezad" in r.work_location.lower())
-    at_sites = sum(1 for r in records if r.work_location and ("site" in r.work_location.lower() or "safario" in r.work_location.lower()))
-    on_client_site = sum(1 for r in records if r.work_type == "client_site")
-    on_business_travel = sum(1 for r in records if r.work_type == "business_travel")
+    # Location breakdown (using new WORK_LOCATIONS values)
+    at_head_office = sum(1 for r in records if r.work_location == "Head Office")
+    at_kezad = sum(1 for r in records if r.work_location == "KEZAD")
+    at_safario = sum(1 for r in records if r.work_location == "Safario")
+    at_sites = sum(1 for r in records if r.work_location == "Sites")
+    at_meeting = sum(1 for r in records if r.work_location == "Meeting")
+    at_event = sum(1 for r in records if r.work_location == "Event")
+    at_wfh = sum(1 for r in records if r.work_location == "Work From Home")
     
     # UAE compliance alerts
     exceeding_daily_limits = sum(1 for r in records if r.exceeds_daily_limit)
@@ -1041,9 +1078,11 @@ async def get_dashboard(
         on_leave_today=on_leave,
         at_head_office=at_head_office,
         at_kezad=at_kezad,
+        at_safario=at_safario,
         at_sites=at_sites,
-        on_client_site=on_client_site,
-        on_business_travel=on_business_travel,
+        at_meeting=at_meeting,
+        at_event=at_event,
+        at_wfh=at_wfh,
         exceeding_daily_limits=exceeding_daily_limits,
         exceeding_overtime_limits=exceeding_overtime_limits
     )
@@ -1393,4 +1432,130 @@ async def get_paid_overtime_summary(
         total_overtime_amount=total_amount,
         hourly_rate=hourly_rate,
         records=overtime_records
+    )
+
+
+@router.get("/manager-daily-summary/{manager_id}", response_model=ManagerDailySummary)
+async def get_manager_daily_summary(
+    manager_id: int,
+    summary_date: Optional[date] = Query(None, description="Date for summary (defaults to today)"),
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Get daily attendance summary for a manager's team.
+    
+    This is used to generate the 10:00 AM daily email to managers.
+    
+    Returns a summary table with:
+    | Employee | Status         | Work Location  | Last Update | Remarks      |
+    | Ali      | Present        | Head Office    | 08:42       | —            |
+    | Sara     | Present        | Sites          | 09:10       | ADNOC        |
+    | Omar     | Present        | Work From Home | 08:30       | Approved     |
+    | Lina     | On Leave       | —              | —           | Annual Leave |
+    | Khaled   | Not Checked In | —              | —           | —            |
+    """
+    # Check permissions - manager can view their own team, admin/HR can view any team
+    if current_user.role not in ["admin", "hr"] and current_user.id != manager_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get manager details
+    manager_result = await session.execute(
+        select(Employee).where(Employee.id == manager_id)
+    )
+    manager = manager_result.scalar_one_or_none()
+    
+    if not manager:
+        raise HTTPException(status_code=404, detail="Manager not found")
+    
+    # Default to today
+    today = summary_date or date.today()
+    
+    # Get all employees who report to this manager
+    team_result = await session.execute(
+        select(Employee).where(
+            and_(
+                Employee.line_manager_id == manager_id,
+                Employee.is_active == True
+            )
+        )
+    )
+    team_members = team_result.scalars().all()
+    
+    if not team_members:
+        return ManagerDailySummary(
+            manager_id=manager_id,
+            manager_name=manager.name,
+            summary_date=today,
+            team_size=0,
+            present_count=0,
+            on_leave_count=0,
+            not_checked_in_count=0,
+            wfh_count=0,
+            employees=[]
+        )
+    
+    summary_rows = []
+    present_count = 0
+    on_leave_count = 0
+    not_checked_in_count = 0
+    wfh_count = 0
+    
+    for employee in team_members:
+        # Get today's attendance record for this employee
+        record_result = await session.execute(
+            select(AttendanceRecord).where(
+                and_(
+                    AttendanceRecord.employee_id == employee.id,
+                    AttendanceRecord.attendance_date == today
+                )
+            )
+        )
+        record = record_result.scalar_one_or_none()
+        
+        if not record or not record.clock_in:
+            # Check if on leave (would need Leave model integration)
+            status = "Not Checked In"
+            work_location = None
+            last_update = None
+            remarks = None
+            not_checked_in_count += 1
+        elif record.status == "on-leave":
+            status = "On Leave"
+            work_location = None
+            last_update = None
+            remarks = record.notes or "Leave"
+            on_leave_count += 1
+        else:
+            status = "Present"
+            work_location = record.work_location
+            last_update = record.clock_in.strftime("%H:%M") if record.clock_in else None
+            remarks = record.location_remarks
+            present_count += 1
+            
+            # WFH with approval status
+            if work_location == "Work From Home":
+                wfh_count += 1
+                if record.wfh_approval_confirmed:
+                    remarks = "Approved" if not remarks else f"Approved - {remarks}"
+                else:
+                    remarks = "Not Approved" if not remarks else f"Not Approved - {remarks}"
+        
+        summary_rows.append(ManagerDailySummaryRow(
+            employee_name=employee.name,
+            status=status,
+            work_location=work_location,
+            last_update=last_update,
+            remarks=remarks or "—"
+        ))
+    
+    return ManagerDailySummary(
+        manager_id=manager_id,
+        manager_name=manager.name,
+        summary_date=today,
+        team_size=len(team_members),
+        present_count=present_count,
+        on_leave_count=on_leave_count,
+        not_checked_in_count=not_checked_in_count,
+        wfh_count=wfh_count,
+        employees=summary_rows
     )

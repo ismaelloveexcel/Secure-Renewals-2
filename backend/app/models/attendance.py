@@ -50,10 +50,20 @@ class AttendanceRecord(Base):
     # Work type: office, wfh (work from home), field, client_site, business_travel, leave, holiday
     work_type: Mapped[str] = mapped_column(String(20), default="office", nullable=False)
     
-    # Work location captured at clock-in (linked from Employee master but can be overridden)
+    # Work location (dropdown with locked values - see WORK_LOCATIONS constant)
+    # Shows employee's default location, can be changed by employee at clock-in
     work_location: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
-    # WFH specific fields
+    # Location remarks/details (required for: Sites, Meeting, Event, Work From Home)
+    # Examples: "ADNOC Meeting", "Client site - Abu Dhabi", "Working from home - approved"
+    location_remarks: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # WFH Approval Confirmation (employee self-confirms they have approval)
+    # Default: False. Employee sets to True only if they have obtained Line Manager approval
+    # Note: Actual approval workflow is handled outside the portal currently
+    wfh_approval_confirmed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    
+    # WFH specific fields (legacy - kept for backward compatibility)
     wfh_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     wfh_approved: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
     wfh_approved_by: Mapped[Optional[int]] = mapped_column(ForeignKey("employees.id"), nullable=True)
@@ -147,8 +157,20 @@ class AttendanceRecord(Base):
 # Work type constants - expanded per requirements
 WORK_TYPES = ["office", "wfh", "field", "client_site", "business_travel", "leave", "holiday"]
 
-# Work locations - linked to Employee master (Head Office, KEZAD, Sites)
-WORK_LOCATIONS = ["Head Office", "Kezad", "Safario", "Sites", "Client Site", "Remote"]
+# Work locations (locked dropdown values per requirements)
+# These are the ONLY valid work location values for clock-in
+WORK_LOCATIONS = [
+    "Head Office",      # Default office location
+    "KEZAD",            # Khalifa Industrial Zone
+    "Safario",          # Manufacturing site
+    "Sites",            # Various project sites (requires remarks)
+    "Meeting",          # External meeting (requires remarks)
+    "Event",            # Company event (requires remarks)
+    "Work From Home"    # WFH (requires remarks + approval confirmation)
+]
+
+# Work locations that require remarks/details
+WORK_LOCATIONS_REQUIRE_REMARKS = ["Sites", "Meeting", "Event", "Work From Home"]
 
 # Attendance status constants
 ATTENDANCE_STATUSES = ["pending", "present", "absent", "late", "half-day", "on-leave", "holiday", "rest-day"]

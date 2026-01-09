@@ -259,71 +259,72 @@ export function NominationPass() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen min-h-dvh bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center p-2 sm:p-4">
+      <div className="w-full max-w-md h-full max-h-[100dvh] sm:max-h-[95dvh] flex flex-col">
         {/* Pass Card Container */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0">
           {/* Header */}
           <div 
-            className="px-5 py-5 text-white"
+            className="px-4 py-3 sm:px-5 sm:py-4 text-white shrink-0"
             style={{ backgroundColor: THEME_COLOR }}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-base font-semibold tracking-wide uppercase">Nomination Pass</span>
+                <span className="text-sm sm:text-base font-semibold tracking-wide uppercase">Nomination Pass</span>
               </div>
               <div className="flex items-center">
                 <img 
                   src="/baynunah-logo.png" 
                   alt="Baynunah" 
-                  className="h-6 object-contain brightness-0 invert opacity-90"
+                  className="h-5 sm:h-6 object-contain brightness-0 invert opacity-90"
                 />
               </div>
             </div>
           </div>
 
           {/* Main Card Content */}
-          <div className="p-5">
+          <div className="p-3 sm:p-5 flex-1 overflow-y-auto min-h-0">
             {/* Info Section with QR */}
-            <div className="flex justify-between mb-4 pb-4 border-b border-gray-100">
+            <div className="flex justify-between mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-100">
               <div className="flex-1 flex flex-col justify-between py-0.5">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900 leading-tight">Employee of the Year</h2>
-                  <p className="text-sm text-gray-500">{selectedManager?.department || 'Year 2025'}</p>
+                  <h2 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">Employee of the Year</h2>
+                  <p className="text-xs sm:text-sm text-gray-500">{selectedManager?.department || 'Year 2025'}</p>
                 </div>
                 
                 {/* Stage & Status Row */}
-                <div className="flex items-center gap-6 mt-3">
+                <div className="flex items-center gap-4 sm:gap-6 mt-2 sm:mt-3">
                   <div>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Stage</p>
-                    <p className="text-xs font-semibold" style={{ color: THEME_COLOR }}>{getStepLabel()}</p>
+                    <p className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Stage</p>
+                    <p className="text-[11px] sm:text-xs font-semibold" style={{ color: THEME_COLOR }}>{getStepLabel()}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Status</p>
-                    <p className="text-xs font-semibold text-gray-700">{step === 'success' ? 'Complete' : 'In Progress'}</p>
+                    <p className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Status</p>
+                    <p className="text-[11px] sm:text-xs font-semibold text-gray-700">{step === 'success' ? 'Complete' : 'In Progress'}</p>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1.5 ml-4">
+              <div className="flex flex-col items-end gap-1 sm:gap-1.5 ml-3 sm:ml-4">
                 <span 
-                  className="px-2.5 py-1 text-[10px] font-semibold rounded text-white"
+                  className="px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-semibold rounded text-white"
                   style={{ backgroundColor: '#22c55e' }}
                 >
                   {step === 'success' ? 'SUBMITTED' : 'ACTIVE'}
                 </span>
-                <div className="bg-white p-1.5 rounded-lg border border-gray-100 shadow-sm">
+                <div className="bg-white p-1 sm:p-1.5 rounded-lg border border-gray-100 shadow-sm">
                   <QRCodeSVG 
                     value={`https://hr.baynunah.ae/nomination-pass`}
-                    size={60}
+                    size={50}
                     level="M"
                     fgColor={THEME_COLOR}
+                    className="w-[45px] h-[45px] sm:w-[55px] sm:h-[55px]"
                   />
                 </div>
               </div>
             </div>
 
             {/* Progress Steps */}
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-3 sm:mb-5">
               {stepLabels.map((label, i) => {
                 const isCompleted = stepIndex > i
                 const isCurrent = stepIndex === i
@@ -339,17 +340,17 @@ export function NominationPass() {
                         />
                       )}
                       <div 
-                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
                           stepIndex >= i ? 'text-white' : 'bg-gray-200 text-gray-500'
                         }`}
                         style={stepColor ? { backgroundColor: stepColor } : {}}
                       >
                         {isCompleted ? (
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                         ) : (
-                          <span className="text-[10px]">{i + 1}</span>
+                          <span className="text-[9px] sm:text-[10px]">{i + 1}</span>
                         )}
                       </div>
                       {i < stepLabels.length - 1 && (
@@ -359,41 +360,41 @@ export function NominationPass() {
                         />
                       )}
                     </div>
-                    <span className="text-[9px] text-gray-500 mt-1.5 text-center">{label}</span>
+                    <span className="text-[8px] sm:text-[9px] text-gray-500 mt-1 sm:mt-1.5 text-center">{label}</span>
                   </div>
                 )
               })}
             </div>
 
             {/* Next Action Card */}
-            <div className="bg-gray-50 rounded-xl p-4 mb-4">
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Next Action</p>
-              <div className="flex items-center gap-3">
+            <div className="bg-gray-50 rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+              <p className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wider mb-1.5 sm:mb-2">Next Action</p>
+              <div className="flex items-center gap-2.5 sm:gap-3">
                 <div 
-                  className="w-9 h-9 rounded-lg flex items-center justify-center text-white"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-white shrink-0"
                   style={{ backgroundColor: THEME_COLOR }}
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">{getStepLabel()}</p>
-                  <p className="text-xs text-gray-500">{getStepDescription()}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-gray-800">{getStepLabel()}</p>
+                  <p className="text-[11px] sm:text-xs text-gray-500">{getStepDescription()}</p>
                 </div>
               </div>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-center justify-between">
+              <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-xl text-xs sm:text-sm text-red-700 flex items-center justify-between">
                 <span>{error}</span>
                 <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-2">×</button>
               </div>
             )}
 
             {/* Step Content */}
-            <div className="min-h-[200px]">
+            <div className="min-h-0 flex-1">
               {/* Step: Select Manager */}
               {step === 'select-manager' && (
                 <div>
@@ -402,26 +403,26 @@ export function NominationPass() {
                       <div className="w-8 h-8 border-3 rounded-full animate-spin" style={{ borderColor: THEME_COLOR, borderTopColor: 'transparent' }} />
                     </div>
                   ) : (
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                    <div className="space-y-1.5 sm:space-y-2 max-h-[40vh] sm:max-h-64 overflow-y-auto">
                       {managers.map(manager => (
                         <button
                           key={manager.id}
                           onClick={() => handleManagerSelect(manager)}
-                          className="w-full p-3 text-left flex items-center justify-between bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all"
+                          className="w-full p-2.5 sm:p-3 text-left flex items-center justify-between bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all"
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2.5 sm:gap-3">
                             <div 
-                              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm"
+                              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm shrink-0"
                               style={{ backgroundColor: THEME_COLOR }}
                             >
                               {manager.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                             </div>
-                            <div>
-                              <p className="font-medium text-gray-900 text-sm">{manager.name}</p>
-                              <p className="text-xs text-gray-500">{manager.job_title}</p>
+                            <div className="min-w-0">
+                              <p className="font-medium text-gray-900 text-xs sm:text-sm truncate">{manager.name}</p>
+                              <p className="text-[11px] sm:text-xs text-gray-500 truncate">{manager.job_title}</p>
                             </div>
                           </div>
-                          <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </button>
@@ -691,32 +692,32 @@ export function NominationPass() {
           </div>
 
           {/* Bottom Navigation */}
-          <div className="border-t border-gray-100 px-6 py-3 flex justify-around bg-white">
+          <div className="border-t border-gray-100 px-4 sm:px-6 py-2 sm:py-3 flex justify-around bg-white shrink-0">
             <button 
               onClick={() => setActiveTab('home')}
               className={`flex flex-col items-center gap-0.5 ${activeTab === 'home' ? '' : 'opacity-50'}`}
               style={activeTab === 'home' ? { color: THEME_COLOR } : { color: '#6b7280' }}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              <span className="text-[10px] font-medium">Home</span>
+              <span className="text-[9px] sm:text-[10px] font-medium">Home</span>
             </button>
             <button 
               onClick={() => setActiveTab('status')}
               className={`flex flex-col items-center gap-0.5 ${activeTab === 'status' ? '' : 'opacity-50'}`}
               style={activeTab === 'status' ? { color: THEME_COLOR } : { color: '#6b7280' }}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
-              <span className="text-[10px] font-medium">Status</span>
+              <span className="text-[9px] sm:text-[10px] font-medium">Status</span>
             </button>
           </div>
 
           {/* Footer */}
-          <div className="text-center py-3 bg-gray-50 border-t border-gray-100">
-            <p className="text-[10px] text-gray-500 font-medium">
+          <div className="text-center py-2 sm:py-3 bg-gray-50 border-t border-gray-100 shrink-0">
+            <p className="text-[9px] sm:text-[10px] text-gray-500 font-medium">
               Baynunah Watergeneration Technologies SP LLC
             </p>
           </div>

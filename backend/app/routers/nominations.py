@@ -139,7 +139,7 @@ async def get_eligible_managers(
         if emp.line_manager_id:
             if emp.line_manager_id not in manager_reports:
                 manager_reports[emp.line_manager_id] = []
-            if check_eligible_job_level(emp.job_title):
+            if check_eligible_job_level(emp.function):
                 manager_reports[emp.line_manager_id].append(emp)
     
     eligible_managers = []
@@ -161,13 +161,15 @@ async def get_eligible_managers(
     return eligible_managers
 
 
-def check_eligible_job_level(job_title: str | None) -> bool:
-    """Check if job title qualifies as Officer level or below"""
-    if not job_title:
+ELIGIBLE_FUNCTION_LEVELS = ["Officer", "Coordinator", "Skilled Labour", "Non Skilled Labour"]
+
+def check_eligible_job_level(function: str | None) -> bool:
+    """Check if employee function qualifies as Officer level or below"""
+    if not function:
         return False
-    job_lower = job_title.lower()
-    for level in ELIGIBLE_JOB_LEVELS:
-        if level.lower() in job_lower:
+    func_lower = function.lower().strip()
+    for level in ELIGIBLE_FUNCTION_LEVELS:
+        if level.lower() == func_lower:
             return True
     return False
 
@@ -272,7 +274,7 @@ async def get_eligible_employees(
     
     eligible = []
     for emp in team_members:
-        if check_eligible_job_level(emp.job_title):
+        if check_eligible_job_level(emp.function):
             eligible.append(EligibleEmployee(
                 id=emp.id,
                 employee_id=emp.employee_id,
@@ -330,7 +332,7 @@ async def submit_nomination_secure(
             detail="You can only nominate employees in your direct team"
         )
     
-    if not check_eligible_job_level(nominee.job_title):
+    if not check_eligible_job_level(nominee.function):
         raise HTTPException(
             status_code=400,
             detail="Only employees at Officer level or below can be nominated"
@@ -785,7 +787,7 @@ async def get_manager_progress(
     for emp in all_employees:
         if emp.line_manager_id:
             manager = next((e for e in all_employees if e.id == emp.line_manager_id), None)
-            if manager and check_eligible_job_level(emp.job_title):
+            if manager and check_eligible_job_level(emp.function):
                 manager_ids_with_reports.add(emp.line_manager_id)
     
     nominations_stmt = select(EoyNomination).where(EoyNomination.nomination_year == year)
@@ -861,7 +863,7 @@ async def send_invitation_emails(
     for emp in all_employees:
         if emp.line_manager_id:
             manager = next((e for e in all_employees if e.id == emp.line_manager_id), None)
-            if manager and check_eligible_job_level(emp.job_title):
+            if manager and check_eligible_job_level(emp.function):
                 manager_ids_with_reports.add(emp.line_manager_id)
     
     nominations_stmt = select(EoyNomination.nominator_id).where(EoyNomination.nomination_year == year)

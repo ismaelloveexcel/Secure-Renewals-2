@@ -304,7 +304,7 @@ export function NominationPass() {
               <div className="flex-1 flex flex-col justify-between py-0.5">
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">Employee of the Year</h2>
-                  <p className="text-xs sm:text-sm text-gray-500">{selectedManager?.department || <span className="font-bold">Year 2025</span>}</p>
+                  <p className="text-xs sm:text-sm text-gray-500">{selectedManager?.department || <span className="font-bold">Year {CURRENT_YEAR}</span>}</p>
                 </div>
                 
                 {/* Stage & Status Row */}

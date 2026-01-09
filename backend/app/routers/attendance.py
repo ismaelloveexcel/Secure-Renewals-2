@@ -114,7 +114,10 @@ def get_employee_work_settings(employee: Employee, is_ramadan: bool = False) -> 
 
 
 def is_friday(check_date: date) -> bool:
-    """Check if the given date is a Friday (UAE weekend for 6-day workers)."""
+    """Check if the given date is a Friday.
+    
+    Note: Friday half-day is a company policy option for 6-day workers, not a UAE Labor Law requirement.
+    """
     return check_date.weekday() == 4  # Friday = 4
 
 
@@ -123,12 +126,17 @@ def get_standard_hours_for_day(
     check_date: date, 
     is_ramadan: bool = False
 ) -> int:
-    """Get the standard work hours for a specific day based on employee settings."""
+    """Get the standard work hours for a specific day based on employee settings.
+    
+    Note: Friday half-day for 6-day workers is a company policy option, not a UAE Labor Law requirement.
+    Companies can configure whether to use reduced Friday hours or full 8-hour days.
+    Currently configured to use Friday half-day - modify FRIDAY_WORK_HOURS if needed.
+    """
     work_schedule = employee.work_schedule or "5 days"
     
-    # For 6-day workers, Friday is a half-day
+    # For 6-day workers, Friday can be a half-day (company policy, not law)
     if "6" in work_schedule and is_friday(check_date):
-        return FRIDAY_WORK_HOURS  # 4 hours on Friday
+        return FRIDAY_WORK_HOURS  # 4 hours on Friday (configurable)
     
     # Regular hours (with Ramadan reduction if applicable)
     if is_ramadan:

@@ -182,9 +182,10 @@ STANDARD_CLOCK_OUT = time(17, 0)  # 5:00 PM (8 hours + 1 hour break)
 RAMADAN_CLOCK_OUT = time(15, 0)  # 3:00 PM during Ramadan
 GRACE_PERIOD_MINUTES = 15  # 15 minutes grace period for late arrivals
 
-# Friday timing (for 6-day workers)
-FRIDAY_CLOCK_OUT = time(12, 0)  # 12:00 PM on Fridays (half day)
-FRIDAY_WORK_HOURS = 4  # Half day on Fridays
+# Friday timing (optional - for companies that implement Friday half-day)
+# Note: Friday half-day is a company policy, NOT a UAE Labor Law requirement
+FRIDAY_CLOCK_OUT = time(12, 0)  # 12:00 PM on Fridays (if half day policy is used)
+FRIDAY_WORK_HOURS = 4  # Half day on Fridays (company policy, not law)
 
 # Break duration
 STANDARD_BREAK_MINUTES = 60  # 1 hour break (not counted in work hours)

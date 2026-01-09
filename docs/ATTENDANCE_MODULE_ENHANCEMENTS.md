@@ -48,8 +48,9 @@ The attendance module is now linked to the following Employee Master fields:
 
 #### Article 21: Weekly Rest
 - Minimum **1 day rest** per week
-- Friday is the standard rest day
-- 6-day workers: Friday is a half-day (4 hours)
+- Friday is the standard rest day in UAE
+
+**Note:** Friday half-day for 6-day workers is a company policy option, not a UAE Labor Law requirement. The system supports configurable Friday hours for organizations that choose to implement reduced Friday hours.
 
 ## New Features
 

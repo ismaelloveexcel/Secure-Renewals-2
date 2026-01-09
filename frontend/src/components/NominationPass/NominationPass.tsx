@@ -47,7 +47,7 @@ type Step = 'select-manager' | 'verify' | 'already-nominated' | 'select-nominee'
 
 const API_BASE = '/api'
 const CURRENT_YEAR = new Date().getFullYear()
-const THEME_COLOR = '#3d1a78'
+const THEME_COLOR = '#1800ad'
 
 export function NominationPass() {
   const [step, setStep] = useState<Step>('select-manager')
@@ -275,23 +275,24 @@ export function NominationPass() {
 
   return (
     <div className="min-h-screen min-h-dvh bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center p-2 sm:p-4">
-      <div className="w-full max-w-md h-full max-h-[100dvh] sm:max-h-[95dvh] flex flex-col">
+      <div className="w-full max-w-lg h-full max-h-[100dvh] sm:max-h-[95dvh] flex flex-col">
         {/* Pass Card Container */}
         <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0">
-          {/* Header */}
+          {/* Header - Premium Manager Pass Style */}
           <div 
-            className="px-4 py-3 sm:px-5 sm:py-4 text-white shrink-0"
+            className="px-5 py-4 sm:px-6 sm:py-5 text-white shrink-0"
             style={{ backgroundColor: THEME_COLOR }}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-sm sm:text-base font-semibold tracking-wide uppercase">Nomination Pass</span>
+                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">Nomination Pass</p>
               </div>
               <div className="flex items-center">
                 <img 
-                  src="/baynunah-logo.png" 
+                  src="/assets/baynunah-logo.png" 
                   alt="Baynunah" 
-                  className="h-5 sm:h-6 object-contain brightness-0 invert opacity-90"
+                  className="h-6 sm:h-7 object-contain"
+                  style={{ filter: 'brightness(0) invert(1)' }}
                 />
               </div>
             </div>
@@ -338,8 +339,8 @@ export function NominationPass() {
               </div>
             </div>
 
-            {/* Progress Steps */}
-            <div className="flex items-start justify-between mb-3 sm:mb-5 px-1">
+            {/* Progress Steps - Grid for Equal Spacing */}
+            <div className="grid grid-cols-5 gap-0 mb-3 sm:mb-5">
               {stepLabels.map((label, i) => {
                 const isCompleted = stepIndex > i
                 const isCurrent = stepIndex === i
@@ -349,7 +350,7 @@ export function NominationPass() {
                 return (
                   <div 
                     key={label} 
-                    className="flex flex-col items-center flex-1 relative"
+                    className="flex flex-col items-center relative"
                     title={stepDescriptions[i]}
                   >
                     <div className="flex items-center w-full justify-center">
@@ -360,18 +361,18 @@ export function NominationPass() {
                         />
                       )}
                       <div 
-                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
                           stepIndex >= i ? 'text-white' : 'bg-gray-200 text-gray-500'
                         }`}
                         style={stepColor ? { backgroundColor: stepColor } : {}}
                         title={stepDescriptions[i]}
                       >
                         {isCompleted ? (
-                          <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                         ) : (
-                          <span className="text-[9px] sm:text-[10px]">{i + 1}</span>
+                          <span className="text-[10px] sm:text-xs">{i + 1}</span>
                         )}
                       </div>
                       {!isLast && (
@@ -381,7 +382,7 @@ export function NominationPass() {
                         />
                       )}
                     </div>
-                    <span className="text-[8px] sm:text-[9px] text-gray-500 mt-1 sm:mt-1.5 text-center whitespace-nowrap">{label}</span>
+                    <span className="text-[9px] sm:text-[10px] text-gray-500 mt-1.5 sm:mt-2 text-center">{label}</span>
                   </div>
                 )
               })}

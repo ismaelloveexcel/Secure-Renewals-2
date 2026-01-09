@@ -285,26 +285,28 @@ export function NominationPass() {
           {/* Main Card Content */}
           <div className="p-5">
             {/* Info Section with QR */}
-            <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-100">
-              <div className="flex-1">
-                <h2 className="text-lg font-bold text-gray-900 leading-tight mb-1">Employee of the Year</h2>
-                <p className="text-sm text-gray-600 mb-3">{selectedManager?.department || 'Year 2025'}</p>
+            <div className="flex justify-between mb-4 pb-4 border-b border-gray-100">
+              <div className="flex-1 flex flex-col justify-between py-0.5">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 leading-tight">Employee of the Year</h2>
+                  <p className="text-sm text-gray-500">{selectedManager?.department || 'Year 2025'}</p>
+                </div>
                 
-                {/* Stage & Status Row - aligned with QR */}
-                <div className="flex items-center gap-4">
+                {/* Stage & Status Row */}
+                <div className="flex items-center gap-6 mt-3">
                   <div>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Stage</p>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Stage</p>
                     <p className="text-xs font-semibold" style={{ color: THEME_COLOR }}>{getStepLabel()}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Status</p>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Status</p>
                     <p className="text-xs font-semibold text-gray-700">{step === 'success' ? 'Complete' : 'In Progress'}</p>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
+              <div className="flex flex-col items-end gap-1.5 ml-4">
                 <span 
-                  className="px-2 py-0.5 text-[10px] font-semibold rounded text-white"
+                  className="px-2.5 py-1 text-[10px] font-semibold rounded text-white"
                   style={{ backgroundColor: '#22c55e' }}
                 >
                   {step === 'success' ? 'SUBMITTED' : 'ACTIVE'}
@@ -312,7 +314,7 @@ export function NominationPass() {
                 <div className="bg-white p-1.5 rounded-lg border border-gray-100 shadow-sm">
                   <QRCodeSVG 
                     value={`https://hr.baynunah.ae/nomination-pass`}
-                    size={56}
+                    size={60}
                     level="M"
                     fgColor={THEME_COLOR}
                   />

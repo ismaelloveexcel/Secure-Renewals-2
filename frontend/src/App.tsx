@@ -5443,82 +5443,89 @@ function App() {
     )
   }
 
-  const portalCards = [
+  const portalButtons = [
     {
       id: 'manager',
       name: 'Manager Portal',
-      description: 'Recruitment pipeline, approvals, and team management',
       icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
       route: 'recruitment' as Section,
-      color: '#3B82F6'
+      color: '#3B82F6',
+      position: { top: '-120px', left: '50%', transform: 'translateX(-50%)' }
     },
     {
       id: 'candidate',
       name: 'Candidate Portal',
-      description: 'Application status and assessment tracking',
       icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
         </svg>
       ),
       route: 'candidate-pass' as Section,
-      color: '#14B8A6'
+      color: '#8B5CF6',
+      position: { top: '0px', right: '-140px' }
     },
     {
       id: 'onboarding',
       name: 'Onboarding Portal',
-      description: 'New joiner tasks and orientation',
       icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-        </svg>
-      ),
-      route: 'onboarding' as Section,
-      color: '#F97316'
-    },
-    {
-      id: 'employee',
-      name: 'Employee Portal',
-      description: 'Leave requests, documents, and HR services',
-      icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       ),
+      route: 'onboarding' as Section,
+      color: '#14B8A6',
+      position: { bottom: '-100px', right: '-80px' }
+    },
+    {
+      id: 'employee',
+      name: 'Employee Self-Service',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
       route: 'employees' as Section,
-      color: '#8B5CF6'
+      color: '#F97316',
+      position: { bottom: '-100px', left: '-80px' }
     },
     {
       id: 'agency',
       name: 'Agency Portal',
-      description: 'Candidate submission and status monitoring',
       icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       ),
       route: 'external' as Section,
-      color: '#EC4899'
+      color: '#EC4899',
+      position: { top: '0px', left: '-140px' }
     }
   ]
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f1f5f9 100%)' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 relative" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)' }}>
       {loginModal}
       
+      {/* Theme toggle in top right */}
+      <button className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-700/50 flex items-center justify-center text-yellow-400 hover:bg-slate-600/50 transition-colors">
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      </button>
+      
       {user && (
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-6 left-6">
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-slate-400">
               {user.name} ({user.role})
             </span>
             <button
               onClick={handleLogout}
-              className="text-sm text-red-600 hover:text-red-700"
+              className="text-sm text-red-400 hover:text-red-300"
             >
               Sign Out
             </button>
@@ -5526,144 +5533,96 @@ function App() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-1 mb-1">
-          <span className="text-xl font-normal tracking-wide text-slate-600">baynunah</span>
-          <span className="text-slate-500 text-sm" style={{ transform: 'rotate(-45deg)', display: 'inline-block' }}>&#9654;</span>
-        </div>
-        <h1 className="text-3xl font-light tracking-[0.3em] text-slate-700 uppercase">HR Portal</h1>
-      </div>
-
-      {/* Portal Cards Grid */}
-      <div className="flex flex-wrap justify-center gap-5 max-w-5xl mb-8">
-        {portalCards.map((portal) => (
-          <button
-            key={portal.id}
-            onClick={() => handleNavigate(portal.route)}
-            className="group bg-white rounded-2xl p-6 flex flex-col items-center text-center transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1"
-            style={{ 
-              width: '180px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)',
-            }}
-          >
-            <div 
-              className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-              style={{ backgroundColor: `${portal.color}12`, color: portal.color }}
-            >
-              {portal.icon}
+      {/* Central Hub with Portal Buttons */}
+      <div className="relative">
+        {/* Central Logo Circle */}
+        <div className="relative w-48 h-48">
+          {/* Gradient Ring */}
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
+            <defs>
+              <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#00A0DF" />
+                <stop offset="100%" stopColor="#34D399" />
+              </linearGradient>
+            </defs>
+            <circle 
+              cx="100" 
+              cy="100" 
+              r="95" 
+              fill="none" 
+              stroke="url(#ringGradient)" 
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeDasharray="450 150"
+              style={{ transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+            />
+          </svg>
+          
+          {/* White Center Circle */}
+          <div className="absolute inset-3 bg-gradient-to-b from-white to-gray-100 rounded-full flex items-center justify-center shadow-xl">
+            <div className="flex items-center">
+              <span className="text-xl font-normal tracking-wide text-slate-800">baynunah</span>
+              <span className="text-slate-800 ml-0.5" style={{ fontSize: '10px' }}>&#9654;</span>
             </div>
-            <h3 className="font-medium text-slate-700 mb-2 text-sm">{portal.name}</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">{portal.description}</p>
-          </button>
+          </div>
+        </div>
+
+        {/* Portal Buttons - Positioned around the center */}
+        {portalButtons.map((portal) => (
+          <div
+            key={portal.id}
+            className="absolute flex flex-col items-center"
+            style={portal.position as React.CSSProperties}
+          >
+            <button
+              onClick={() => handleNavigate(portal.route)}
+              className="w-20 h-20 rounded-full bg-gradient-to-b from-gray-200 to-gray-300 flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300"
+              style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5)' }}
+            >
+              <div style={{ color: portal.color }}>
+                {portal.icon}
+              </div>
+            </button>
+            <span className="mt-2 text-xs text-slate-400 text-center whitespace-nowrap">{portal.name}</span>
+          </div>
         ))}
       </div>
 
-      {/* Admin Panel */}
-      <div className="w-full max-w-3xl">
-        <button
-          onClick={() => handleNavigate('admin')}
-          className="w-full bg-white rounded-2xl p-4 flex items-center justify-between transition-all duration-300 hover:shadow-md"
-          style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
-              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Admin Quick Access - Only visible when logged in as admin/hr */}
+      {user && (user.role === 'admin' || user.role === 'hr') && (
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+          <div className="flex flex-wrap gap-3 justify-center">
+            <button
+              onClick={() => handleNavigate('admin')}
+              className="bg-slate-700/50 rounded-xl px-4 py-2 flex items-center gap-2 transition-all duration-300 hover:bg-slate-600/50 border border-slate-600/50"
+            >
+              <svg className="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-            </div>
-            <span className="font-medium text-slate-600">Admin Panel</span>
-          </div>
-          <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-
-        {/* Quick Access Buttons - Only visible when logged in as admin/hr */}
-        {user && (user.role === 'admin' || user.role === 'hr') && (
-          <div className="flex flex-wrap gap-3 justify-center mt-4">
-            <button
-              onClick={() => handleNavigate('attendance')}
-              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
-              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-            >
-              <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">Attendance</span>
+              <span className="text-sm text-slate-300">Admin</span>
             </button>
-
-            <button
-              onClick={() => setActiveSection('templates')}
-              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
-              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-            >
-              <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">Templates</span>
-            </button>
-
-            <button
-              onClick={() => setActiveSection('passes')}
-              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
-              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-            >
-              <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">Passes</span>
-            </button>
-
-            <button
-              onClick={() => setActiveSection('recruitment')}
-              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
-              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-            >
-              <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">Recruitment</span>
-            </button>
-
-            <button
-              onClick={() => handleNavigate('performance')}
-              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
-              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-            >
-              <svg className="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">Appraisals</span>
-            </button>
-
             <button
               onClick={() => handleNavigate('compliance-alerts')}
-              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
-              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+              className="bg-slate-700/50 rounded-xl px-4 py-2 flex items-center gap-2 transition-all duration-300 hover:bg-slate-600/50 border border-slate-600/50"
             >
-              <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <span className="text-sm font-medium text-gray-700">Compliance Alerts</span>
+              <span className="text-sm text-slate-300">Alerts</span>
             </button>
-
             <button
               onClick={() => handleNavigate('insurance-census')}
-              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
-              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+              className="bg-slate-700/50 rounded-xl px-4 py-2 flex items-center gap-2 transition-all duration-300 hover:bg-slate-600/50 border border-slate-600/50"
             >
-              <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <span className="text-sm font-medium text-gray-700">Insurance Census</span>
+              <span className="text-sm text-slate-300">Census</span>
             </button>
           </div>
-        )}
-      </div>
-
-      <p className="text-slate-400 text-xs mt-10">Baynunah Watergeneration Technologies SP LLC</p>
+        </div>
+      )}
     </div>
   )
 }

@@ -224,7 +224,15 @@ export function NominationPass() {
   }
 
   const stepLabels = ['Manager', 'Verify', 'Nominee', 'Form', 'Done']
-  const stepIndex = ['select-manager', 'verify', 'select-nominee', 'form', 'success'].indexOf(step)
+  const stepMapping: Record<Step, number> = {
+    'select-manager': 0,
+    'verify': 1,
+    'already-nominated': 4,
+    'select-nominee': 2,
+    'form': 3,
+    'success': 4
+  }
+  const stepIndex = stepMapping[step]
 
   const getStepLabel = () => {
     switch (step) {

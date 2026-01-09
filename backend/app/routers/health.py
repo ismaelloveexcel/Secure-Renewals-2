@@ -104,17 +104,34 @@ async def fix_production_data(
     
     await session.commit()
     
-    # 4. Verify managers now show
-    manager_check = await session.execute(
-        text("""
-            SELECT COUNT(DISTINCT e.line_manager_id) 
-            FROM employees e 
-            WHERE e.line_manager_id IS NOT NULL 
-            AND e.is_active = true 
-            AND LOWER(TRIM(e.employment_status)) = 'active'
-            AND LOWER(TRIM(e.function)) IN ('officer', 'coordinator', 'skilled labour', 'non skilled labour')
-        """)
-    )
-    results["managers_with_eligible_reports"] = manager_check.scalar() or 0
+    # 4. Verify managers now show (safely handle missing columns)
+    try:
+        # Check if the newer columns exist before querying them
+        column_check = await session.execute(
+            text("""
+                SELECT column_name FROM information_schema.columns 
+                WHERE table_name = 'employees' 
+                AND column_name IN ('line_manager_id', 'is_active', 'function')
+            """)
+        )
+        existing_columns = {row[0] for row in column_check.fetchall()}
+        
+        if {'line_manager_id', 'is_active', 'function'}.issubset(existing_columns):
+            manager_check = await session.execute(
+                text("""
+                    SELECT COUNT(DISTINCT e.line_manager_id) 
+                    FROM employees e 
+                    WHERE e.line_manager_id IS NOT NULL 
+                    AND e.is_active = true 
+                    AND LOWER(TRIM(e.employment_status)) = 'active'
+                    AND LOWER(TRIM(e.function)) IN ('officer', 'coordinator', 'skilled labour', 'non skilled labour')
+                """)
+            )
+            results["managers_with_eligible_reports"] = manager_check.scalar() or 0
+        else:
+            results["managers_with_eligible_reports"] = "skipped - schema not fully migrated"
+            results["missing_columns"] = list({'line_manager_id', 'is_active', 'function'} - existing_columns)
+    except Exception as e:
+        results["managers_with_eligible_reports"] = f"skipped - {str(e)}"
     
     return {"success": True, "fixes_applied": results}

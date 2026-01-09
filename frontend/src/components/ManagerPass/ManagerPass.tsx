@@ -417,11 +417,10 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
         </div>
       </div>
       
-      {/* Info Card - overlapping the header with glassmorphism */}
+      {/* Info Card - overlapping the header with clean styling */}
       <div className="px-4 -mt-3">
         <div 
-          className="rounded-2xl border border-white/20 shadow-lg p-4 relative overflow-hidden backdrop-blur-sm"
-          style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+          className="rounded-2xl border border-slate-200 shadow-lg p-4 relative overflow-hidden bg-white"
         >
           <div className="flex items-start gap-3">
             {/* Left: Info */}
@@ -525,24 +524,15 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             <div>
               <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Pipeline Overview</p>
               <div className="grid grid-cols-3 gap-2">
-                <div 
-                  className="p-3 rounded-xl border border-white/30 shadow-sm text-center backdrop-blur-sm"
-                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
-                >
+                <div className="p-3 rounded-xl border border-slate-200 shadow-sm text-center bg-slate-50">
                   <p className="text-lg font-bold text-slate-800">{passData.total_candidates || 0}</p>
                   <p className="text-[9px] text-slate-400">Total</p>
                 </div>
-                <div 
-                  className="p-3 rounded-xl border border-white/30 shadow-sm text-center backdrop-blur-sm"
-                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
-                >
+                <div className="p-3 rounded-xl border border-slate-200 shadow-sm text-center bg-slate-50">
                   <p className="text-lg font-bold" style={{ color: '#1800ad' }}>{passData.pipeline_stats['interview'] || 0}</p>
                   <p className="text-[9px] text-slate-400">Interview</p>
                 </div>
-                <div 
-                  className="p-3 rounded-xl border border-white/30 shadow-sm text-center backdrop-blur-sm"
-                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
-                >
+                <div className="p-3 rounded-xl border border-slate-200 shadow-sm text-center bg-slate-50">
                   <p className="text-lg font-bold text-emerald-600">{passData.pipeline_stats['offer'] || 0}</p>
                   <p className="text-[9px] text-slate-400">Offer</p>
                 </div>
@@ -550,10 +540,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             </div>
 
             {/* Quick Status Card */}
-            <div 
-              className="p-3 rounded-xl border border-white/30 shadow-sm backdrop-blur-sm"
-              style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
-            >
+            <div className="p-3 rounded-xl border border-slate-200 shadow-sm bg-slate-50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div 
@@ -598,16 +585,10 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             </div>
 
             <div className="space-y-2">
-              <div 
-                className="rounded-xl p-4 border border-white/30 shadow-sm backdrop-blur-sm"
-                style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
-              >
+              <div className="rounded-xl p-4 border border-slate-200 shadow-sm bg-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div 
-                      className="rounded-xl p-2.5 border border-white/30"
-                      style={{ backgroundColor: 'rgba(24, 0, 173, 0.08)' }}
-                    >
+                    <div className="rounded-xl p-2.5 border border-slate-200 bg-slate-50">
                       <svg className="h-5 w-5" style={{ color: '#1800ad' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
@@ -627,16 +608,10 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
                 </div>
               </div>
 
-              <div 
-                className="rounded-xl p-4 border border-white/30 shadow-sm backdrop-blur-sm"
-                style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
-              >
+              <div className="rounded-xl p-4 border border-slate-200 shadow-sm bg-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div 
-                      className="rounded-xl p-2.5 border border-white/30"
-                      style={{ backgroundColor: 'rgba(24, 0, 173, 0.08)' }}
-                    >
+                    <div className="rounded-xl p-2.5 border border-slate-200 bg-slate-50">
                       <svg className="h-5 w-5" style={{ color: '#1800ad' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
@@ -934,8 +909,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
                   href={`https://wa.me/${passData.hr_whatsapp?.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/30 hover:shadow-md transition-all backdrop-blur-sm"
-                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 hover:shadow-md transition-all bg-white"
                 >
                   <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center">
                     <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -947,8 +921,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
                 
                 <a 
                   href={`mailto:${passData.hr_email}`}
-                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/30 hover:shadow-md transition-all backdrop-blur-sm"
-                  style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 hover:shadow-md transition-all bg-white"
                 >
                   <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#1800ad' }}>
                     <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -963,10 +936,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             {/* Feedback Section */}
             <div>
               <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Feedback & Suggestions</p>
-              <div 
-                className="rounded-xl p-4 border border-white/30 backdrop-blur-sm"
-                style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
-              >
+              <div className="rounded-xl p-4 border border-slate-200 bg-white">
                 {feedbackSubmitted ? (
                   <div className="text-center py-4">
                     <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -1026,10 +996,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             </div>
 
             {/* HR Contact Info */}
-            <div 
-              className="rounded-xl p-4 border border-white/30 backdrop-blur-sm"
-              style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
-            >
+            <div className="rounded-xl p-4 border border-slate-200 bg-slate-50">
               <p className="text-xs font-medium text-slate-700 mb-1">HR Contact</p>
               <p className="text-[11px] text-slate-500">{passData.hr_email}</p>
               {passData.hr_whatsapp && (
@@ -1126,8 +1093,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
                   {candidates.map((candidate) => (
                     <div 
                       key={candidate.id} 
-                      className="p-3 rounded-xl border border-white/30 backdrop-blur-sm"
-                      style={{ backgroundColor: 'rgba(24, 0, 173, 0.04)' }}
+                      className="p-3 rounded-xl border border-slate-200 bg-white"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">

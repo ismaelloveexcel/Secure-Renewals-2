@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 from decimal import Decimal
 from typing import List, Optional
 
@@ -11,12 +11,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.database import get_session
 from app.models.employee import Employee
-from app.models.attendance import AttendanceRecord, STANDARD_WORK_HOURS, GRACE_PERIOD_MINUTES
+from app.models.attendance import (
+    AttendanceRecord, 
+    STANDARD_WORK_HOURS_5_DAY, STANDARD_WORK_HOURS_6_DAY,
+    MAX_OVERTIME_HOURS_PER_DAY, MAX_WEEKLY_HOURS,
+    RAMADAN_WORK_HOURS, GRACE_PERIOD_MINUTES, 
+    FRIDAY_WORK_HOURS
+)
 from app.models.system_settings import SystemSetting
 from app.schemas.attendance import (
     ClockInRequest, ClockOutRequest, BreakRequest,
-    AttendanceResponse, AttendanceDashboard,
-    WFHApprovalRequest, OvertimeApprovalRequest, TodayAttendanceStatus
+    AttendanceResponse, AttendanceDashboard, EmployeeWorkSettings,
+    WFHApprovalRequest, OvertimeApprovalRequest, TodayAttendanceStatus,
+    ManualAttendanceRequest, AttendanceCorrectionRequest, CorrectionApprovalRequest
 )
 
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
@@ -72,8 +79,127 @@ async def get_current_employee(
         )
 
 
+def get_employee_work_settings(employee: Employee, is_ramadan: bool = False) -> EmployeeWorkSettings:
+    """Get employee work settings from Employee master for attendance calculations.
+    
+    Links attendance to:
+    - Working Days (5 days or 6 days) via employee.work_schedule
+    - Work Location (Head Office, KEZAD, Sites) via employee.location  
+    - Extra Hours Policy (Offset, Paid, N/A) via employee.overtime_type
+    """
+    # Parse work schedule to determine standard hours
+    work_schedule = employee.work_schedule or "5 days"
+    
+    if "6" in work_schedule:
+        standard_hours = STANDARD_WORK_HOURS_6_DAY  # 8 hours
+    else:
+        standard_hours = STANDARD_WORK_HOURS_5_DAY  # 8 hours
+    
+    # Apply Ramadan reduction if applicable
+    if is_ramadan:
+        standard_hours = RAMADAN_WORK_HOURS  # 6 hours during Ramadan
+    
+    return EmployeeWorkSettings(
+        employee_id=employee.id,
+        employee_name=employee.name,
+        work_schedule=work_schedule,
+        location=employee.location,
+        overtime_type=employee.overtime_type,
+        standard_hours_per_day=standard_hours,
+        is_ramadan_schedule=is_ramadan
+    )
+
+
+def is_friday(check_date: date) -> bool:
+    """Check if the given date is a Friday (UAE weekend for 6-day workers)."""
+    return check_date.weekday() == 4  # Friday = 4
+
+
+def get_standard_hours_for_day(
+    employee: Employee, 
+    check_date: date, 
+    is_ramadan: bool = False
+) -> int:
+    """Get the standard work hours for a specific day based on employee settings."""
+    work_schedule = employee.work_schedule or "5 days"
+    
+    # For 6-day workers, Friday is a half-day
+    if "6" in work_schedule and is_friday(check_date):
+        return FRIDAY_WORK_HOURS  # 4 hours on Friday
+    
+    # Regular hours (with Ramadan reduction if applicable)
+    if is_ramadan:
+        return RAMADAN_WORK_HOURS  # 6 hours
+    
+    return STANDARD_WORK_HOURS_5_DAY  # 8 hours
+
+
+def calculate_hours_with_employee_settings(
+    clock_in: datetime, 
+    clock_out: datetime, 
+    break_minutes: int,
+    employee: Employee,
+    attendance_date: date,
+    is_ramadan: bool = False
+) -> tuple:
+    """Calculate total, regular, and overtime hours based on employee work settings.
+    
+    This function links attendance to Employee master data:
+    - Uses employee.work_schedule for standard hours (5 days = 8hrs, 6 days = 8hrs + half-day Friday)
+    - Uses employee.overtime_type to determine if overtime should be tracked (N/A, Offset, Paid)
+    - Applies UAE Labor Law limits (max 2 hours overtime per day per Article 19)
+    
+    Returns:
+        tuple: (total_hours, regular_hours, overtime_hours, exceeds_daily_limit, exceeds_overtime_limit)
+    """
+    if not clock_in or not clock_out:
+        return None, None, None, False, False
+    
+    # Calculate total worked time
+    total_seconds = (clock_out - clock_in).total_seconds()
+    total_hours = Decimal(str(total_seconds / 3600)) - Decimal(str(break_minutes / 60))
+    
+    if total_hours < 0:
+        total_hours = Decimal("0")
+    
+    # Get standard hours for this day based on employee settings
+    standard_hours = get_standard_hours_for_day(employee, attendance_date, is_ramadan)
+    standard_hours_decimal = Decimal(str(standard_hours))
+    
+    # Calculate regular and overtime hours
+    regular_hours = min(total_hours, standard_hours_decimal)
+    overtime_hours = max(total_hours - standard_hours_decimal, Decimal("0"))
+    
+    # Check employee's overtime policy (from Employee master)
+    overtime_policy = employee.overtime_type or "N/A"
+    
+    # If employee is not eligible for overtime (N/A), zero out overtime
+    if overtime_policy.upper() == "N/A":
+        overtime_hours = Decimal("0")
+    
+    # UAE Labor Law compliance checks
+    # Article 17: Maximum 8 regular hours + Article 19: Maximum 2 hours overtime = 10 hours max
+    max_daily_hours = Decimal(str(standard_hours + MAX_OVERTIME_HOURS_PER_DAY))
+    exceeds_daily_limit = total_hours > max_daily_hours
+    
+    # Article 19: Maximum 2 hours overtime per day
+    exceeds_overtime_limit = overtime_hours > Decimal(str(MAX_OVERTIME_HOURS_PER_DAY))
+    
+    # Cap overtime at legal limit if exceeded
+    if exceeds_overtime_limit:
+        overtime_hours = Decimal(str(MAX_OVERTIME_HOURS_PER_DAY))
+    
+    return (
+        round(total_hours, 2), 
+        round(regular_hours, 2), 
+        round(overtime_hours, 2),
+        exceeds_daily_limit,
+        exceeds_overtime_limit
+    )
+
+
 def calculate_hours(clock_in: datetime, clock_out: datetime, break_minutes: int = 0) -> tuple:
-    """Calculate total, regular, and overtime hours."""
+    """Calculate total, regular, and overtime hours (legacy function for backward compatibility)."""
     if not clock_in or not clock_out:
         return None, None, None
     
@@ -83,8 +209,8 @@ def calculate_hours(clock_in: datetime, clock_out: datetime, break_minutes: int 
     if total_hours < 0:
         total_hours = Decimal("0")
     
-    regular_hours = min(total_hours, Decimal(str(STANDARD_WORK_HOURS)))
-    overtime_hours = max(total_hours - Decimal(str(STANDARD_WORK_HOURS)), Decimal("0"))
+    regular_hours = min(total_hours, Decimal(str(STANDARD_WORK_HOURS_5_DAY)))
+    overtime_hours = max(total_hours - Decimal(str(STANDARD_WORK_HOURS_5_DAY)), Decimal("0"))
     
     return round(total_hours, 2), round(regular_hours, 2), round(overtime_hours, 2)
 
@@ -105,6 +231,7 @@ def build_response(record: AttendanceRecord, employee_name: str) -> AttendanceRe
         clock_out_longitude=record.clock_out_longitude,
         clock_out_address=record.clock_out_address,
         work_type=record.work_type,
+        work_location=record.work_location,
         wfh_reason=record.wfh_reason,
         wfh_approved=record.wfh_approved,
         wfh_approved_by=record.wfh_approved_by,
@@ -114,6 +241,8 @@ def build_response(record: AttendanceRecord, employee_name: str) -> AttendanceRe
         overtime_hours=record.overtime_hours,
         overtime_type=record.overtime_type,
         overtime_approved=record.overtime_approved,
+        offset_hours_earned=record.offset_hours_earned,
+        offset_day_reference=record.offset_day_reference,
         break_start=record.break_start,
         break_end=record.break_end,
         break_duration_minutes=record.break_duration_minutes,
@@ -124,10 +253,50 @@ def build_response(record: AttendanceRecord, employee_name: str) -> AttendanceRe
         is_early_departure=record.is_early_departure,
         early_departure_minutes=record.early_departure_minutes,
         early_departure_reason=record.early_departure_reason,
+        is_ramadan_hours=record.is_ramadan_hours,
+        is_rest_day=record.is_rest_day,
+        exceeds_daily_limit=record.exceeds_daily_limit,
+        exceeds_overtime_limit=record.exceeds_overtime_limit,
+        is_manual_entry=record.is_manual_entry,
+        manual_entry_reason=record.manual_entry_reason,
+        correction_approved=record.correction_approved,
         notes=record.notes,
         created_at=record.created_at,
         updated_at=record.updated_at
     )
+
+
+@router.get("/employee-work-settings/{employee_id}", response_model=EmployeeWorkSettings)
+async def get_employee_attendance_settings(
+    employee_id: int,
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Get employee work settings that affect attendance calculations.
+    
+    Returns the employee's work settings from Employee master:
+    - Working Days: 5 days or 6 days per week
+    - Work Location: Head Office, KEZAD, Safario, Sites
+    - Extra Hours Policy: Offset, Paid, or N/A
+    
+    These settings determine:
+    - Standard work hours per day
+    - Whether overtime is tracked
+    - How overtime is compensated
+    """
+    # Check if admin/HR or the employee themselves
+    if current_user.role not in ["admin", "hr"] and current_user.id != employee_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    result = await session.execute(
+        select(Employee).where(Employee.id == employee_id)
+    )
+    employee = result.scalar_one_or_none()
+    
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    return get_employee_work_settings(employee)
 
 
 @router.get("/today", response_model=TodayAttendanceStatus)
@@ -135,12 +304,14 @@ async def get_today_status(
     current_user: Employee = Depends(get_current_employee),
     session: AsyncSession = Depends(get_session)
 ):
-    """Get today's attendance status for current user."""
+    """Get today's attendance status for current user, including employee work settings."""
     # Check if attendance feature is enabled
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
     
     today = date.today()
+    work_settings = get_employee_work_settings(current_user)
+    standard_hours_today = get_standard_hours_for_day(current_user, today)
     
     result = await session.execute(
         select(AttendanceRecord).where(
@@ -160,6 +331,11 @@ async def get_today_status(
             is_on_break=False,
             break_start_time=None,
             work_type=None,
+            work_location=current_user.location,
+            employee_work_schedule=work_settings.work_schedule,
+            employee_overtime_policy=work_settings.overtime_type,
+            standard_hours_today=standard_hours_today,
+            is_ramadan_schedule=work_settings.is_ramadan_schedule,
             can_clock_in=True,
             can_clock_out=False,
             can_start_break=False,
@@ -192,6 +368,11 @@ async def get_today_status(
         is_on_break=is_on_break,
         break_start_time=record.break_start,
         work_type=record.work_type,
+        work_location=record.work_location or current_user.location,
+        employee_work_schedule=work_settings.work_schedule,
+        employee_overtime_policy=work_settings.overtime_type,
+        standard_hours_today=standard_hours_today,
+        is_ramadan_schedule=work_settings.is_ramadan_schedule,
         can_clock_in=can_clock_in,
         can_clock_out=can_clock_out,
         can_start_break=can_start_break,
@@ -206,7 +387,12 @@ async def clock_in(
     current_user: Employee = Depends(get_current_employee),
     session: AsyncSession = Depends(get_session)
 ):
-    """Clock in for the day."""
+    """Clock in for the day with employee work settings integration.
+    
+    Work settings from Employee master are automatically applied:
+    - Work location defaults to employee.location (Head Office, KEZAD, Sites)
+    - Can be overridden in request for field work, client site, or business travel
+    """
     # Check if attendance feature is enabled
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
@@ -232,6 +418,9 @@ async def clock_in(
     
     if existing and existing.clock_in:
         raise HTTPException(status_code=400, detail="Already clocked in today")
+    
+    # Get work location - use from request or default to employee's location from master
+    work_location = request.work_location or current_user.location
     
     # Check if late (after 8:15 AM - using UTC for now, assuming UAE timezone UTC+4)
     # Standard start time is 8:00 AM UAE (04:00 UTC)
@@ -262,6 +451,7 @@ async def clock_in(
         clock_in_longitude=lng,
         clock_in_address=addr,
         work_type=request.work_type,
+        work_location=work_location,
         wfh_reason=request.wfh_reason if request.work_type == "wfh" else None,
         wfh_approved=None if request.work_type == "wfh" else None,
         status=att_status,
@@ -283,7 +473,13 @@ async def clock_out(
     current_user: Employee = Depends(get_current_employee),
     session: AsyncSession = Depends(get_session)
 ):
-    """Clock out for the day."""
+    """Clock out for the day with employee work settings integration.
+    
+    Calculates hours based on employee's work settings:
+    - Uses employee.work_schedule for standard hours
+    - Applies employee.overtime_type to determine overtime tracking (Offset, Paid, N/A)
+    - Enforces UAE Labor Law limits (max 2 hours overtime per day)
+    """
     # Check if attendance feature is enabled
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
@@ -323,28 +519,55 @@ async def clock_out(
     if request.notes:
         record.notes = (record.notes or "") + "\n" + request.notes
     
-    # Calculate hours
+    # Calculate hours using employee work settings
     break_mins = record.break_duration_minutes or 0
-    total_hrs, regular_hrs, overtime_hrs = calculate_hours(record.clock_in, record.clock_out, break_mins)
+    (
+        total_hrs, 
+        regular_hrs, 
+        overtime_hrs,
+        exceeds_daily_limit,
+        exceeds_overtime_limit
+    ) = calculate_hours_with_employee_settings(
+        record.clock_in, 
+        record.clock_out, 
+        break_mins,
+        current_user,
+        today
+    )
+    
     record.total_hours = total_hrs
     record.regular_hours = regular_hrs
     record.overtime_hours = overtime_hrs
+    record.exceeds_daily_limit = exceeds_daily_limit
+    record.exceeds_overtime_limit = exceeds_overtime_limit
+    
+    # Get employee's overtime policy and apply it
+    overtime_policy = current_user.overtime_type or "N/A"
     
     # Check if overtime feature is enabled
     overtime_enabled = await check_feature_enabled(session, "feature_attendance_overtime")
-    if overtime_hrs and overtime_hrs > 0 and overtime_enabled:
+    
+    if overtime_hrs and overtime_hrs > 0 and overtime_enabled and overtime_policy.upper() != "N/A":
         record.overtime_type = "auto-calculated"
         record.overtime_approved = None  # Requires approval
+        
+        # For Offset policy, track offset hours earned
+        if overtime_policy.upper() == "OFFSET":
+            record.offset_hours_earned = overtime_hrs
     elif overtime_hrs and overtime_hrs > 0:
-        # Overtime disabled, don't track overtime
+        # Overtime not applicable for this employee
         record.overtime_hours = Decimal("0")
+        record.overtime_type = "none"
     
-    # Check early departure (before 5 PM UAE time = 13:00 UTC)
+    # Check early departure based on employee's work schedule
+    standard_hours_today = get_standard_hours_for_day(current_user, today)
+    expected_end_hour = 8 + standard_hours_today + 1  # 8 AM + work hours + 1 hour break
     uae_hour = (now.hour + 4) % 24  # Convert UTC to UAE time
-    if uae_hour < 17:
+    
+    if uae_hour < expected_end_hour:
         record.is_early_departure = True
-        # Calculate minutes before 5 PM UAE
-        record.early_departure_minutes = (17 - uae_hour) * 60 - now.minute
+        # Calculate minutes before expected end time
+        record.early_departure_minutes = (expected_end_hour - uae_hour) * 60 - now.minute
     
     await session.commit()
     await session.refresh(record)
@@ -442,7 +665,193 @@ async def end_break(
     return build_response(record, current_user.name)
 
 
-@router.get("/my-records", response_model=List[AttendanceResponse])
+@router.post("/manual-entry", response_model=AttendanceResponse)
+async def create_manual_entry(
+    request: ManualAttendanceRequest,
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Create a manual attendance entry (admin/HR only).
+    
+    Used for:
+    - Missing clock-in/clock-out corrections
+    - Backdating attendance for employees who forgot to clock in
+    - Historical data entry
+    
+    Requires HR approval if created by the employee themselves.
+    """
+    if current_user.role not in ["admin", "hr"]:
+        raise HTTPException(status_code=403, detail="Access denied. Manual entries require HR/Admin role.")
+    
+    # Get the target employee
+    result = await session.execute(
+        select(Employee).where(Employee.id == request.employee_id)
+    )
+    employee = result.scalar_one_or_none()
+    
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Check if record already exists for this date
+    existing = await session.execute(
+        select(AttendanceRecord).where(
+            and_(
+                AttendanceRecord.employee_id == request.employee_id,
+                AttendanceRecord.attendance_date == request.attendance_date
+            )
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Attendance record already exists for this date. Use correction endpoint instead.")
+    
+    now = datetime.now(timezone.utc)
+    
+    # Determine work location
+    work_location = request.work_location or employee.location
+    
+    # Create the manual entry
+    record = AttendanceRecord(
+        employee_id=request.employee_id,
+        attendance_date=request.attendance_date,
+        clock_in=request.clock_in,
+        clock_out=request.clock_out,
+        work_type=request.work_type,
+        work_location=work_location,
+        status="present" if request.clock_in else "pending",
+        is_manual_entry=True,
+        manual_entry_reason=request.reason,
+        manual_entry_by=current_user.id,
+        manual_entry_at=now,
+        correction_approved=True,  # Auto-approved since created by HR/Admin
+        correction_approved_by=current_user.id,
+        correction_approved_at=now,
+        notes=request.notes
+    )
+    
+    # Calculate hours if both clock in and clock out are provided
+    if request.clock_in and request.clock_out:
+        (
+            total_hrs, 
+            regular_hrs, 
+            overtime_hrs,
+            exceeds_daily_limit,
+            exceeds_overtime_limit
+        ) = calculate_hours_with_employee_settings(
+            request.clock_in, 
+            request.clock_out, 
+            0,  # No break duration for manual entry
+            employee,
+            request.attendance_date
+        )
+        
+        record.total_hours = total_hrs
+        record.regular_hours = regular_hrs
+        record.overtime_hours = overtime_hrs
+        record.exceeds_daily_limit = exceeds_daily_limit
+        record.exceeds_overtime_limit = exceeds_overtime_limit
+    
+    session.add(record)
+    await session.commit()
+    await session.refresh(record)
+    
+    return build_response(record, employee.name)
+
+
+@router.post("/{record_id}/request-correction", response_model=AttendanceResponse)
+async def request_correction(
+    record_id: int,
+    request: AttendanceCorrectionRequest,
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Request correction to an attendance record.
+    
+    Employees can request corrections to their own attendance records.
+    Corrections require HR approval before taking effect.
+    """
+    result = await session.execute(
+        select(AttendanceRecord, Employee.name).join(
+            Employee, AttendanceRecord.employee_id == Employee.id
+        ).where(AttendanceRecord.id == record_id)
+    )
+    row = result.first()
+    
+    if not row:
+        raise HTTPException(status_code=404, detail="Record not found")
+    
+    record, emp_name = row
+    
+    # Check if user can request correction (own record or HR/Admin)
+    if record.employee_id != current_user.id and current_user.role not in ["admin", "hr"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    now = datetime.now(timezone.utc)
+    
+    # Store the correction request
+    record.is_manual_entry = True
+    record.manual_entry_reason = request.reason
+    record.manual_entry_by = current_user.id
+    record.manual_entry_at = now
+    record.correction_approved = None  # Pending approval
+    
+    # Store proposed corrections in notes (they will be applied upon approval)
+    correction_details = []
+    if request.clock_in:
+        correction_details.append(f"Clock In: {request.clock_in}")
+    if request.clock_out:
+        correction_details.append(f"Clock Out: {request.clock_out}")
+    if request.work_type:
+        correction_details.append(f"Work Type: {request.work_type}")
+    if request.work_location:
+        correction_details.append(f"Location: {request.work_location}")
+    
+    record.notes = (record.notes or "") + f"\n[Correction Requested: {', '.join(correction_details)}]"
+    
+    await session.commit()
+    await session.refresh(record)
+    
+    return build_response(record, emp_name)
+
+
+@router.post("/{record_id}/approve-correction", response_model=AttendanceResponse)
+async def approve_correction(
+    record_id: int,
+    request: CorrectionApprovalRequest,
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Approve or reject an attendance correction request (admin/HR only)."""
+    if current_user.role not in ["admin", "hr"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    result = await session.execute(
+        select(AttendanceRecord, Employee.name).join(
+            Employee, AttendanceRecord.employee_id == Employee.id
+        ).where(AttendanceRecord.id == record_id)
+    )
+    row = result.first()
+    
+    if not row:
+        raise HTTPException(status_code=404, detail="Record not found")
+    
+    record, emp_name = row
+    
+    if not record.is_manual_entry or record.correction_approved is not None:
+        raise HTTPException(status_code=400, detail="No pending correction for this record")
+    
+    now = datetime.now(timezone.utc)
+    
+    record.correction_approved = request.approved
+    record.correction_approved_by = current_user.id
+    record.correction_approved_at = now
+    
+    if request.notes:
+        record.notes = (record.notes or "") + f"\nCorrection {'Approved' if request.approved else 'Rejected'}: {request.notes}"
+    
+    await session.commit()
+    await session.refresh(record)
+    
+    return build_response(record, emp_name)
 async def get_my_records(
     start_date: Optional[date] = Query(None),
     end_date: Optional[date] = Query(None),
@@ -471,11 +880,14 @@ async def get_all_records(
     start_date: Optional[date] = Query(None),
     end_date: Optional[date] = Query(None),
     work_type: Optional[str] = Query(None),
+    work_location: Optional[str] = Query(None),
     att_status: Optional[str] = Query(None, alias="status"),
+    pending_corrections: Optional[bool] = Query(None),
+    exceeds_limits: Optional[bool] = Query(None),
     current_user: Employee = Depends(get_current_employee),
     session: AsyncSession = Depends(get_session)
 ):
-    """Get all attendance records (admin/HR only)."""
+    """Get all attendance records (admin/HR only) with enhanced filtering."""
     if current_user.role not in ["admin", "hr"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
@@ -491,8 +903,22 @@ async def get_all_records(
         query = query.where(AttendanceRecord.attendance_date <= end_date)
     if work_type:
         query = query.where(AttendanceRecord.work_type == work_type)
+    if work_location:
+        query = query.where(AttendanceRecord.work_location == work_location)
     if att_status:
         query = query.where(AttendanceRecord.status == att_status)
+    if pending_corrections:
+        query = query.where(
+            and_(
+                AttendanceRecord.is_manual_entry == True,
+                AttendanceRecord.correction_approved == None
+            )
+        )
+    if exceeds_limits:
+        query = query.where(
+            (AttendanceRecord.exceeds_daily_limit == True) | 
+            (AttendanceRecord.exceeds_overtime_limit == True)
+        )
     
     query = query.order_by(AttendanceRecord.attendance_date.desc())
     
@@ -507,7 +933,7 @@ async def get_dashboard(
     current_user: Employee = Depends(get_current_employee),
     session: AsyncSession = Depends(get_session)
 ):
-    """Get attendance dashboard (admin/HR only)."""
+    """Get attendance dashboard (admin/HR only) with location breakdown and compliance alerts."""
     # Check if attendance feature is enabled
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
@@ -534,6 +960,17 @@ async def get_dashboard(
     late = sum(1 for r in records if r.is_late)
     on_leave = sum(1 for r in records if r.status == "on-leave")
     
+    # Location breakdown
+    at_head_office = sum(1 for r in records if r.work_location and "head" in r.work_location.lower())
+    at_kezad = sum(1 for r in records if r.work_location and "kezad" in r.work_location.lower())
+    at_sites = sum(1 for r in records if r.work_location and ("site" in r.work_location.lower() or "safario" in r.work_location.lower()))
+    on_client_site = sum(1 for r in records if r.work_type == "client_site")
+    on_business_travel = sum(1 for r in records if r.work_type == "business_travel")
+    
+    # UAE compliance alerts
+    exceeding_daily_limits = sum(1 for r in records if r.exceeds_daily_limit)
+    exceeding_overtime_limits = sum(1 for r in records if r.exceeds_overtime_limit)
+    
     # Pending approvals
     pending_wfh = await session.execute(
         select(func.count(AttendanceRecord.id)).where(
@@ -551,6 +988,14 @@ async def get_dashboard(
             )
         )
     )
+    pending_corrections = await session.execute(
+        select(func.count(AttendanceRecord.id)).where(
+            and_(
+                AttendanceRecord.is_manual_entry == True,
+                AttendanceRecord.correction_approved == None
+            )
+        )
+    )
     
     return AttendanceDashboard(
         total_employees=total_employees,
@@ -560,7 +1005,15 @@ async def get_dashboard(
         late_today=late,
         pending_wfh_approvals=pending_wfh.scalar() or 0,
         pending_overtime_approvals=pending_overtime.scalar() or 0,
-        on_leave_today=on_leave
+        pending_corrections=pending_corrections.scalar() or 0,
+        on_leave_today=on_leave,
+        at_head_office=at_head_office,
+        at_kezad=at_kezad,
+        at_sites=at_sites,
+        on_client_site=on_client_site,
+        on_business_travel=on_business_travel,
+        exceeding_daily_limits=exceeding_daily_limits,
+        exceeding_overtime_limits=exceeding_overtime_limits
     )
 
 
@@ -616,7 +1069,11 @@ async def approve_overtime(
     current_user: Employee = Depends(get_current_employee),
     session: AsyncSession = Depends(get_session)
 ):
-    """Approve or reject overtime (admin/HR only)."""
+    """Approve or reject overtime (admin/HR only).
+    
+    For employees with Offset overtime policy, approved overtime is tracked as offset hours.
+    For employees with Paid overtime policy, approved overtime is tracked for payroll.
+    """
     # Check if attendance and overtime features are enabled
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
@@ -627,7 +1084,7 @@ async def approve_overtime(
         raise HTTPException(status_code=403, detail="Access denied")
     
     result = await session.execute(
-        select(AttendanceRecord, Employee.name).join(
+        select(AttendanceRecord, Employee.name, Employee.overtime_type).join(
             Employee, AttendanceRecord.employee_id == Employee.id
         ).where(AttendanceRecord.id == record_id)
     )
@@ -636,7 +1093,7 @@ async def approve_overtime(
     if not row:
         raise HTTPException(status_code=404, detail="Record not found")
     
-    record, emp_name = row
+    record, emp_name, emp_overtime_type = row
     
     if not record.overtime_hours or record.overtime_hours <= 0:
         raise HTTPException(status_code=400, detail="No overtime to approve")
@@ -647,6 +1104,10 @@ async def approve_overtime(
     
     if request.hours and request.approved:
         record.overtime_hours = request.hours
+        
+        # Update offset hours if employee uses Offset policy
+        if emp_overtime_type and emp_overtime_type.upper() == "OFFSET":
+            record.offset_hours_earned = request.hours
     
     if request.notes:
         record.notes = (record.notes or "") + f"\nOvertime {'Approved' if request.approved else 'Rejected'}: {request.notes}"

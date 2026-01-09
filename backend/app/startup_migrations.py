@@ -28,12 +28,21 @@ async def run_startup_migrations(session: AsyncSession):
 
 async def normalize_employment_status(session: AsyncSession):
     """Normalize employment_status values to proper 'Active' casing."""
+    # First, check what values exist in production
+    check_result = await session.execute(
+        text("SELECT DISTINCT employment_status, COUNT(*) FROM employees GROUP BY employment_status")
+    )
+    rows = check_result.fetchall()
+    for row in rows:
+        logger.info(f"Production employment_status: '{row[0]}' = {row[1]} records")
+    
+    # Normalize any variation of 'active' to 'Active'
     result = await session.execute(
         text("""
             UPDATE employees 
             SET employment_status = 'Active' 
-            WHERE LOWER(TRIM(employment_status)) = 'active' 
-            AND employment_status != 'Active'
+            WHERE LOWER(TRIM(COALESCE(employment_status, ''))) = 'active' 
+            AND (employment_status IS NULL OR employment_status != 'Active')
         """)
     )
     row_count = result.rowcount if hasattr(result, 'rowcount') else 0
@@ -42,12 +51,13 @@ async def normalize_employment_status(session: AsyncSession):
 
 
 async def ensure_admin_access(session: AsyncSession):
-    """Ensure admin user has admin role. Only reset password if it cannot authenticate with DOB."""
+    """Ensure admin user has admin role and working password."""
     import hashlib
     
+    # First check if admin exists
     check_result = await session.execute(
         text("""
-            SELECT password_hash, role 
+            SELECT id, password_hash, role, password_changed, name
             FROM employees 
             WHERE employee_id = :emp_id
         """),
@@ -56,10 +66,16 @@ async def ensure_admin_access(session: AsyncSession):
     row = check_result.fetchone()
     
     if not row:
-        logger.warning(f"Admin employee {ADMIN_EMPLOYEE_ID} not found in database")
+        logger.error(f"CRITICAL: Admin employee {ADMIN_EMPLOYEE_ID} NOT FOUND in production database!")
+        # List all employees to debug
+        all_emp = await session.execute(text("SELECT employee_id, name FROM employees LIMIT 10"))
+        for emp in all_emp.fetchall():
+            logger.info(f"  Found employee: {emp[0]} - {emp[1]}")
         return
     
-    current_hash, current_role = row
+    emp_id, current_hash, current_role, password_changed, name = row
+    logger.info(f"Found admin: {name} (id={emp_id}, role={current_role}, password_changed={password_changed})")
+    logger.info(f"Current hash prefix: {current_hash[:50] if current_hash else 'NULL'}...")
     
     # Always ensure admin role
     if current_role != 'admin':
@@ -69,7 +85,7 @@ async def ensure_admin_access(session: AsyncSession):
         )
         logger.info(f"Set admin role for {ADMIN_EMPLOYEE_ID}")
     
-    # Only reset password if current hash doesn't work with DOB password
+    # Check if current password works
     dob_password = "16051988"
     password_works = False
     
@@ -80,19 +96,22 @@ async def ensure_admin_access(session: AsyncSession):
                 salt, stored_key = parts
                 key = hashlib.pbkdf2_hmac('sha256', dob_password.encode(), salt.encode(), 100000)
                 password_works = (key.hex() == stored_key)
-        except Exception:
-            pass
+                logger.info(f"Password verification result: {password_works}")
+        except Exception as e:
+            logger.error(f"Password verification error: {e}")
     
+    # ALWAYS reset password in this migration to ensure it works
     if not password_works:
         await session.execute(
             text("""
                 UPDATE employees 
                 SET password_hash = :hash,
-                    password_changed = false
+                    password_changed = false,
+                    role = 'admin'
                 WHERE employee_id = :emp_id
             """),
             {"hash": ADMIN_PASSWORD_HASH, "emp_id": ADMIN_EMPLOYEE_ID}
         )
-        logger.info(f"Reset password for {ADMIN_EMPLOYEE_ID} (DOB-based)")
+        logger.info(f"Reset password and role for {ADMIN_EMPLOYEE_ID}")
     else:
         logger.info(f"Admin {ADMIN_EMPLOYEE_ID} password already valid")

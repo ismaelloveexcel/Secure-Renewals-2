@@ -1,0 +1,209 @@
+# Azure DevOps Deployment Pipeline
+# This is the Azure Pipelines equivalent of .github/workflows/deploy.yml
+# 
+# To use this pipeline:
+# 1. Copy this file to your Azure DevOps repository root
+# 2. Create a new pipeline in Azure DevOps and point to this file
+# 3. Configure service connections and variable groups as described in docs/AZURE_DEVOPS_TRANSFER_GUIDE.md
+#
+# Required Variable Groups:
+# - secure-renewals-prod (with AZURE_WEBAPP_NAME, AZURE_STATIC_WEB_APPS_TOKEN, etc.)
+#
+# Required Service Connections:
+# - azure-subscription (Azure Resource Manager connection)
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - '*.md'
+      - 'docs/**'
+      - '.github/**'
+
+# Disable PR triggers for deployment pipeline
+pr: none
+
+variables:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+  # Link your variable group with Azure settings
+  # - group: secure-renewals-prod
+
+stages:
+  # ============================================
+  # Stage 1: Build
+  # ============================================
+  - stage: Build
+    displayName: 'Build'
+    jobs:
+      # Build Frontend
+      - job: BuildFrontend
+        displayName: 'Build Frontend'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            displayName: 'Set up Node.js'
+            inputs:
+              versionSpec: '$(NODE_VERSION)'
+
+          - task: Cache@2
+            displayName: 'Cache npm dependencies'
+            inputs:
+              key: 'npm | "$(Agent.OS)" | frontend/package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.npm
+
+          - script: |
+              cd frontend
+              npm ci --cache $(Pipeline.Workspace)/.npm
+            displayName: 'Install Dependencies'
+
+          - script: |
+              cd frontend
+              npm run build
+            displayName: 'Build Frontend'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Frontend Artifact'
+            inputs:
+              pathToPublish: 'frontend/dist'
+              artifactName: 'frontend-dist'
+              publishLocation: 'Container'
+
+      # Build Backend
+      - job: BuildBackend
+        displayName: 'Build Backend'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: UsePythonVersion@0
+            displayName: 'Set up Python'
+            inputs:
+              versionSpec: '$(PYTHON_VERSION)'
+              addToPath: true
+
+          - task: Cache@2
+            displayName: 'Cache uv dependencies'
+            inputs:
+              key: 'uv | "$(Agent.OS)" | backend/uv.lock'
+              restoreKeys: |
+                uv | "$(Agent.OS)"
+              path: ~/.cache/uv
+
+          - script: |
+              pip install uv
+            displayName: 'Install uv'
+
+          - script: |
+              cd backend
+              uv sync
+            displayName: 'Install Dependencies'
+
+          - task: ArchiveFiles@2
+            displayName: 'Archive Backend'
+            inputs:
+              rootFolderOrFile: 'backend'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/backend.zip'
+              replaceExistingArchive: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Backend Artifact'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)/backend.zip'
+              artifactName: 'backend-dist'
+              publishLocation: 'Container'
+
+  # ============================================
+  # Stage 2: Deploy to Azure
+  # ============================================
+  - stage: Deploy
+    displayName: 'Deploy to Azure'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      # Deploy Frontend to Azure Static Web Apps
+      - deployment: DeployFrontend
+        displayName: 'Deploy Frontend'
+        environment: 'production'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: 'frontend-dist'
+                  displayName: 'Download Frontend Artifact'
+
+                # Option 1: Azure Static Web Apps
+                - task: AzureStaticWebApp@0
+                  displayName: 'Deploy to Azure Static Web Apps'
+                  inputs:
+                    app_location: '$(Pipeline.Workspace)/frontend-dist'
+                    skip_app_build: true
+                    # Set this token in your variable group
+                    azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_TOKEN)
+                  condition: ne(variables['AZURE_STATIC_WEB_APPS_TOKEN'], '')
+
+                # Option 2: Azure Blob Storage (for static hosting)
+                # - task: AzureCLI@2
+                #   displayName: 'Deploy to Azure Blob Storage'
+                #   inputs:
+                #     azureSubscription: 'azure-subscription'
+                #     scriptType: 'bash'
+                #     scriptLocation: 'inlineScript'
+                #     inlineScript: |
+                #       az storage blob upload-batch \
+                #         --account-name $(STORAGE_ACCOUNT_NAME) \
+                #         --destination '$web' \
+                #         --source '$(Pipeline.Workspace)/frontend-dist' \
+                #         --overwrite
+
+      # Deploy Backend to Azure App Service
+      - deployment: DeployBackend
+        displayName: 'Deploy Backend'
+        environment: 'production'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: 'backend-dist'
+                  displayName: 'Download Backend Artifact'
+
+                - task: AzureWebApp@1
+                  displayName: 'Deploy to Azure App Service'
+                  inputs:
+                    azureSubscription: 'azure-subscription'
+                    appType: 'webAppLinux'
+                    appName: $(AZURE_WEBAPP_NAME)
+                    package: '$(Pipeline.Workspace)/backend-dist/backend.zip'
+                    runtimeStack: 'PYTHON|3.11'
+                    startUpCommand: 'gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app'
+
+                # Run database migrations after deployment
+                - task: AzureCLI@2
+                  displayName: 'Run Database Migrations'
+                  inputs:
+                    azureSubscription: 'azure-subscription'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      echo "To run migrations, SSH into the app service:"
+                      echo "az webapp ssh --resource-group <resource-group> --name $(AZURE_WEBAPP_NAME)"
+                      echo "Then run: cd /home/site/wwwroot && alembic upgrade head"
+                  condition: always()

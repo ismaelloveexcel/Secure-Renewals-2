@@ -71,10 +71,13 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [Awesome Resources](docs/AWESOME_RESOURCES.md) | **NEW!** Curated tools from awesome lists for performance, deployment & HR features | Everyone |
-| [Performance & Deployment Quick Reference](docs/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md) | **NEW!** Quick reference for 30-minute performance wins and deployment options | Everyone |
-| [Performance Optimization Guide](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md) | **NEW!** Comprehensive performance optimization strategies using awesome lists tools | Developers/Admins |
-| [Deployment Alternatives Guide](docs/DEPLOYMENT_ALTERNATIVES_GUIDE.md) | **NEW!** Privacy-focused deployment options: Docker, On-Premise, Oracle Cloud Free | HR Users/Developers/Admins |
+| **🆕 [Quick Repo Setup](QUICK_REPO_SETUP.md)** | **3-minute guide to create new repository with PR #79 content** | Everyone |
+| **🆕 [New Repository Summary](NEW_REPOSITORY_SUMMARY.md)** | **Complete guide for creating standalone repository with all PR #79 revisions** | Everyone |
+| [Awesome Resources](docs/AWESOME_RESOURCES.md) | Curated tools from awesome lists for performance, deployment & HR features | Everyone |
+| [Performance & Deployment Quick Reference](docs/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md) | Quick reference for 30-minute performance wins and deployment options | Everyone |
+| [Performance Optimization Guide](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md) | Comprehensive performance optimization strategies using awesome lists tools | Developers/Admins |
+| [Deployment Alternatives Guide](docs/DEPLOYMENT_ALTERNATIVES_GUIDE.md) | Privacy-focused deployment options: Docker, On-Premise, Oracle Cloud Free | HR Users/Developers/Admins |
+| [Create New Repository Guide](docs/CREATE_NEW_REPOSITORY_GUIDE.md) | Detailed step-by-step guide for creating new repository with PR #79 | Everyone |
 | [GitHub Deployment Options](docs/GITHUB_DEPLOYMENT_OPTIONS.md) | Complete guide for local laptop, GitHub Codespaces, and self-hosted deployment options | HR Users/Developers |
 | [VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md) | Complete guide for development and deployment in Visual Studio Code | Developers |
 | [Contributing Guide](CONTRIBUTING.md) | Setup instructions, Copilot best practices, troubleshooting | Contributors/Developers |

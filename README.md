@@ -71,6 +71,8 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
+| [Awesome Resources](docs/AWESOME_RESOURCES.md) | **NEW!** Curated tools from awesome lists for performance, deployment & HR features | Everyone |
+| [Performance & Deployment Quick Reference](docs/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md) | **NEW!** Quick reference for 30-minute performance wins and deployment options | Everyone |
 | [Performance Optimization Guide](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md) | **NEW!** Comprehensive performance optimization strategies using awesome lists tools | Developers/Admins |
 | [Deployment Alternatives Guide](docs/DEPLOYMENT_ALTERNATIVES_GUIDE.md) | **NEW!** Privacy-focused deployment options: Docker, On-Premise, Oracle Cloud Free | HR Users/Developers/Admins |
 | [GitHub Deployment Options](docs/GITHUB_DEPLOYMENT_OPTIONS.md) | Complete guide for local laptop, GitHub Codespaces, and self-hosted deployment options | HR Users/Developers |

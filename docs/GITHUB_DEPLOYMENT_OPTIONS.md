@@ -104,11 +104,63 @@ pause
 - ✅ **No third-party domains**
 - ✅ **Works offline** (once data is loaded)
 - ✅ **Simple to understand and maintain**
+- ✅ **Auto-start available** - Can start automatically with Windows/macOS
 
 ### Considerations
 - ⚠️ Only accessible from your laptop
-- ⚠️ Need to start manually (or set to auto-start)
 - ⚠️ PostgreSQL must be running
+
+### 🤖 Automated Installation (Recommended)
+
+Run the installation script for a fully automated setup:
+
+**Windows:**
+```batch
+scripts\install-windows.bat
+```
+
+**macOS/Linux:**
+```bash
+chmod +x scripts/install.sh
+./scripts/install.sh
+```
+
+The installer will:
+1. ✅ Check all prerequisites (Python, Node.js, npm)
+2. ✅ Install UV package manager
+3. ✅ Install backend dependencies
+4. ✅ Install frontend dependencies
+5. ✅ Configure environment files
+6. ✅ Run database migrations
+7. ✅ Optionally enable auto-start
+
+### 🔄 Enable Auto-Start
+
+Make the HR Portal start automatically when your computer boots:
+
+**Windows:**
+```batch
+scripts\setup-autostart-windows.bat
+```
+Choose option 1 to enable auto-start. The portal will launch silently in the background.
+
+**macOS:**
+```bash
+./scripts/setup-autostart-macos.sh enable
+```
+The portal will start automatically when you log in.
+
+### Manual Start (if auto-start not enabled)
+
+**Windows:**
+```batch
+scripts\start-portal-windows.bat
+```
+
+**macOS/Linux:**
+```bash
+./scripts/start-portal.sh
+```
 
 ---
 

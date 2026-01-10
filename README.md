@@ -276,18 +276,38 @@ DEV_USER_ROLE=admin
 - ✅ **No subscription costs** - Completely free
 - ✅ **No third-party domains** - No replit.dev, vercel.app, etc.
 - ✅ **Works offline** - Once data is loaded
+- ✅ **Auto-start available** - Launches automatically with your computer
 
-**Quick Start (Windows):**
-```bash
-# Double-click or run:
-scripts\start-portal-windows.bat
+**🤖 Automated Installation (First Time):**
+
+Windows:
+```batch
+scripts\install-windows.bat
 ```
 
-**Quick Start (Mac/Linux):**
+macOS/Linux:
 ```bash
-chmod +x scripts/start-portal.sh
-./scripts/start-portal.sh
+chmod +x scripts/install.sh && ./scripts/install.sh
 ```
+
+The installer handles everything: dependencies, environment setup, database, and optionally enables auto-start.
+
+**🔄 Enable Auto-Start (After Installation):**
+
+Windows:
+```batch
+scripts\setup-autostart-windows.bat
+```
+
+macOS:
+```bash
+./scripts/setup-autostart-macos.sh enable
+```
+
+**Manual Start (if needed):**
+
+Windows: `scripts\start-portal-windows.bat`  
+macOS/Linux: `./scripts/start-portal.sh`
 
 **Access URLs:**
 - Application: http://localhost:5000

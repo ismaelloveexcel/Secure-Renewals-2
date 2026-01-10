@@ -1,0 +1,99 @@
+name: Deploy to Local Machine (Self-Hosted)
+
+# This workflow deploys the HR Portal to a self-hosted runner (your laptop/server)
+# Setup self-hosted runner: Settings → Actions → Runners → New self-hosted runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - update-only
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'local'
+        type: choice
+        options:
+          - local
+          - development
+
+# Minimal permissions required for this workflow
+permissions:
+  contents: read
+
+jobs:
+  deploy-local:
+    name: Deploy to Self-Hosted Runner
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install UV Package Manager
+        run: |
+          pip install uv
+          uv --version
+      
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: uv sync
+      
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm install
+      
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
+      
+      - name: Copy Frontend Build to Backend Static (non-Windows)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p backend/static
+          cp -r frontend/dist/* backend/static/
+      
+      - name: Copy Frontend Build to Backend Static (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "backend\static" | Out-Null
+          Copy-Item -Path "frontend\dist\*" -Destination "backend\static\" -Recurse -Force
+      
+      - name: Run Database Migrations
+        working-directory: backend
+        run: uv run alembic upgrade head
+        continue-on-error: true
+      
+      - name: Display Deployment Info
+        run: |
+          echo "=============================================="
+          echo "  DEPLOYMENT COMPLETE"
+          echo "=============================================="
+          echo ""
+          echo "To start the application manually:"
+          echo ""
+          echo "  Backend:  cd backend && uv run uvicorn app.main:app --host 127.0.0.1 --port 8000"
+          echo "  Frontend: cd frontend && npm run dev"
+          echo ""
+          echo "Access URLs:"
+          echo "  - Application: http://localhost:5000"
+          echo "  - API Docs:    http://localhost:8000/docs"
+          echo ""
+          echo "=============================================="

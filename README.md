@@ -71,31 +71,32 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md) | **NEW!** Complete guide for development and deployment in Visual Studio Code | Developers |
-| [Contributing Guide](CONTRIBUTING.md) | **NEW!** Setup instructions, Copilot best practices, troubleshooting | Contributors/Developers |
+| [GitHub Deployment Options](docs/GITHUB_DEPLOYMENT_OPTIONS.md) | **NEW!** Complete guide for local laptop, GitHub Codespaces, and self-hosted deployment options | HR Users/Developers |
+| [VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md) | Complete guide for development and deployment in Visual Studio Code | Developers |
+| [Contributing Guide](CONTRIBUTING.md) | Setup instructions, Copilot best practices, troubleshooting | Contributors/Developers |
 | [HR User Guide](docs/HR_USER_GUIDE.md) | How to use the portal | HR Users |
-| [HR Templates Reference](docs/HR_TEMPLATES_REFERENCE.md) | **NEW!** Performance Evaluation & Employee of the Year templates | HR Users/Managers |
-| [App Analysis Report](docs/APP_ANALYSIS_REPORT.md) | **NEW!** Comprehensive codebase analysis and issue remediation | Admins/Developers |
-| [Process Simplification (UAE)](docs/PROCESS_SIMPLIFICATION_UAE.md) | **NEW!** Automated workflows for solo HR/multi-entity operations | HR Leadership |
+| [HR Templates Reference](docs/HR_TEMPLATES_REFERENCE.md) | Performance Evaluation & Employee of the Year templates | HR Users/Managers |
+| [App Analysis Report](docs/APP_ANALYSIS_REPORT.md) | Comprehensive codebase analysis and issue remediation | Admins/Developers |
+| [Process Simplification (UAE)](docs/PROCESS_SIMPLIFICATION_UAE.md) | Automated workflows for solo HR/multi-entity operations | HR Leadership |
 | [Copilot Agents Guide](docs/COPILOT_AGENTS.md) | AI agents for development assistance | Developers |
 | [Agent Deployment Guide](docs/AGENT_DEPLOYMENT_GUIDE.md) | How to deploy and use agents | Developers |
 | [System Health Check](docs/SYSTEM_HEALTH_CHECK.md) | Application assessment & roadmap | Admins/Developers |
 | [Recommended Add-ons](docs/RECOMMENDED_ADDONS.md) | Integration options | Developers |
 | [HR Implementation Plan](docs/HR_IMPLEMENTATION_PLAN.md) | Migration, admin hardening, and HR ops structure | HR Leadership/Admins |
 | [HR Apps Integration Guide](docs/HR_APPS_INTEGRATION_GUIDE.md) | Complete guide to GitHub HR apps & integration strategies | HR Leadership/Developers |
-| [Employee Management Quick Start](docs/EMPLOYEE_MANAGEMENT_QUICK_START.md) | **NEW!** Add employee management features to your existing app | Developers |
+| [Employee Management Quick Start](docs/EMPLOYEE_MANAGEMENT_QUICK_START.md) | Add employee management features to your existing app | Developers |
 | [Employee Migration Apps Guide](docs/EMPLOYEE_MIGRATION_APPS_GUIDE.md) | GitHub apps for layered employee migration strategy | HR Leadership/Developers |
 | [Frappe HRMS Implementation Plan](docs/FRAPPE_HRMS_IMPLEMENTATION_PLAN.md) | 6-week plan to integrate Frappe HRMS (if needed later) | HR Leadership/Developers |
-| [Recruitment Systems Research](docs/RECRUITMENT_SYSTEMS_RESEARCH.md) | **NEW!** Comprehensive analysis of open-source ATS options & custom build recommendation | HR Leadership/Developers |
-| [Recruitment Implementation Architecture](docs/RECRUITMENT_IMPLEMENTATION_ARCHITECTURE.md) | **NEW!** Technical architecture for custom lightweight ATS with pass integration | Developers |
-| [Recruitment Quick Reference](docs/RECRUITMENT_QUICK_REFERENCE.md) | **NEW!** Executive summary and quick decision guide for recruitment system | HR Leadership |
-| [AI CV Parsing Solutions](docs/AI_CV_PARSING_SOLUTIONS.md) | **NEW!** AI-powered resume parsing with pyresparser for automatic candidate data extraction | Developers/HR |
-| [Recruitment Full Implementation Guide](docs/RECRUITMENT_FULL_IMPLEMENTATION_GUIDE.md) | **NEW!** Complete ready-to-implement code for recruitment system (solo HR, UAE startup) | Developers |
-| [Recruitment Deployment Checklist](docs/RECRUITMENT_DEPLOYMENT_CHECKLIST.md) | **NEW!** Step-by-step deployment checklist and verification guide | Developers/DevOps |
+| [Recruitment Systems Research](docs/RECRUITMENT_SYSTEMS_RESEARCH.md) | Comprehensive analysis of open-source ATS options & custom build recommendation | HR Leadership/Developers |
+| [Recruitment Implementation Architecture](docs/RECRUITMENT_IMPLEMENTATION_ARCHITECTURE.md) | Technical architecture for custom lightweight ATS with pass integration | Developers |
+| [Recruitment Quick Reference](docs/RECRUITMENT_QUICK_REFERENCE.md) | Executive summary and quick decision guide for recruitment system | HR Leadership |
+| [AI CV Parsing Solutions](docs/AI_CV_PARSING_SOLUTIONS.md) | AI-powered resume parsing with pyresparser for automatic candidate data extraction | Developers/HR |
+| [Recruitment Full Implementation Guide](docs/RECRUITMENT_FULL_IMPLEMENTATION_GUIDE.md) | Complete ready-to-implement code for recruitment system (solo HR, UAE startup) | Developers |
+| [Recruitment Deployment Checklist](docs/RECRUITMENT_DEPLOYMENT_CHECKLIST.md) | Step-by-step deployment checklist and verification guide | Developers/DevOps |
 
 ### 📋 Recruitment Documentation Review
 
-> **NEW!** Comprehensive review of recruitment system documentation
+> Comprehensive review of recruitment system documentation
 
 | Document | Description | Audience |
 |----------|-------------|----------|
@@ -264,9 +265,57 @@ DEV_USER_ROLE=admin
 
 ## 🚀 Deployment
 
+### 🏆 Local Desktop Deployment (RECOMMENDED for HR Privacy)
+
+**Best for:** Solo HR user, maximum privacy, no third-party domain exposure
+
+📖 **[GitHub Deployment Options Guide](docs/GITHUB_DEPLOYMENT_OPTIONS.md)** - Complete guide for all deployment options
+
+**Why Local Desktop?**
+- ✅ **100% Private** - Data never leaves your computer
+- ✅ **No subscription costs** - Completely free
+- ✅ **No third-party domains** - No replit.dev, vercel.app, etc.
+- ✅ **Works offline** - Once data is loaded
+- ✅ **Auto-start available** - Launches automatically with your computer
+
+**🤖 Automated Installation (First Time):**
+
+Windows:
+```batch
+scripts\install-windows.bat
+```
+
+macOS/Linux:
+```bash
+chmod +x scripts/install.sh && ./scripts/install.sh
+```
+
+The installer handles everything: dependencies, environment setup, database, and optionally enables auto-start.
+
+**🔄 Enable Auto-Start (After Installation):**
+
+Windows:
+```batch
+scripts\setup-autostart-windows.bat
+```
+
+macOS:
+```bash
+./scripts/setup-autostart-macos.sh enable
+```
+
+**Manual Start (if needed):**
+
+Windows: `scripts\start-portal-windows.bat`  
+macOS/Linux: `./scripts/start-portal.sh`
+
+**Access URLs:**
+- Application: http://localhost:5000
+- API Docs: http://localhost:8000/docs
+
 ### Visual Studio Code (Development & Deployment)
 
-**NEW!** Complete VSCode setup with debugging, tasks, and deployment support.
+Complete VSCode setup with debugging, tasks, and deployment support.
 
 📖 **[VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md)** - Comprehensive guide for development in VSCode
 
@@ -284,7 +333,24 @@ DEV_USER_ROLE=admin
 - ✅ One-click deployment to Azure
 - ✅ Database migration tasks
 
-### Replit Deployment (Recommended for Quick Deploy)
+### GitHub Codespaces (Cloud Development)
+
+Run the application in a cloud-based development environment under Microsoft infrastructure.
+
+**Quick Start:**
+1. Go to repository → **Code** → **Codespaces** → **Create codespace on main**
+2. Wait for environment to start
+3. Run: `cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`
+4. Run (new terminal): `cd frontend && npm run dev`
+5. Access via the **Ports** tab (set to Private)
+
+**Advantages:**
+- ✅ Microsoft infrastructure (github.dev domain)
+- ✅ Private URLs (not publicly visible)
+- ✅ 60 hours/month free
+- ✅ No setup on your laptop needed
+
+### Replit Deployment
 
 The app is also configured for **Replit** deployment under your company domain.
 

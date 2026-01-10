@@ -23,6 +23,10 @@ on:
           - local
           - development
 
+# Minimal permissions required for this workflow
+permissions:
+  contents: read
+
 jobs:
   deploy-local:
     name: Deploy to Self-Hosted Runner

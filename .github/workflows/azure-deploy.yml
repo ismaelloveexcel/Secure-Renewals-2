@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+# Set explicit permissions for GITHUB_TOKEN
+permissions:
+  contents: read
+
 env:
   AZURE_WEBAPP_NAME: secure-renewals-app
   PYTHON_VERSION: '3.11'

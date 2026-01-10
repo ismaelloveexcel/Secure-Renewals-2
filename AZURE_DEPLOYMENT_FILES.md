@@ -6,6 +6,24 @@ This document identifies which files are **REQUIRED** for deploying the applicat
 
 ---
 
+## 🚀 Ready to Create Your New Repository?
+
+**See the complete guide:** [NEW_REPO_CREATION_GUIDE.md](NEW_REPO_CREATION_GUIDE.md)
+
+**Quick start with automated script:**
+
+```bash
+# Linux/macOS
+./scripts/create_new_repo.sh
+
+# Windows
+scripts\create_new_repo.bat
+```
+
+The script automatically copies only the essential files listed below and sets up your new lean repository!
+
+---
+
 ## Summary
 
 | Category | File Count | Status |

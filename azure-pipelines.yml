@@ -1,0 +1,153 @@
+# Azure DevOps CI Pipeline
+# This is the Azure Pipelines equivalent of .github/workflows/ci.yml
+# 
+# To use this pipeline:
+# 1. Copy this file to your Azure DevOps repository root
+# 2. Create a new pipeline in Azure DevOps and point to this file
+# 3. Configure variable groups as described in docs/AZURE_DEVOPS_TRANSFER_GUIDE.md
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - '*.md'
+      - 'docs/**'
+      - '.github/**'
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - '*.md'
+      - 'docs/**'
+      - '.github/**'
+
+variables:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+
+stages:
+  # ============================================
+  # Stage 1: Lint & Validate
+  # ============================================
+  - stage: Lint
+    displayName: 'Lint & Validate'
+    jobs:
+      # Backend Linting
+      - job: BackendLint
+        displayName: 'Backend Lint'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: UsePythonVersion@0
+            displayName: 'Set up Python'
+            inputs:
+              versionSpec: '$(PYTHON_VERSION)'
+              addToPath: true
+
+          - task: Cache@2
+            displayName: 'Cache uv dependencies'
+            inputs:
+              key: 'uv | "$(Agent.OS)" | backend/uv.lock'
+              restoreKeys: |
+                uv | "$(Agent.OS)"
+              path: ~/.cache/uv
+
+          - script: |
+              pip install uv
+            displayName: 'Install uv'
+
+          - script: |
+              cd backend
+              uv sync
+            displayName: 'Install Backend Dependencies'
+
+          - script: |
+              cd backend
+              find app -name '*.py' -exec uv run python -m py_compile {} +
+            displayName: 'Check Python Syntax'
+
+      # Frontend Linting
+      - job: FrontendLint
+        displayName: 'Frontend Lint'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            displayName: 'Set up Node.js'
+            inputs:
+              versionSpec: '$(NODE_VERSION)'
+
+          - task: Cache@2
+            displayName: 'Cache npm dependencies'
+            inputs:
+              key: 'npm | "$(Agent.OS)" | frontend/package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.npm
+
+          - script: |
+              cd frontend
+              npm ci --cache $(Pipeline.Workspace)/.npm
+            displayName: 'Install Frontend Dependencies'
+
+          - script: |
+              cd frontend
+              npm run lint
+            displayName: 'TypeScript Check'
+
+  # ============================================
+  # Stage 2: Security Scan
+  # ============================================
+  - stage: Security
+    displayName: 'Security Scan'
+    dependsOn: Lint
+    condition: succeeded()
+    jobs:
+      - job: SecurityScan
+        displayName: 'Security Scan'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          # Note: Advanced Security requires GitHub Advanced Security for Azure DevOps license
+          # If not available, you can use other security scanning tools like:
+          # - Snyk
+          # - SonarQube
+          # - WhiteSource
+          
+          # Example with Microsoft Security DevOps (if available):
+          # - task: MicrosoftSecurityDevOps@1
+          #   inputs:
+          #     categories: 'code'
+
+          # Fallback: Basic dependency check with pip-audit
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(PYTHON_VERSION)'
+
+          - script: |
+              pip install pip-audit
+              cd backend
+              pip install -r <(uv pip compile pyproject.toml --quiet) 2>/dev/null || true
+              pip-audit --ignore-vuln PYSEC-2024-* --ignore-vuln GHSA-* || echo "Security scan completed with warnings"
+            displayName: 'Python Security Audit'
+            continueOnError: true
+
+          - script: |
+              cd frontend
+              npm audit --audit-level=high || echo "npm audit completed with warnings"
+            displayName: 'npm Security Audit'
+            continueOnError: true

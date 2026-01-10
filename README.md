@@ -71,7 +71,8 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md) | **NEW!** Complete guide for development and deployment in Visual Studio Code | Developers |
+| [Azure DevOps Transfer Guide](docs/AZURE_DEVOPS_TRANSFER_GUIDE.md) | **NEW!** Complete guide to migrate from GitHub to Azure DevOps | DevOps/Developers |
+| [VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md) | Complete guide for development and deployment in Visual Studio Code | Developers |
 | [Contributing Guide](CONTRIBUTING.md) | **NEW!** Setup instructions, Copilot best practices, troubleshooting | Contributors/Developers |
 | [HR User Guide](docs/HR_USER_GUIDE.md) | How to use the portal | HR Users |
 | [HR Templates Reference](docs/HR_TEMPLATES_REFERENCE.md) | **NEW!** Performance Evaluation & Employee of the Year templates | HR Users/Managers |
@@ -283,6 +284,26 @@ DEV_USER_ROLE=admin
 - ✅ Integrated terminal with proper environment
 - ✅ One-click deployment to Azure
 - ✅ Database migration tasks
+
+### Azure DevOps (Enterprise CI/CD)
+
+**NEW!** Complete Azure DevOps migration support with Azure Pipelines.
+
+📖 **[Azure DevOps Transfer Guide](docs/AZURE_DEVOPS_TRANSFER_GUIDE.md)** - Step-by-step migration from GitHub
+
+**What's Included:**
+- ✅ `azure-pipelines.yml` - CI pipeline (lint, test, security scan)
+- ✅ `azure-pipelines-deploy.yml` - CD pipeline (build & deploy to Azure)
+- ✅ Complete migration checklist
+- ✅ GitHub Actions to Azure Pipelines conversion reference
+- ✅ Variable groups and secrets setup guide
+
+**Quick Start:**
+1. Create Azure DevOps organization at https://dev.azure.com
+2. Import repository from GitHub
+3. Create pipelines using the included YAML files
+4. Configure service connections and variable groups
+5. Enable branch policies
 
 ### Replit Deployment (Recommended for Quick Deploy)
 

@@ -191,7 +191,7 @@ GitHub Codespaces runs in the cloud under Microsoft's infrastructure with a `.gi
    uv run alembic upgrade head
    
    # Start backend (Terminal 1)
-   uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
    
    # Start frontend (Terminal 2)
    cd ../frontend

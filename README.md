@@ -71,6 +71,7 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
+| [VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md) | **NEW!** Complete guide for development and deployment in Visual Studio Code | Developers |
 | [Contributing Guide](CONTRIBUTING.md) | **NEW!** Setup instructions, Copilot best practices, troubleshooting | Contributors/Developers |
 | [HR User Guide](docs/HR_USER_GUIDE.md) | How to use the portal | HR Users |
 | [HR Templates Reference](docs/HR_TEMPLATES_REFERENCE.md) | **NEW!** Performance Evaluation & Employee of the Year templates | HR Users/Managers |
@@ -263,9 +264,29 @@ DEV_USER_ROLE=admin
 
 ## 🚀 Deployment
 
-### Replit Deployment (Recommended)
+### Visual Studio Code (Development & Deployment)
 
-The app is configured for **Replit** deployment under your company domain.
+**NEW!** Complete VSCode setup with debugging, tasks, and deployment support.
+
+📖 **[VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md)** - Comprehensive guide for development in VSCode
+
+**Quick Start:**
+1. Open the project: `code .` or open `secure-renewals.code-workspace`
+2. Install recommended extensions (VSCode will prompt)
+3. Press `Ctrl+Shift+B` to start both frontend and backend
+4. Press `F5` to debug
+
+**Key Features:**
+- ✅ Pre-configured tasks for building, running, and deploying
+- ✅ Debug configurations for Python and React
+- ✅ Multi-folder workspace support
+- ✅ Integrated terminal with proper environment
+- ✅ One-click deployment to Azure
+- ✅ Database migration tasks
+
+### Replit Deployment (Recommended for Quick Deploy)
+
+The app is also configured for **Replit** deployment under your company domain.
 
 **Auto-configured features:**
 - ✅ Frontend runs on port 5000 (external port 80)

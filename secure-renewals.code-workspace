@@ -1,0 +1,106 @@
+{
+  "folders": [
+    {
+      "name": "Secure Renewals (Root)",
+      "path": "."
+    },
+    {
+      "name": "Backend (FastAPI)",
+      "path": "backend"
+    },
+    {
+      "name": "Frontend (React)",
+      "path": "frontend"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/__pycache__": true,
+      "**/*.pyc": true,
+      "**/node_modules": true,
+      "**/.venv": true,
+      "**/uv.lock": false
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.venv": true,
+      "**/uv.lock": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "ms-python.black-formatter",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "dsznajder.es7-react-js-snippets",
+      "bradlc.vscode-tailwindcss",
+      "eamodio.gitlens",
+      "ckolkman.vscode-postgres",
+      "humao.rest-client",
+      "ms-azuretools.vscode-docker"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Backend: FastAPI",
+        "type": "debugpy",
+        "request": "launch",
+        "module": "uvicorn",
+        "args": [
+          "app.main:app",
+          "--reload",
+          "--host",
+          "0.0.0.0",
+          "--port",
+          "8000"
+        ],
+        "cwd": "${workspaceFolder:Backend (FastAPI)}",
+        "console": "integratedTerminal",
+        "justMyCode": false
+      },
+      {
+        "name": "Frontend: Launch Chrome",
+        "type": "chrome",
+        "request": "launch",
+        "url": "http://localhost:5000",
+        "webRoot": "${workspaceFolder:Frontend (React)}/src"
+      }
+    ],
+    "compounds": [
+      {
+        "name": "Full Stack",
+        "configurations": ["Backend: FastAPI", "Frontend: Launch Chrome"]
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Start Backend",
+        "type": "shell",
+        "command": "uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+        "options": {
+          "cwd": "${workspaceFolder:Backend (FastAPI)}"
+        },
+        "isBackground": true,
+        "group": "build"
+      },
+      {
+        "label": "Start Frontend",
+        "type": "shell",
+        "command": "npm run dev",
+        "options": {
+          "cwd": "${workspaceFolder:Frontend (React)}"
+        },
+        "isBackground": true,
+        "group": "build"
+      }
+    ]
+  }
+}

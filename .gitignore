@@ -29,9 +29,12 @@ ENV/
 
 # IDE
 .idea/
-.vscode/
 *.swp
 *.swo
+
+# VSCode - Keep configuration, ignore user-specific settings
+# .vscode/ - commented out to allow version control
+.vscode/*.code-workspace.backup
 
 # Database
 *.db

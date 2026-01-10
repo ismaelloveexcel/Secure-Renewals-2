@@ -1,0 +1,125 @@
+### Secure Renewals API Testing
+### Use the REST Client extension in VSCode to run these requests
+### Press Ctrl+Alt+R (or Cmd+Alt+R) on a request line to execute it
+
+@baseUrl = http://localhost:8000
+@apiUrl = {{baseUrl}}/api
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Get API Documentation
+GET {{baseUrl}}/docs
+
+### Authentication - Login
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "employee_id": "EMP001",
+  "password": "your-password"
+}
+
+### Store the token from login response
+@authToken = <paste-your-token-here>
+
+### Get Current User Profile
+GET {{apiUrl}}/auth/me
+Authorization: Bearer {{authToken}}
+
+### List All Employees
+GET {{apiUrl}/employees
+Authorization: Bearer {{authToken}}
+
+### Get Specific Employee
+GET {{apiUrl}}/employees/EMP001
+Authorization: Bearer {{authToken}}
+
+### Create Renewal Request
+POST {{apiUrl}}/renewals
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "employee_id": "EMP001",
+  "renewal_date": "2026-12-31",
+  "notes": "Annual contract renewal"
+}
+
+### List All Renewals
+GET {{apiUrl}}/renewals
+Authorization: Bearer {{authToken}}
+
+### Get Specific Renewal
+GET {{apiUrl}}/renewals/1
+Authorization: Bearer {{authToken}}
+
+### Update Renewal Status (Admin only)
+PATCH {{apiUrl}}/renewals/1/approve
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "notes": "Approved by HR"
+}
+
+### Create Employee (Admin only)
+POST {{apiUrl}}/employees
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "employee_id": "EMP999",
+  "full_name": "Test Employee",
+  "email": "test@example.com",
+  "department": "IT",
+  "job_title": "Developer",
+  "date_of_birth": "1990-01-01",
+  "date_joined": "2026-01-10",
+  "role": "viewer"
+}
+
+### Update Employee
+PATCH {{apiUrl}}/employees/EMP999
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "department": "Engineering",
+  "job_title": "Senior Developer"
+}
+
+### Change Password
+POST {{apiUrl}}/auth/change-password
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "old_password": "current-password",
+  "new_password": "new-secure-password"
+}
+
+### Logout
+POST {{apiUrl}}/auth/logout
+Authorization: Bearer {{authToken}}
+
+### ===================================
+### Error Testing
+### ===================================
+
+### Test Unauthorized Access
+GET {{apiUrl}}/employees
+# No Authorization header
+
+### Test Invalid Credentials
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "employee_id": "INVALID",
+  "password": "wrong"
+}
+
+### Test Not Found
+GET {{apiUrl}}/employees/NONEXISTENT
+Authorization: Bearer {{authToken}}

@@ -263,9 +263,46 @@ DEV_USER_ROLE=admin
 
 ## 🚀 Deployment
 
-### Replit Deployment (Recommended)
+### Microsoft Azure (Recommended for Production)
 
-The app is configured for **Replit** deployment under your company domain.
+**Complete Azure deployment guide with automated scripts, GitHub Actions CI/CD, and Docker support.**
+
+📖 **[Full Azure Deployment Guide](docs/AZURE_DEPLOYMENT_GUIDE.md)**
+
+**Quick Start - Automated Deployment:**
+
+1. **Open Azure Cloud Shell**: https://shell.azure.com
+2. **Clone and deploy**:
+   ```bash
+   git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
+   cd Secure-Renewals-2
+   chmod +x deploy_to_azure.sh
+   ./deploy_to_azure.sh
+   ```
+3. **Follow prompts** - script handles everything automatically
+
+**What gets deployed:**
+- ✅ PostgreSQL Database (Azure Database for PostgreSQL)
+- ✅ App Service (Linux + Python 3.11)
+- ✅ Auto-configured environment variables
+- ✅ GitHub integration (optional)
+- ✅ Frontend + Backend in single app
+
+**Deployment time**: ~15 minutes  
+**Cost estimate**: $50-150/month
+
+**Available deployment methods:**
+- 🚀 **Automated Script** - One-click deployment (easiest)
+- 🔄 **GitHub Actions** - Continuous deployment
+- 🐳 **Docker Containers** - Containerized deployment
+
+📋 **[Deployment Checklist](docs/AZURE_DEPLOYMENT_CHECKLIST.md)** - Track your progress
+
+---
+
+### Alternative: Replit Deployment
+
+The app can also be deployed to **Replit** for quick testing.
 
 **Auto-configured features:**
 - ✅ Frontend runs on port 5000 (external port 80)
@@ -279,44 +316,55 @@ The app is configured for **Replit** deployment under your company domain.
 2. **Configure Secrets** (in Replit Secrets tab):
    ```
    DATABASE_URL=postgresql+asyncpg://...
-   AUTH_ISSUER=https://login.microsoftonline.com/<tenant-id>/v2.0
-   AUTH_AUDIENCE=api://secure-renewals
-   AUTH_JWKS_URL=https://login.microsoftonline.com/<tenant-id>/discovery/v2.0/keys
+   AUTH_SECRET_KEY=your-secret-key
    ALLOWED_ORIGINS=https://your-replit-app.your-company.com
    ```
 3. **Set Custom Domain**: In Replit → Settings → Custom Domains, add your company domain
 4. **Run**: Click the Run button - frontend and backend start automatically
 
-**Replit-specific URLs:**
-- Frontend: `https://your-app-name.your-company.com`
-- Backend API: `https://your-app-name.your-company.com:3000/api`
-- API Docs: `https://your-app-name.your-company.com:3000/docs`
+---
 
 ### Environment Variables
 
-**Backend Secrets (Replit Secrets or `.env`):**
+**Required Backend Environment Variables:**
 ```env
+# Database
 DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname
-ALLOWED_ORIGINS=https://your-app.your-company.com
-AUTH_ISSUER=https://login.microsoftonline.com/<tenant>/v2.0
-AUTH_AUDIENCE=api://secure-renewals
-AUTH_JWKS_URL=https://login.microsoftonline.com/<tenant>/discovery/v2.0/keys
+
+# Authentication
+AUTH_SECRET_KEY=your-secret-key-min-32-chars
+
+# App Configuration
+APP_NAME=Secure Renewals API
+APP_ENV=production
+API_PREFIX=/api
+ALLOWED_ORIGINS=https://your-domain.com
+
+# Email (Optional - for notifications)
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+SMTP_USER=hr@company.com
+SMTP_PASSWORD=email-password
+SMTP_FROM_EMAIL=hr@company.com
 ```
 
-**Frontend (auto-configured in Replit):**
-```env
-VITE_API_BASE_URL=https://your-app.your-company.com:3000/api
+**Azure automatically configures these during deployment.**
+
+---
+
+### Docker Deployment
+
+For custom deployments using Docker:
+
+```bash
+# Build and run locally
+docker-compose up
+
+# Or build for Azure Container Registry
+docker build -t secure-renewals:latest .
 ```
 
-### Deployment Checklist
-
-- [ ] Import repo to Replit workspace
-- [ ] Configure Replit Secrets with database and auth settings
-- [ ] Set custom company domain in Replit settings
-- [ ] Run database migrations (`cd backend && uv run alembic upgrade head`)
-- [ ] Click Run to start the application
-- [ ] Add admin user (first user with admin role)
-- [ ] Share portal URL with HR team
+See [Azure Deployment Guide](docs/AZURE_DEPLOYMENT_GUIDE.md) for container deployment details.
 
 ---
 

@@ -1,0 +1,65 @@
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: secure-renewals-app
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18.x'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm ci
+        npm run build
+
+    - name: Copy frontend build to backend static
+      run: |
+        mkdir -p backend/static
+        cp -r frontend/dist/* backend/static/
+
+    - name: Create deployment package
+      run: |
+        cd backend
+        zip -r ../deployment.zip . -x "*.git*" "*.env*" "__pycache__/*" "*.pyc"
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: deployment.zip
+
+    - name: Run database migrations
+      run: |
+        echo "Database migrations should be run via Azure CLI or SSH"
+        echo "az webapp ssh --resource-group secure-renewals-rg --name ${{ env.AZURE_WEBAPP_NAME }}"
+        echo "cd /home/site/wwwroot && alembic upgrade head"

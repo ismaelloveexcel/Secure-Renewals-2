@@ -297,17 +297,52 @@ jobs:
       - name: Start Application
         if: github.event.inputs.action == 'start'
         run: |
-          # Backend (runs in background)
+          # Stop any previously running instances (if PID files exist)
+          if [ -f /tmp/hr_app_backend.pid ]; then
+            echo "Stopping existing backend process..."
+            kill "$(cat /tmp/hr_app_backend.pid)" 2>/dev/null || true
+            rm -f /tmp/hr_app_backend.pid
+          fi
+          if [ -f /tmp/hr_app_frontend.pid ]; then
+            echo "Stopping existing frontend process..."
+            kill "$(cat /tmp/hr_app_frontend.pid)" 2>/dev/null || true
+            rm -f /tmp/hr_app_frontend.pid
+          fi
+
+          # Backend (runs in background, PID tracked)
           cd backend
           nohup uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          echo $! > /tmp/hr_app_backend.pid
           
-          # Frontend (runs in background)
+          # Frontend (runs in background, PID tracked)
           cd ../frontend
           nohup npm run dev &
+          echo $! > /tmp/hr_app_frontend.pid
           
           echo "Application started!"
           echo "Frontend: http://localhost:5000"
           echo "Backend: http://localhost:8000"
+      
+      - name: Stop Application
+        if: github.event.inputs.action == 'stop'
+        run: |
+          # Stop backend
+          if [ -f /tmp/hr_app_backend.pid ]; then
+            echo "Stopping backend..."
+            kill "$(cat /tmp/hr_app_backend.pid)" 2>/dev/null || true
+            rm -f /tmp/hr_app_backend.pid
+          else
+            echo "No backend PID file found; backend may not be running."
+          fi
+
+          # Stop frontend
+          if [ -f /tmp/hr_app_frontend.pid ]; then
+            echo "Stopping frontend..."
+            kill "$(cat /tmp/hr_app_frontend.pid)" 2>/dev/null || true
+            rm -f /tmp/hr_app_frontend.pid
+          else
+            echo "No frontend PID file found; frontend may not be running."
+          fi
 ```
 
 ### Advantages

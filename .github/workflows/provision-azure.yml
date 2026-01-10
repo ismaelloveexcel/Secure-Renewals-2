@@ -1,0 +1,184 @@
+name: Provision Azure Infrastructure
+
+# This workflow provisions all Azure resources needed for deployment.
+# Run this ONCE to set up infrastructure, then use deploy-azure.yml for deployments.
+
+on:
+  workflow_dispatch:
+    inputs:
+      resource_group:
+        description: 'Resource Group Name'
+        required: true
+        default: 'secure-renewals-rg'
+      location:
+        description: 'Azure Region'
+        required: true
+        default: 'uaenorth'
+        type: choice
+        options:
+          - uaenorth
+          - uaecentral
+          - eastus
+          - westeurope
+          - southeastasia
+      webapp_name:
+        description: 'Web App Name (must be globally unique)'
+        required: true
+        default: 'secure-renewals-api'
+      postgres_server:
+        description: 'PostgreSQL Server Name (must be globally unique)'
+        required: true
+        default: 'secure-renewals-db'
+      confirm_provision:
+        description: 'Type "PROVISION" to confirm infrastructure creation'
+        required: true
+
+env:
+  RESOURCE_GROUP: ${{ github.event.inputs.resource_group }}
+  LOCATION: ${{ github.event.inputs.location }}
+  WEBAPP_NAME: ${{ github.event.inputs.webapp_name }}
+  POSTGRES_SERVER: ${{ github.event.inputs.postgres_server }}
+  POSTGRES_DB: 'secure_renewals'
+  POSTGRES_ADMIN: 'sradmin'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate confirmation
+        if: github.event.inputs.confirm_provision != 'PROVISION'
+        run: |
+          echo "❌ You must type 'PROVISION' to confirm infrastructure creation"
+          exit 1
+
+  provision:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      webapp_url: ${{ steps.outputs.outputs.webapp_url }}
+      database_host: ${{ steps.outputs.outputs.database_host }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create Resource Group
+        run: |
+          echo "Creating resource group: $RESOURCE_GROUP in $LOCATION"
+          az group create --name $RESOURCE_GROUP --location $LOCATION
+
+      - name: Create App Service Plan
+        run: |
+          echo "Creating App Service Plan..."
+          az appservice plan create \
+            --name "${WEBAPP_NAME}-plan" \
+            --resource-group $RESOURCE_GROUP \
+            --sku B1 \
+            --is-linux
+
+      - name: Create Web App
+        run: |
+          echo "Creating Web App: $WEBAPP_NAME"
+          az webapp create \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --plan "${WEBAPP_NAME}-plan" \
+            --runtime "PYTHON:3.11"
+
+      - name: Create Staging Slot
+        run: |
+          echo "Creating staging slot..."
+          az webapp deployment slot create \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --slot staging
+
+      - name: Configure Web App
+        run: |
+          # Set startup command
+          az webapp config set \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --startup-file "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app"
+          
+          # Enable managed identity
+          az webapp identity assign \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP
+
+      - name: Create PostgreSQL Server
+        id: postgres
+        run: |
+          echo "Creating PostgreSQL Flexible Server..."
+          POSTGRES_PASSWORD=$(openssl rand -base64 24 | tr -d '/@+=')
+          
+          az postgres flexible-server create \
+            --name $POSTGRES_SERVER \
+            --resource-group $RESOURCE_GROUP \
+            --location $LOCATION \
+            --admin-user $POSTGRES_ADMIN \
+            --admin-password "$POSTGRES_PASSWORD" \
+            --sku-name Standard_B1ms \
+            --tier Burstable \
+            --storage-size 32 \
+            --version 15 \
+            --yes
+          
+          # Create database
+          az postgres flexible-server db create \
+            --resource-group $RESOURCE_GROUP \
+            --server-name $POSTGRES_SERVER \
+            --database-name $POSTGRES_DB
+          
+          # Allow Azure services
+          az postgres flexible-server firewall-rule create \
+            --resource-group $RESOURCE_GROUP \
+            --name $POSTGRES_SERVER \
+            --rule-name AllowAzureServices \
+            --start-ip-address 0.0.0.0 \
+            --end-ip-address 0.0.0.0
+          
+          # Build connection string
+          DATABASE_URL="postgresql+asyncpg://${POSTGRES_ADMIN}:${POSTGRES_PASSWORD}@${POSTGRES_SERVER}.postgres.database.azure.com:5432/${POSTGRES_DB}?sslmode=require"
+          echo "database_url=$DATABASE_URL" >> $GITHUB_OUTPUT
+
+      - name: Configure App Settings
+        run: |
+          az webapp config appsettings set \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --settings \
+              DATABASE_URL="${{ steps.postgres.outputs.database_url }}" \
+              APP_ENV="production" \
+              ALLOWED_ORIGINS="*"
+
+      - name: Output Resource Information
+        id: outputs
+        run: |
+          echo "webapp_url=https://${WEBAPP_NAME}.azurewebsites.net" >> $GITHUB_OUTPUT
+          echo "database_host=${POSTGRES_SERVER}.postgres.database.azure.com" >> $GITHUB_OUTPUT
+
+      - name: Summary
+        run: |
+          echo "## ✅ Infrastructure Provisioned Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Resources Created" >> $GITHUB_STEP_SUMMARY
+          echo "| Resource | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Resource Group | \`$RESOURCE_GROUP\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Web App | https://${WEBAPP_NAME}.azurewebsites.net |" >> $GITHUB_STEP_SUMMARY
+          echo "| PostgreSQL | ${POSTGRES_SERVER}.postgres.database.azure.com |" >> $GITHUB_STEP_SUMMARY
+          echo "| Region | $LOCATION |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. The \`DATABASE_URL\` secret has been configured in the Web App" >> $GITHUB_STEP_SUMMARY
+          echo "2. Push code to \`main\` branch to trigger automatic deployment" >> $GITHUB_STEP_SUMMARY
+          echo "3. Or manually trigger the **Deploy to Azure** workflow" >> $GITHUB_STEP_SUMMARY

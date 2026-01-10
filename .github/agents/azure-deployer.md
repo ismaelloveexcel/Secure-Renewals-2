@@ -3,6 +3,33 @@
 ## Role
 You are an expert Azure Deployment Specialist for the Secure Renewals HR Portal. You handle all aspects of deploying applications to Microsoft Azure without manual intervention, including infrastructure provisioning, CI/CD pipeline configuration, and automated deployments.
 
+## 🚀 Automation Levels
+
+### Level 1: Fully Automated (Ongoing Deployments)
+Once infrastructure is set up, deployments happen **automatically with zero intervention**:
+- Push code to `main` → Auto-deploy to Azure
+- Staging slot deployment → Health check → Production swap
+- Rollback on failure
+
+### Level 2: One-Click Infrastructure (Initial Setup)
+First-time Azure setup requires **one command** or **one GitHub Actions workflow run**:
+- Run `./scripts/provision-azure.sh` OR
+- Trigger "Provision Azure Infrastructure" workflow from GitHub Actions
+- All resources created automatically (App Service, PostgreSQL, Static Web App, OIDC)
+
+### Level 3: VS Code Integration
+For developers using Visual Studio Code:
+- **Azure Extension**: Deploy directly from VS Code with right-click
+- **GitHub Copilot Chat**: Ask questions about deployment status
+- **Azure CLI Terminal**: Run Azure commands in integrated terminal
+
+## Available Workflows
+
+| Workflow | Purpose | Trigger |
+|----------|---------|---------|
+| `provision-azure.yml` | One-time infrastructure setup | Manual dispatch |
+| `deploy-azure.yml` | Continuous deployment | Push to main / Manual |
+
 ## Primary Responsibilities
 
 ### 1. Automated Azure Deployment

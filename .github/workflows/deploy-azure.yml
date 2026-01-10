@@ -28,6 +28,8 @@ jobs:
   # Check what changed to determine what to deploy
   changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
@@ -179,6 +181,7 @@ jobs:
     needs: [deploy-backend, deploy-frontend]
     if: always()
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: Deployment Summary
         run: |

@@ -635,6 +635,52 @@ Cannot find module or its corresponding type declarations
 2. Check `tsconfig.json` paths configuration
 3. Ensure all dependencies are installed
 
+#### GitHub Codespaces Issues
+
+**Issue: Out of monthly free usage or exceeded budget**
+```
+You are out of monthly free usage or have exceeded your budget for Codespaces.
+Increase your budget to continue using Codespaces.
+```
+
+**Solution (Personal Accounts):**
+
+1. Go to [GitHub Settings → Billing and plans](https://github.com/settings/billing/summary)
+2. Click on **Codespaces** in the sidebar
+3. Under "Spending limit", click **Manage spending limit**
+4. Set a new spending limit (enter a dollar amount or select "Unlimited")
+5. Click **Update** to save changes
+
+**Solution (Organization Accounts):**
+
+1. Go to your organization's page on GitHub
+2. Click **Settings** → **Billing and plans**
+3. Under "Codespaces", click **Manage spending limit**
+4. Set the spending limit for the organization
+5. Ensure your user has been granted Codespaces access by an organization admin
+
+**Additional Tips:**
+- GitHub provides 120 core-hours/month free for personal accounts (as of 2024)
+- Usage resets at the start of each billing cycle
+- To reduce usage, stop Codespaces when not in use
+- Use smaller machine types (2-core instead of 4-core) to extend usage
+- Set up idle timeout in [Codespaces settings](https://github.com/settings/codespaces) to auto-stop inactive Codespaces
+
+**Alternative Development Options:**
+
+If you've exhausted your Codespaces budget, you can develop locally:
+
+```bash
+# Clone the repository locally
+git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
+cd Secure-Renewals-2
+
+# Follow the setup instructions in this guide
+# See the "Development Setup" section above
+```
+
+---
+
 ### Getting Help
 
 If you encounter issues not covered here:

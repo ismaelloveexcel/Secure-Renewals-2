@@ -71,7 +71,11 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [GitHub Deployment Options](docs/GITHUB_DEPLOYMENT_OPTIONS.md) | **NEW!** Complete guide for local laptop, GitHub Codespaces, and self-hosted deployment options | HR Users/Developers |
+| [Awesome Resources](docs/AWESOME_RESOURCES.md) | **NEW!** Curated tools from awesome lists for performance, deployment & HR features | Everyone |
+| [Performance & Deployment Quick Reference](docs/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md) | **NEW!** Quick reference for 30-minute performance wins and deployment options | Everyone |
+| [Performance Optimization Guide](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md) | **NEW!** Comprehensive performance optimization strategies using awesome lists tools | Developers/Admins |
+| [Deployment Alternatives Guide](docs/DEPLOYMENT_ALTERNATIVES_GUIDE.md) | **NEW!** Privacy-focused deployment options: Docker, On-Premise, Oracle Cloud Free | HR Users/Developers/Admins |
+| [GitHub Deployment Options](docs/GITHUB_DEPLOYMENT_OPTIONS.md) | Complete guide for local laptop, GitHub Codespaces, and self-hosted deployment options | HR Users/Developers |
 | [VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md) | Complete guide for development and deployment in Visual Studio Code | Developers |
 | [Contributing Guide](CONTRIBUTING.md) | Setup instructions, Copilot best practices, troubleshooting | Contributors/Developers |
 | [HR User Guide](docs/HR_USER_GUIDE.md) | How to use the portal | HR Users |
@@ -265,7 +269,38 @@ DEV_USER_ROLE=admin
 
 ## 🚀 Deployment
 
-### 🏆 Local Desktop Deployment (RECOMMENDED for HR Privacy)
+### 🐳 Docker Deployment (RECOMMENDED - Easy & Portable)
+
+**Best for:** Easy setup, portability, and professional deployment
+
+Docker provides a clean, isolated environment that runs consistently across different machines.
+
+**Quick Start:**
+
+```bash
+# One-command deployment (Linux/macOS)
+./scripts/deploy-docker.sh
+
+# OR Windows
+scripts\deploy-docker.bat
+```
+
+**What you get:**
+- ✅ **All-in-one setup** - Backend, Frontend, Database, Redis cache
+- ✅ **One command to start** - `docker compose up -d`
+- ✅ **Easy backup/restore** - `./scripts/backup-database.sh`
+- ✅ **Portable** - Move to another machine easily
+- ✅ **Production-ready** - Same setup works in cloud
+
+**Access URLs:**
+- Application: http://localhost:5000
+- API Docs: http://localhost:8000/docs
+
+📖 **Full Guide**: [Deployment Alternatives Guide](docs/DEPLOYMENT_ALTERNATIVES_GUIDE.md) - Docker, On-Premise, Oracle Cloud Free
+
+---
+
+### 🏆 Local Desktop Deployment (Simple & Private)
 
 **Best for:** Solo HR user, maximum privacy, no third-party domain exposure
 

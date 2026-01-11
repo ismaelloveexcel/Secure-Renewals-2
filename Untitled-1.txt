@@ -1,1 +1,0 @@
-c:\Users\MohammadIsmaelSudall\OneDrive - Baynunah watergeneration technologies SOL\Documents\GitHub\Secure-Renewals-2\deploy_to_azure.sh

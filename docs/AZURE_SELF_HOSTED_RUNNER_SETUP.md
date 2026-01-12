@@ -144,7 +144,8 @@ docker --version
 mkdir ~/actions-runner && cd ~/actions-runner
 
 # Download the latest runner package
-RUNNER_VERSION="2.311.0"  # Check for latest: https://github.com/actions/runner/releases
+# Check for latest version: https://github.com/actions/runner/releases
+RUNNER_VERSION="2.311.0"  # Update this to the latest version
 curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
   -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
 
@@ -422,8 +423,8 @@ cd ~/actions-runner
 sudo ./svc.sh stop
 sudo ./svc.sh uninstall
 
-# Download new version
-RUNNER_VERSION="2.312.0"  # New version
+# Download new version (check https://github.com/actions/runner/releases for latest)
+RUNNER_VERSION="2.312.0"  # Example: Update to newer version
 curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
   -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
 

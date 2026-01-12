@@ -40,10 +40,10 @@ jobs:
           echo "=============================================="
           
           if [ -z "${{ secrets.AZURE_WEBAPP_NAME }}" ] || [ -z "${{ secrets.AZURE_RESOURCE_GROUP }}" ]; then
-            echo "❌ Error: AZURE_WEBAPP_NAME or AZURE_RESOURCE_GROUP not configured"
+            echo "ERROR: AZURE_WEBAPP_NAME or AZURE_RESOURCE_GROUP not configured"
             echo ""
             echo "Please configure these secrets in:"
-            echo "  Repository → Settings → Secrets and variables → Actions"
+            echo "  Repository -> Settings -> Secrets and variables -> Actions"
             exit 1
           fi
           
@@ -107,9 +107,14 @@ jobs:
           
           echo ""
           echo "=== Live Log Stream (last 50 lines) ==="
-          timeout 10s az webapp log tail \
-            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} 2>/dev/null || echo "Live logs not available"
+          # Use timeout if available, otherwise skip
+          if command -v timeout >/dev/null 2>&1; then
+            timeout 10s az webapp log tail \
+              --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} 2>/dev/null || echo "Live logs not available"
+          else
+            echo "Timeout command not available, skipping live logs"
+          fi
       
       - name: Restart Application
         if: github.event.inputs.debug_action == 'restart-app'
@@ -150,9 +155,9 @@ jobs:
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/api/health" 2>/dev/null || echo "000")
           
           if [ "$HTTP_CODE" = "200" ]; then
-            echo "✅ Health check passed (HTTP $HTTP_CODE)"
+            echo "[OK] Health check passed (HTTP $HTTP_CODE)"
           else
-            echo "⚠️  Health check failed (HTTP $HTTP_CODE)"
+            echo "[WARN] Health check failed (HTTP $HTTP_CODE)"
             echo "App URL: $APP_URL"
           fi
       
@@ -210,16 +215,20 @@ jobs:
             --query "[?name=='DATABASE_URL'].value" -o tsv)
           
           if [ -n "$DB_CONFIGURED" ]; then
-            echo "✅ DATABASE_URL is configured"
+            echo "[OK] DATABASE_URL is configured"
           else
-            echo "⚠️  DATABASE_URL not found in app settings"
+            echo "[WARN] DATABASE_URL not found in app settings"
           fi
           
           echo ""
           echo "=== 6. Recent Errors (if any) ==="
-          timeout 5s az webapp log tail \
-            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} 2>/dev/null | grep -i "error\|exception\|fail" || echo "No recent errors in live logs"
+          if command -v timeout >/dev/null 2>&1; then
+            timeout 5s az webapp log tail \
+              --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} 2>/dev/null | grep -i "error\|exception\|fail" || echo "No recent errors in live logs"
+          else
+            echo "Timeout command not available, skipping error check"
+          fi
       
       - name: Test Connection
         if: github.event.inputs.debug_action == 'test-connection'

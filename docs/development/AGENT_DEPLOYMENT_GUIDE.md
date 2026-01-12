@@ -281,13 +281,13 @@ Track these metrics:
 ## Support & Resources
 
 ### Quick Links
-- **Quick Reference**: [.github/agents/QUICK_REFERENCE.md](.github/agents/QUICK_REFERENCE.md)
-- **Full Guide**: [docs/COPILOT_AGENTS.md](docs/COPILOT_AGENTS.md)
-- **Workflow Examples**: [docs/AGENT_WORKFLOW_EXAMPLES.md](docs/AGENT_WORKFLOW_EXAMPLES.md)
+- **Quick Reference**: [.github/agents/QUICK_REFERENCE.md](../../.github/agents/QUICK_REFERENCE.md)
+- **Full Guide**: [COPILOT_AGENTS.md](COPILOT_AGENTS.md)
+- **Documentation Index**: [../README.md](../README.md)
 
 ### Getting Help
-1. Check [QUICK_REFERENCE.md](.github/agents/QUICK_REFERENCE.md) first
-2. Review [workflow examples](docs/AGENT_WORKFLOW_EXAMPLES.md)
+1. Check [QUICK_REFERENCE.md](../../.github/agents/QUICK_REFERENCE.md) first
+2. Review the [documentation index](../README.md) for all available guides
 3. Open an agent file and ask Copilot your question!
 
 ---

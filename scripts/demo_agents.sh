@@ -160,16 +160,10 @@ else
     print_warning "Full Guide not found"
 fi
 
-if [ -f "docs/AGENT_WORKFLOW_EXAMPLES.md" ]; then
-    print_success "Workflow Examples: docs/AGENT_WORKFLOW_EXAMPLES.md"
+if [ -f "docs/AGENT_DEPLOYMENT_GUIDE.md" ]; then
+    print_success "Deployment Guide: docs/AGENT_DEPLOYMENT_GUIDE.md"
 else
-    print_warning "Workflow Examples not found"
-fi
-
-if [ -f "docs/AGENT_IMPLEMENTATION_SUMMARY.md" ]; then
-    print_success "Implementation Summary: docs/AGENT_IMPLEMENTATION_SUMMARY.md"
-else
-    print_warning "Implementation Summary not found"
+    print_warning "Deployment Guide not found"
 fi
 
 echo ""
@@ -199,8 +193,8 @@ echo ""
 echo "# View full documentation"
 echo "cat docs/COPILOT_AGENTS.md"
 echo ""
-echo "# View workflow examples"
-echo "cat docs/AGENT_WORKFLOW_EXAMPLES.md"
+echo "# View deployment guide"
+echo "cat docs/AGENT_DEPLOYMENT_GUIDE.md"
 echo ""
 
 print_header "SUCCESS METRICS"
@@ -217,9 +211,9 @@ echo ""
 print_header "NEXT STEPS"
 
 echo "1. Read the Quick Reference: .github/agents/QUICK_REFERENCE.md"
-echo "2. Try an example from: docs/AGENT_WORKFLOW_EXAMPLES.md"
+echo "2. Read the Deployment Guide: docs/AGENT_DEPLOYMENT_GUIDE.md"
 echo "3. Open an agent file and ask Copilot a question"
-echo "4. Review the implementation summary: docs/AGENT_IMPLEMENTATION_SUMMARY.md"
+echo "4. Review the full guide: docs/COPILOT_AGENTS.md"
 echo "5. Run the proactive scan: python scripts/proactive_scan.py"
 echo ""
 

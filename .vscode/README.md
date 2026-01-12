@@ -232,8 +232,8 @@ Add to `launch.json`:
 
 ## Additional Resources
 
-- [VSCode Quick Start Guide](../docs/VSCODE_QUICK_START.md)
-- [VSCode Deployment Guide](../docs/VSCODE_DEPLOYMENT_GUIDE.md)
+- [VSCode Deployment Guide](../docs/deployment/VSCODE_DEPLOYMENT_GUIDE.md)
+- [Documentation Index](../docs/README.md)
 - [Main README](../README.md)
 - [Contributing Guide](../CONTRIBUTING.md)
 
@@ -241,7 +241,7 @@ Add to `launch.json`:
 
 For issues with VSCode configuration:
 1. Check [Troubleshooting](#troubleshooting) above
-2. Review [VSCode Deployment Guide](../docs/VSCODE_DEPLOYMENT_GUIDE.md)
+2. Review [VSCode Deployment Guide](../docs/deployment/VSCODE_DEPLOYMENT_GUIDE.md)
 3. Open an issue on GitHub
 
 ---

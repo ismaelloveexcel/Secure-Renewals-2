@@ -26,12 +26,12 @@
 
 **New to the system?** Start here:
 
-1. 📖 Read the [HR User Guide](docs/HR_USER_GUIDE.md) - Simple, step-by-step instructions
+1. 📖 Read the [HR User Guide](docs/user-guides/HR_USER_GUIDE.md) - Simple, step-by-step instructions
 2. 🔑 Get your authentication token from IT
 3. 🌐 Open the portal URL in your browser
 4. ✅ Enter your token and start managing renewals!
 
-**Need help?** Check the [Troubleshooting section](docs/HR_USER_GUIDE.md#troubleshooting) in the user guide.
+**Need help?** Check the [Troubleshooting section](docs/user-guides/HR_USER_GUIDE.md#troubleshooting) in the user guide.
 
 ---
 
@@ -63,7 +63,7 @@ Open: .github/agents/code-quality-monitor.md
 Ask: "Scan for security vulnerabilities"
 ```
 
-**📖 Full Documentation**: [Copilot Agents Guide](docs/COPILOT_AGENTS.md) | [Quick Reference](.github/agents/QUICK_REFERENCE.md) | [Deployment Guide](docs/AGENT_DEPLOYMENT_GUIDE.md)
+**📖 Full Documentation**: [Copilot Agents Guide](docs/development/COPILOT_AGENTS.md) | [Quick Reference](.github/agents/QUICK_REFERENCE.md) | [Deployment Guide](docs/development/AGENT_DEPLOYMENT_GUIDE.md)
 
 ---
 
@@ -289,7 +289,7 @@ scripts\deploy-docker.bat
 - Application: http://localhost:5000
 - API Docs: http://localhost:8000/docs
 
-📖 **Full Guide**: [Deployment Alternatives Guide](docs/DEPLOYMENT_ALTERNATIVES_GUIDE.md) - Docker, On-Premise, Oracle Cloud Free
+📖 **Full Guide**: [Deployment Alternatives Guide](docs/deployment/DEPLOYMENT_ALTERNATIVES_GUIDE.md) - Docker, On-Premise, Oracle Cloud Free
 
 ---
 
@@ -345,7 +345,7 @@ macOS/Linux: `./scripts/start-portal.sh`
 
 Complete VSCode setup with debugging, tasks, and deployment support.
 
-📖 **[VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md)** - Comprehensive guide for development in VSCode
+📖 **[VSCode Deployment Guide](docs/deployment/VSCODE_DEPLOYMENT_GUIDE.md)** - Comprehensive guide for development in VSCode
 
 **Quick Start:**
 1. Open the project: `code .` or open `secure-renewals.code-workspace`

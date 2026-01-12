@@ -17,34 +17,34 @@ Your repository now has **everything you need** to:
 ## 📚 Start Here
 
 ### 1. For Direct Answers to Your Questions
-👉 **[Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)**
+👉 **[Implementation Summary](docs/development/IMPLEMENTATION_SUMMARY.md)**
 - Answers both your questions directly
 - Quick comparison tables
 - Decision matrix
 - 10-minute quick start
 
 ### 2. For Performance Improvements
-�� **[Performance Optimization Guide](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md)**
+�� **[Performance Optimization Guide](docs/development/PERFORMANCE_OPTIMIZATION_GUIDE.md)**
 - Redis caching (10-50x faster)
 - Database indexes (10-100x faster)
 - Frontend optimization (50% faster loads)
 - Tools from awesome lists
 
 ### 3. For Deployment Options
-👉 **[Deployment Alternatives Guide](docs/DEPLOYMENT_ALTERNATIVES_GUIDE.md)**
+👉 **[Deployment Alternatives Guide](docs/deployment/DEPLOYMENT_ALTERNATIVES_GUIDE.md)**
 - Docker Desktop (local, $0, 100% private)
 - On-Premise Server (office deployment)
 - Oracle Cloud Free ($0 forever)
 - Complete setup instructions
 
 ### 4. For Awesome Lists Tools
-👉 **[Awesome Resources](docs/AWESOME_RESOURCES.md)**
+👉 **[Awesome Resources](docs/development/AWESOME_RESOURCES.md)**
 - Redis, Prometheus, Grafana
 - Docker, Portainer, Watchtower
 - Tools from https://github.com/sindresorhus/awesome
 
 ### 5. For Quick Reference
-👉 **[Quick Reference](docs/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md)**
+👉 **[Quick Reference](docs/deployment/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md)**
 - 30-minute performance wins
 - Deployment commands
 - Maintenance tips
@@ -151,13 +151,13 @@ docker compose down
 ## 💡 Optional Enhancements
 
 ### Add Redis Caching (15 minutes)
-See: [Performance Guide - Redis Caching](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md#add-redis-caching)
+See: [Performance Guide - Redis Caching](docs/development/PERFORMANCE_OPTIMIZATION_GUIDE.md#add-redis-caching)
 
 ### Add Database Indexes (10 minutes)
-See: [Performance Guide - Database Indexes](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md#add-database-indexes)
+See: [Performance Guide - Database Indexes](docs/development/PERFORMANCE_OPTIMIZATION_GUIDE.md#add-database-indexes)
 
 ### Add Monitoring (30 minutes)
-See: [Performance Guide - Monitoring](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md#performance-monitoring)
+See: [Performance Guide - Monitoring](docs/development/PERFORMANCE_OPTIMIZATION_GUIDE.md#performance-monitoring)
 
 ---
 
@@ -165,11 +165,11 @@ See: [Performance Guide - Monitoring](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md#per
 
 | Document | Purpose | Lines |
 |----------|---------|-------|
-| [Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md) | Direct answers to your questions | 300+ |
-| [Performance Guide](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md) | How to optimize performance | 500+ |
-| [Deployment Guide](docs/DEPLOYMENT_ALTERNATIVES_GUIDE.md) | Where to deploy | 500+ |
-| [Awesome Resources](docs/AWESOME_RESOURCES.md) | Tools from awesome lists | 400+ |
-| [Quick Reference](docs/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md) | TL;DR | 150+ |
+| [Implementation Summary](docs/development/IMPLEMENTATION_SUMMARY.md) | Direct answers to your questions | 300+ |
+| [Performance Guide](docs/development/PERFORMANCE_OPTIMIZATION_GUIDE.md) | How to optimize performance | 500+ |
+| [Deployment Guide](docs/deployment/DEPLOYMENT_ALTERNATIVES_GUIDE.md) | Where to deploy | 500+ |
+| [Awesome Resources](docs/development/AWESOME_RESOURCES.md) | Tools from awesome lists | 400+ |
+| [Quick Reference](docs/deployment/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md) | TL;DR | 150+ |
 
 ---
 

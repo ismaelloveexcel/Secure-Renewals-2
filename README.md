@@ -71,6 +71,7 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
+| [Azure Debugging Complete Solution](docs/AZURE_DEBUGGING_COMPLETE_SOLUTION.md) | **START HERE!** Complete answer with all 5 GitHub agents for Azure debugging | Everyone |
 | [Azure Debugging FAQ](docs/AZURE_DEBUGGING_FAQ.md) | **NEW!** Frequently asked questions about GitHub agents for Azure debugging | Everyone |
 | [Azure Debugging Guide](docs/AZURE_DEBUGGING_GUIDE.md) | **NEW!** Complete guide to debug Azure deployments with GitHub Actions agents | Developers/DevOps |
 | [Azure Self-Hosted Runner Setup](docs/AZURE_SELF_HOSTED_RUNNER_SETUP.md) | **NEW!** Step-by-step guide to set up GitHub runner on Azure VM for debugging | Developers/DevOps |

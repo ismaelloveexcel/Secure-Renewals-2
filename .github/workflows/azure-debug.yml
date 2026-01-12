@@ -1,0 +1,283 @@
+name: Azure Debug & Diagnostics
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_action:
+        description: 'Debug action to perform'
+        required: true
+        type: choice
+        options:
+          - 'check-status'
+          - 'view-logs'
+          - 'restart-app'
+          - 'run-diagnostics'
+          - 'ssh-session'
+          - 'test-connection'
+
+permissions:
+  contents: read
+
+jobs:
+  azure-debug:
+    name: Debug Azure Deployment
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Check App Status
+        if: github.event.inputs.debug_action == 'check-status'
+        run: |
+          echo "=============================================="
+          echo "  Azure App Service Status"
+          echo "=============================================="
+          
+          if [ -z "${{ secrets.AZURE_WEBAPP_NAME }}" ] || [ -z "${{ secrets.AZURE_RESOURCE_GROUP }}" ]; then
+            echo "❌ Error: AZURE_WEBAPP_NAME or AZURE_RESOURCE_GROUP not configured"
+            echo ""
+            echo "Please configure these secrets in:"
+            echo "  Repository → Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          
+          echo ""
+          echo "=== Basic App Info ==="
+          az webapp show \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "{Name:name, State:state, Location:location, DefaultHostName:defaultHostName, OutboundIPs:outboundIpAddresses}" \
+            --output table
+          
+          echo ""
+          echo "=== Application Settings (excluding secrets) ==="
+          az webapp config appsettings list \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --output table | grep -v "MYSQL\|PASSWORD\|SECRET\|KEY" || echo "No non-sensitive settings found"
+          
+          echo ""
+          echo "=== Runtime Configuration ==="
+          az webapp config show \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "{PythonVersion:pythonVersion, LinuxFxVersion:linuxFxVersion, AlwaysOn:alwaysOn, AppCommandLine:appCommandLine}" \
+            --output table
+      
+      - name: View Application Logs
+        if: github.event.inputs.debug_action == 'view-logs'
+        run: |
+          echo "=============================================="
+          echo "  Application Logs"
+          echo "=============================================="
+          
+          echo ""
+          echo "=== Enabling Application Logging ==="
+          az webapp log config \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --application-logging filesystem \
+            --level verbose
+          
+          echo ""
+          echo "=== Downloading Recent Logs ==="
+          az webapp log download \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --log-file app-logs.zip || echo "Warning: Could not download logs archive"
+          
+          if [ -f app-logs.zip ]; then
+            echo ""
+            echo "=== Extracting and Displaying Recent Logs ==="
+            unzip -q app-logs.zip 2>/dev/null || echo "Could not extract logs"
+            
+            # Show last 100 lines of each log file
+            find . -name "*.log" -type f 2>/dev/null | while read logfile; do
+              echo ""
+              echo "=== Log: $logfile (last 100 lines) ==="
+              tail -100 "$logfile" 2>/dev/null || cat "$logfile" 2>/dev/null
+            done
+          fi
+          
+          echo ""
+          echo "=== Live Log Stream (last 50 lines) ==="
+          timeout 10s az webapp log tail \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} 2>/dev/null || echo "Live logs not available"
+      
+      - name: Restart Application
+        if: github.event.inputs.debug_action == 'restart-app'
+        run: |
+          echo "=============================================="
+          echo "  Restarting Azure App Service"
+          echo "=============================================="
+          
+          echo ""
+          echo "=== Current Status ==="
+          az webapp show \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "{Name:name, State:state}" \
+            --output table
+          
+          echo ""
+          echo "=== Initiating Restart ==="
+          az webapp restart \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+          
+          echo ""
+          echo "⏳ Waiting 30 seconds for app to restart..."
+          sleep 30
+          
+          echo ""
+          echo "=== New Status ==="
+          az webapp show \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "{Name:name, State:state}" \
+            --output table
+          
+          echo ""
+          echo "=== Testing Health Endpoint ==="
+          APP_URL="https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/api/health" 2>/dev/null || echo "000")
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Health check passed (HTTP $HTTP_CODE)"
+          else
+            echo "⚠️  Health check failed (HTTP $HTTP_CODE)"
+            echo "App URL: $APP_URL"
+          fi
+      
+      - name: Run Diagnostics
+        if: github.event.inputs.debug_action == 'run-diagnostics'
+        run: |
+          echo "=============================================="
+          echo "  Azure App Diagnostics"
+          echo "=============================================="
+          
+          echo ""
+          echo "=== 1. Deployment Status ==="
+          az webapp deployment list \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "[].{Time:start_time, Status:status, Message:message, Deployer:deployer}" \
+            --output table 2>/dev/null || echo "No recent deployments found"
+          
+          echo ""
+          echo "=== 2. Network Configuration ==="
+          az webapp show \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "{OutboundIPs:outboundIpAddresses, PossibleOutboundIPs:possibleOutboundIpAddresses}" \
+            --output json
+          
+          echo ""
+          echo "=== 3. App Service Plan ==="
+          PLAN_NAME=$(az webapp show \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "appServicePlanId" -o tsv | xargs basename)
+          
+          if [ -n "$PLAN_NAME" ]; then
+            az appservice plan show \
+              --name "$PLAN_NAME" \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --query "{Name:name, Tier:sku.tier, Size:sku.size, Capacity:sku.capacity, Status:status}" \
+              --output table
+          fi
+          
+          echo ""
+          echo "=== 4. SSL/TLS Configuration ==="
+          az webapp config ssl list \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "[].{Thumbprint:thumbprint, SubjectName:subjectName, ExpirationDate:expirationDate}" \
+            --output table 2>/dev/null || echo "No custom SSL certificates configured"
+          
+          echo ""
+          echo "=== 5. Database Connection Test ==="
+          echo "Checking if DATABASE_URL is configured..."
+          DB_CONFIGURED=$(az webapp config appsettings list \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --query "[?name=='DATABASE_URL'].value" -o tsv)
+          
+          if [ -n "$DB_CONFIGURED" ]; then
+            echo "✅ DATABASE_URL is configured"
+          else
+            echo "⚠️  DATABASE_URL not found in app settings"
+          fi
+          
+          echo ""
+          echo "=== 6. Recent Errors (if any) ==="
+          timeout 5s az webapp log tail \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} 2>/dev/null | grep -i "error\|exception\|fail" || echo "No recent errors in live logs"
+      
+      - name: Test Connection
+        if: github.event.inputs.debug_action == 'test-connection'
+        run: |
+          echo "=============================================="
+          echo "  Testing Azure App Connection"
+          echo "=============================================="
+          
+          APP_URL="https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          
+          echo ""
+          echo "=== Testing Main URL ==="
+          echo "URL: $APP_URL"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL" -L)
+          echo "HTTP Status: $HTTP_CODE"
+          
+          echo ""
+          echo "=== Testing API Health Endpoint ==="
+          echo "URL: $APP_URL/api/health"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/api/health")
+          echo "HTTP Status: $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo ""
+            echo "Response body:"
+            curl -s "$APP_URL/api/health"
+          fi
+          
+          echo ""
+          echo ""
+          echo "=== Testing API Docs ==="
+          echo "URL: $APP_URL/docs"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/docs")
+          echo "HTTP Status: $HTTP_CODE"
+          
+          echo ""
+          echo "=== DNS Resolution ==="
+          nslookup "${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net" || echo "DNS lookup failed"
+          
+          echo ""
+          echo "=== SSL Certificate Check ==="
+          echo | openssl s_client -servername "${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net" -connect "${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net:443" 2>/dev/null | openssl x509 -noout -dates 2>/dev/null || echo "Could not check SSL certificate"
+      
+      - name: Setup SSH Debug Session
+        if: github.event.inputs.debug_action == 'ssh-session'
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+          timeout-minutes: 30
+      
+      - name: Upload Logs as Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: azure-debug-logs-${{ github.run_number }}
+          path: |
+            *.log
+            *.zip
+            *.json
+          retention-days: 7
+          if-no-files-found: ignore

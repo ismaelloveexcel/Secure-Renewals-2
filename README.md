@@ -71,6 +71,8 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
+| [Azure Debugging Guide](docs/AZURE_DEBUGGING_GUIDE.md) | **NEW!** Complete guide to debug Azure deployments with GitHub Actions agents | Developers/DevOps |
+| [Azure Debugging Quick Reference](docs/AZURE_DEBUGGING_QUICK_REFERENCE.md) | **NEW!** Quick reference for Azure debugging with GitHub agents | Everyone |
 | [Awesome Resources](docs/AWESOME_RESOURCES.md) | **NEW!** Curated tools from awesome lists for performance, deployment & HR features | Everyone |
 | [Performance & Deployment Quick Reference](docs/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md) | **NEW!** Quick reference for 30-minute performance wins and deployment options | Everyone |
 | [Performance Optimization Guide](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md) | **NEW!** Comprehensive performance optimization strategies using awesome lists tools | Developers/Admins |
@@ -368,6 +370,29 @@ Complete VSCode setup with debugging, tasks, and deployment support.
 - ✅ One-click deployment to Azure
 - ✅ Database migration tasks
 
+### Azure Deployment & Debugging
+
+Deploy to Microsoft Azure with built-in GitHub Actions workflows for debugging.
+
+📖 **[Azure Debugging Guide](docs/AZURE_DEBUGGING_GUIDE.md)** | **[Quick Reference](docs/AZURE_DEBUGGING_QUICK_REFERENCE.md)**
+
+**Available GitHub Agents for Azure Debugging:**
+- ✅ **GitHub Actions Workflow** - Automated diagnostics (check status, view logs, restart, SSH)
+- ✅ **Self-Hosted Runner** - Run GitHub Actions on Azure VM for direct access
+- ✅ **Azure Portal SSH** - Direct SSH to deployed app container
+- ✅ **Interactive Debug Session** - Live SSH debugging via GitHub Actions
+
+**Quick Start:**
+1. Configure Azure credentials in GitHub Secrets
+2. Go to: **Actions** → **Azure Debug & Diagnostics**
+3. Select action: check-status, view-logs, restart-app, or ssh-session
+4. Run workflow and view diagnostics
+
+**Existing Workflows:**
+- `azure-debug.yml` - Interactive debugging with 6 debug actions
+- `deploy.yml` - Automated deployment to Azure App Service
+- `deploy_to_azure.sh` - Manual deployment script
+
 ### GitHub Codespaces (Cloud Development)
 
 Run the application in a cloud-based development environment under Microsoft infrastructure.
@@ -384,6 +409,7 @@ Run the application in a cloud-based development environment under Microsoft inf
 - ✅ Private URLs (not publicly visible)
 - ✅ 60 hours/month free
 - ✅ No setup on your laptop needed
+- ✅ Azure CLI pre-installed for debugging Azure deployments
 
 ### Replit Deployment
 

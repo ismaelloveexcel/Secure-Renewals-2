@@ -71,9 +71,12 @@ Ask: "Scan for security vulnerabilities"
 
 | Document | Description | Audience |
 |----------|-------------|----------|
+| [Azure Debugging FAQ](docs/AZURE_DEBUGGING_FAQ.md) | **NEW!** Frequently asked questions about GitHub agents for Azure debugging | Everyone |
 | [Azure Debugging Guide](docs/AZURE_DEBUGGING_GUIDE.md) | **NEW!** Complete guide to debug Azure deployments with GitHub Actions agents | Developers/DevOps |
+| [Azure Self-Hosted Runner Setup](docs/AZURE_SELF_HOSTED_RUNNER_SETUP.md) | **NEW!** Step-by-step guide to set up GitHub runner on Azure VM for debugging | Developers/DevOps |
+| [Using Azure Debug Workflow](docs/USING_AZURE_DEBUG_WORKFLOW.md) | **NEW!** How to use the Azure debugging GitHub Actions workflow | Everyone |
 | [Azure Debugging Quick Reference](docs/AZURE_DEBUGGING_QUICK_REFERENCE.md) | **NEW!** Quick reference for Azure debugging with GitHub agents | Everyone |
-| [Awesome Resources](docs/AWESOME_RESOURCES.md) | **NEW!** Curated tools from awesome lists for performance, deployment & HR features | Everyone |
+| [Awesome Resources](docs/AWESOME_RESOURCES.md) | Curated tools from awesome lists for performance, deployment & HR features | Everyone |
 | [Performance & Deployment Quick Reference](docs/PERFORMANCE_DEPLOYMENT_QUICK_REFERENCE.md) | **NEW!** Quick reference for 30-minute performance wins and deployment options | Everyone |
 | [Performance Optimization Guide](docs/PERFORMANCE_OPTIMIZATION_GUIDE.md) | **NEW!** Comprehensive performance optimization strategies using awesome lists tools | Developers/Admins |
 | [Deployment Alternatives Guide](docs/DEPLOYMENT_ALTERNATIVES_GUIDE.md) | **NEW!** Privacy-focused deployment options: Docker, On-Premise, Oracle Cloud Free | HR Users/Developers/Admins |

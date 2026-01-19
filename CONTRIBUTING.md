@@ -655,10 +655,10 @@ If you encounter issues not covered here:
 ### Documentation
 
 - [README.md](README.md) - Project overview
-- [docs/HR_USER_GUIDE.md](docs/HR_USER_GUIDE.md) - End-user guide
-- [docs/COPILOT_AGENTS.md](docs/COPILOT_AGENTS.md) - Copilot Agents guide
-- [docs/SYSTEM_HEALTH_CHECK.md](docs/SYSTEM_HEALTH_CHECK.md) - System status
-- [replit.md](replit.md) - System architecture details
+- [docs/README.md](docs/README.md) - Documentation index
+- [docs/user-guides/HR_USER_GUIDE.md](docs/user-guides/HR_USER_GUIDE.md) - End-user guide
+- [docs/development/COPILOT_AGENTS.md](docs/development/COPILOT_AGENTS.md) - Copilot Agents guide
+- [docs/development/SYSTEM_HEALTH_CHECK.md](docs/development/SYSTEM_HEALTH_CHECK.md) - System status
 
 ### External Documentation
 

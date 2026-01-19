@@ -306,6 +306,15 @@ scripts\deploy-docker.bat
 
 📖 **[GitHub Deployment Options Guide](docs/GITHUB_DEPLOYMENT_OPTIONS.md)** - Complete guide for all deployment options
 
+**🖱️ One-Click (macOS/Linux)**
+
+```bash
+chmod +x scripts/oneclick-local.sh
+./scripts/oneclick-local.sh
+```
+
+This installs dependencies, creates env files, runs migrations, and starts everything locally (auto-starts Postgres/Redis via Docker when available). On Windows, use the bundled scripts: `scripts\install-windows.bat` then `scripts\start-portal-windows.bat`.
+
 **Why Local Desktop?**
 - ✅ **100% Private** - Data never leaves your computer
 - ✅ **No subscription costs** - Completely free

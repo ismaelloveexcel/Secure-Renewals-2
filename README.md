@@ -46,7 +46,7 @@
 | [HR Assistant](.github/agents/hr-assistant.md) | HR workflows & portal engineering | Planning features, automation ideas, finding HR modules |
 | [Portal Engineer](.github/agents/portal-engineer.md) | Technical implementation | Building features, fixing bugs, optimizing code |
 | [Code Quality Monitor](.github/agents/code-quality-monitor.md) | Security & quality scanning | Checking security, code quality, performance |
-| [Deployment & Repo Review](docs/development/DEPLOYMENT_REVIEW_AGENT.md) | Repo understanding & local deployment | Running locally, troubleshooting, finding GitHub resources |
+| [Deployment & Repo Review](docs/development/DEPLOYMENT_REVIEW_AGENT.md) | Repo understanding & hands-free local deployment | Running locally (autopilot), troubleshooting, GitHub resources |
 
 ### Quick Start with Agents
 

@@ -14,6 +14,7 @@
 - **Local Deployment:** Guide macOS/Linux/Windows setup using `scripts/oneclick-local.sh` or Docker (`deploy-docker.sh` / `deploy-docker.bat`), ensuring `.env` files exist and dependencies install.
 - **Proactive Issue Detection:** Run/interpret health checks (e.g., `python scripts/proactive_scan.py`, `uv run alembic upgrade head`, `npm run lint/test` where applicable) and surface likely failures (ports, missing env vars, DB connectivity, migrations).
 - **GitHub Resource Guidance:** Recommend relevant repos/gists/docs for fixes or improvements (UI/UX, backend patterns, DevOps), pointing to examples and keywords to search.
+- **Hands-Free Execution:** Execute the full local deployment flow end-to-end (no prompts) by running the commands below on behalf of the user.
 
 ## Quick Playbooks
 
@@ -38,6 +39,20 @@ Key checkpoints:
 - Ensure Docker is running (for DB/Redis) or have local PostgreSQL at `localhost:5432`.
 - Verify generated `.env` in `backend/` and `frontend/`.
 - Watch for migration errors (`uv run alembic upgrade head`).
+
+### Full Hands-Free Autopilot (no manual intervention)
+The agent should execute these steps sequentially:
+```bash
+# From repo root
+chmod +x scripts/oneclick-local.sh
+./scripts/oneclick-local.sh
+```
+What this does automatically:
+- Generates `.env` files if missing (backend + frontend)
+- Starts Postgres/Redis via Docker Compose when available
+- Installs backend deps (`uv sync`) and runs migrations (`uv run alembic upgrade head`)
+- Installs frontend deps and starts both backend (port 8000) and frontend (port 5000)
+If Docker is unavailable, the agent must ensure PostgreSQL is reachable at `localhost:5432` before continuing.
 
 ### Troubleshooting Signals
 - **Ports busy:** 5000/8000/5432 in use → stop existing processes or change ports in `.env`.

@@ -93,11 +93,11 @@ For system engineering tasks, use the **Portal Engineer agent** (`.github/agents
 ### 4. Deployment & Repo Review Agent
 **File**: `docs/development/DEPLOYMENT_REVIEW_AGENT.md`
 
-**Purpose**: Guides repo review and local deployment while proactively spotting issues and pointing to GitHub resources.
+**Purpose**: Guides repo review and performs hands-free local deployment while proactively spotting issues and pointing to GitHub resources.
 
 **Key Capabilities**:
 - Review backend/frontend layout, key scripts, and entrypoints
-- Walk through local/Docker deployment and env setup
+- Walk through or fully execute local/Docker deployment and env setup
 - Surface common blockers (ports, DB auth, migrations, CORS)
 - Recommend GitHub repos/templates for fixes or enhancements
 

@@ -23,13 +23,14 @@
 - Check entrypoints: `backend/app/main.py` (API), `frontend/src` (UI), migrations under `backend/alembic/`.
 - Run fast scan: `python scripts/proactive_scan.py` for hotspots.
 
-### Local Deployment (preferred flow)
+### Local Deployment on Your Disk (preferred flow)
 ```bash
 chmod +x scripts/oneclick-local.sh
 ./scripts/oneclick-local.sh
 # Backend: http://localhost:8000/docs
 # Frontend: http://localhost:5000
 ```
+This runs entirely on your local disk (no cloud services): dependencies, generated `.env` files, and database/cache data stay on your machine.
 If you prefer containers only:
 ```bash
 ./scripts/deploy-docker.sh   # Linux/macOS

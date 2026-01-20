@@ -138,6 +138,8 @@ az ad sp create-for-rbac \
 
 Copy the JSON output.
 
+📖 **Need help with the JSON format?** See [Azure Credentials Example](AZURE_CREDENTIALS_EXAMPLE.md) for detailed format and examples.
+
 ### Step 2: Add GitHub Secrets
 
 1. Go to: **Repository → Settings → Secrets and variables → Actions**
@@ -309,6 +311,7 @@ You now have:
 
 ### Start Here
 - **[FAQ](AZURE_DEBUGGING_FAQ.md)** - Your question answered!
+- **[Azure Credentials Example](AZURE_CREDENTIALS_EXAMPLE.md)** - Exact JSON format with examples
 - **[Quick Reference](AZURE_DEBUGGING_QUICK_REFERENCE.md)** - Common commands
 - **[Using the Workflow](USING_AZURE_DEBUG_WORKFLOW.md)** - Step-by-step
 

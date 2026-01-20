@@ -84,10 +84,33 @@ For system engineering tasks, use the **Portal Engineer agent** (`.github/agents
 
 **Example Use Cases**:
 ```
-- "Implement a new probation tracking API endpoint"
-- "Create a React component for document management"
-- "Optimize the employee query with proper joins"
-- "Help me create a database migration for the onboarding module"
+ - "Implement a new probation tracking API endpoint"
+ - "Create a React component for document management"
+ - "Optimize the employee query with proper joins"
+ - "Help me create a database migration for the onboarding module"
+```
+
+### 4. Deployment & Repo Review Agent
+**File**: `docs/development/DEPLOYMENT_REVIEW_AGENT.md`
+
+**Purpose**: Guides repo review and local deployment while proactively spotting issues and pointing to GitHub resources.
+
+**Key Capabilities**:
+- Review backend/frontend layout, key scripts, and entrypoints
+- Walk through local/Docker deployment and env setup
+- Surface common blockers (ports, DB auth, migrations, CORS)
+- Recommend GitHub repos/templates for fixes or enhancements
+
+**Best For**:
+- Quickly running the app locally
+- Troubleshooting deployment errors
+- Gathering references to improve features or UX/DevOps
+
+**Example Use Cases**:
+```
+- "Summarize the repo structure and main services"
+- "Help me run oneclick-local.sh and fix migration errors"
+- "Suggest GitHub examples to improve the dashboard UI"
 ```
 
 ## How to Use These Agents

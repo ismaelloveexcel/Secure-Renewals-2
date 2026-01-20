@@ -48,11 +48,13 @@ chmod +x scripts/oneclick-local.sh
 ./scripts/oneclick-local.sh
 ```
 What this does automatically:
-- Generates `.env` files if missing (backend + frontend)
+- Generates `.env` files if missing (backend + frontend) — confirm by reading `scripts/oneclick-local.sh` steps
 - Starts Postgres/Redis via Docker Compose when available
 - Installs backend deps (`uv sync`) and runs migrations (`uv run alembic upgrade head`)
 - Installs frontend deps and starts both backend (port 8000) and frontend (port 5000)
-If Docker is unavailable, the agent must ensure PostgreSQL is reachable at `localhost:5432` before continuing.
+- If Docker is unavailable, verify PostgreSQL manually before continuing, e.g.:
+  - Check service: `pg_isready -h localhost -p 5432`
+  - Test connection: `psql "postgresql://hruser:YOURPASS@localhost:5432/secure_renewals" -c "SELECT 1"`
 
 ### Troubleshooting Signals
 - **Ports busy:** 5000/8000/5432 in use → stop existing processes or change ports in `.env`.

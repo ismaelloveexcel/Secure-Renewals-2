@@ -61,4 +61,3 @@ Key checkpoints:
 - Repeated migration failures after verifying DB connectivity.
 - Security scan flags high/critical issues in auth, SQL handling, or secrets.
 - Persistent CORS or proxy issues between frontend/backed despite correct envs.
-

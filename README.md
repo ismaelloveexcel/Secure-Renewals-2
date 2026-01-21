@@ -83,6 +83,9 @@ Ask: "Scan for security vulnerabilities"
 ### Main Documentation Categories
 
 #### 📦 Deployment Guides
+- [⭐ Azure Implementation Guide](docs/deployment/AZURE_IMPLEMENTATION_GUIDE.md) - **NEW** - Complete Azure deployment (6-week plan)
+- [⚡ Azure Quick Reference](AZURE_QUICK_REFERENCE.md) - **NEW** - Fast Azure migration checklist
+- [📊 Azure Deployment Analysis](AZURE_DEPLOYMENT_ANALYSIS.md) - **NEW** - Full component analysis for Azure
 - [Deployment Alternatives](docs/deployment/DEPLOYMENT_ALTERNATIVES_GUIDE.md) - Docker, On-Premise, Oracle Cloud
 - [GitHub Deployment Options](docs/deployment/GITHUB_DEPLOYMENT_OPTIONS.md) - Local, Codespaces, self-hosted
 - [VSCode Deployment](docs/deployment/VSCODE_DEPLOYMENT_GUIDE.md) - Complete VSCode setup
@@ -106,7 +109,7 @@ Ask: "Scan for security vulnerabilities"
 - [Employee Management Quick Start](docs/hr-management/EMPLOYEE_MANAGEMENT_QUICK_START.md) - Employee features
 - [Process Simplification (UAE)](docs/hr-management/PROCESS_SIMPLIFICATION_UAE.md) - UAE workflows
 
-**📊 Total**: 30 organized documents across 5 categories | **See [docs/README.md](docs/README.md) for complete listing**
+**📊 Total**: 33 organized documents across 5 categories | **See [docs/README.md](docs/README.md) for complete listing**
 
 ---
 
@@ -258,6 +261,56 @@ DEV_AUTH_BYPASS=true
 DEV_USER_ID=EMP001
 DEV_USER_ROLE=admin
 ```
+
+---
+
+## ☁️ Azure Deployment (NEW - January 2026)
+
+**Ready for Microsoft Azure?** We've created comprehensive guides for deploying this HR Portal to Azure.
+
+### 🚀 Quick Start - Azure Deployment
+
+**Complete setup in ~18 minutes** with our automated scripts:
+
+1. 📊 **[Azure Deployment Analysis](AZURE_DEPLOYMENT_ANALYSIS.md)** - Complete component review
+   - What's ready for Azure
+   - Architecture recommendations
+   - Cost estimates ($20-40/month optimized)
+   - Security checklist
+
+2. 📖 **[Azure Implementation Guide](docs/deployment/AZURE_IMPLEMENTATION_GUIDE.md)** - Step-by-step deployment
+   - 6-week implementation plan
+   - Azure CLI commands (copy-paste ready)
+   - Database migration steps
+   - Testing & monitoring setup
+
+3. ⚡ **[Azure Quick Reference](AZURE_QUICK_REFERENCE.md)** - Fast migration checklist
+   - One-command deployment
+   - Priority matrix for features
+   - Troubleshooting guide
+   - Cost calculator
+
+### Why Azure for HR Portal?
+
+✅ **UAE Compliance**: Deploy in UAE North region for data residency  
+✅ **Enterprise Ready**: Azure AD integration, Key Vault for secrets  
+✅ **Cost Effective**: $20-40/month with optimizations  
+✅ **Scalable**: Auto-scaling from 50 to 1000+ employees  
+✅ **Secure**: WAF, DDoS protection, encryption at rest/transit  
+✅ **Proven Stack**: PostgreSQL, App Service, Blob Storage  
+
+### Azure Services Used
+
+| Component | Azure Service | Cost/Month |
+|-----------|---------------|------------|
+| Backend API | Azure App Service (B1) | $13 |
+| Frontend | Azure Static Web Apps | Free |
+| Database | Azure DB for PostgreSQL | $12 |
+| Storage | Azure Blob Storage | $2 |
+| Monitoring | Application Insights | $10 |
+| **Total** | | **~$37** |
+
+**Optimized**: $20-30/month with reserved instances and auto-scaling
 
 ---
 

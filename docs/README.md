@@ -6,6 +6,7 @@ This directory contains all project documentation, organized into logical catego
 
 ### 📦 [deployment/](./deployment/)
 Guides for deploying the application in various environments:
+- **⭐ AZURE_IMPLEMENTATION_GUIDE.md** - **NEW** - Complete Azure deployment (6-week plan, step-by-step)
 - **DEPLOYMENT_ALTERNATIVES_GUIDE.md** - Docker, On-Premise, Oracle Cloud deployment options
 - **GITHUB_DEPLOYMENT_OPTIONS.md** - Local, GitHub Codespaces, and self-hosted deployment
 - **VSCODE_DEPLOYMENT_GUIDE.md** - Complete VSCode deployment setup
@@ -51,6 +52,11 @@ Recruitment system documentation:
 
 ## 🚀 Quick Start Paths
 
+### For Azure Deployment
+1. Start with [📊 Azure Deployment Analysis](../AZURE_DEPLOYMENT_ANALYSIS.md) - What can be reused
+2. Follow [⚡ Azure Quick Reference](../AZURE_QUICK_REFERENCE.md) - Fast migration checklist
+3. Use [📖 Azure Implementation Guide](./deployment/AZURE_IMPLEMENTATION_GUIDE.md) - Complete step-by-step
+
 ### For HR Users
 1. Start with [user-guides/HR_USER_GUIDE.md](./user-guides/HR_USER_GUIDE.md)
 2. Review [hr-management/HR_TEMPLATES_REFERENCE.md](./hr-management/HR_TEMPLATES_REFERENCE.md)
@@ -70,11 +76,12 @@ Recruitment system documentation:
 
 ## 📊 Documentation Statistics
 
-- **Total Files**: 30 organized documents
-- **Size**: ~588KB of documentation
+- **Total Files**: 33 organized documents
+- **Size**: ~650KB of documentation
 - **Categories**: 5 main areas (deployment, development, user guides, HR management, recruitment)
 - **Languages**: English
 - **Last Updated**: January 2026
+- **New**: 3 Azure deployment guides added (AZURE_DEPLOYMENT_ANALYSIS.md, AZURE_IMPLEMENTATION_GUIDE.md, AZURE_QUICK_REFERENCE.md)
 
 ## 🔍 Finding What You Need
 

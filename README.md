@@ -264,7 +264,38 @@ DEV_USER_ROLE=admin
 
 ---
 
-## ☁️ Azure Deployment (NEW - January 2026)
+## ☁️ Azure Integration (NEW - January 2026)
+
+**Already have an Azure HR Portal?** We've created comprehensive guides for **forking specific features** from this repository into your existing app.
+
+### 🔀 Feature Forking (For Existing Azure Apps)
+
+**Use Case**: You have Azure-Deployment-HR-Portal running, want to add features from this repo
+
+1. **[FEATURES_TO_FORK.md](FEATURES_TO_FORK.md)** - Quick reference (start here!)
+   - Top 10 features to fork (prioritized)
+   - File extraction map
+   - Time estimates (30min - 10h per feature)
+   - Integration steps
+
+2. **[FEATURE_EXTRACTION_GUIDE.md](FEATURE_EXTRACTION_GUIDE.md)** - Detailed extraction guide
+   - Complete extraction patterns
+   - Code snippets to copy
+   - Common pitfalls & solutions
+   - Quick wins (extract in <1 hour)
+
+**Top Features to Fork**:
+- ✅ UAE Compliance Tracking (6h) - Automated visa/EID alerts
+- ✅ Document OCR Patterns (30min) - Auto-extract ID numbers  
+- ✅ Bank Approval Workflow (4h) - WPS compliance
+- ✅ Attendance Tracking (5h) - Clock in/out system
+- ✅ Document Management (8h) - Azure Blob + versioning
+
+---
+
+### 🚀 Full Deployment (For New Azure Apps)
+
+**Use Case**: Deploy this entire repository as a new Azure app
 
 **Ready for Microsoft Azure?** We've created comprehensive guides for deploying this HR Portal to Azure.
 

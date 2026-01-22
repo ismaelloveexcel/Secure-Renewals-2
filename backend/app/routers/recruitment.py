@@ -5,6 +5,7 @@ from fastapi import (
     APIRouter, Depends, HTTPException, File, UploadFile,
     Query, status, Request
 )
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 import tempfile
 import os
@@ -27,6 +28,7 @@ from app.schemas.recruitment import (
 from app.services.recruitment_service import recruitment_service
 from app.services.resume_parser import resume_parser_service
 from app.services.cv_scoring_service import score_candidate_cv
+from app.services.pdf_generation_service import pdf_service
 
 router = APIRouter(prefix="/recruitment", tags=["recruitment"])
 
@@ -1185,3 +1187,188 @@ async def get_recruitment_metrics(
     **Admin and HR only.**
     """
     return await recruitment_service.get_recruitment_metrics(session)
+
+
+# ============================================================================
+# PDF GENERATION ENDPOINTS
+# ============================================================================
+
+@router.get(
+    "/candidates/{candidate_id}/pdf",
+    summary="Download candidate profile PDF"
+)
+async def download_candidate_pdf(
+    candidate_id: int,
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Generate and download candidate profile as PDF.
+    
+    **Admin and HR only.**
+    **No approval required - instant generation.**
+    """
+    # Get candidate data
+    candidate = await recruitment_service.get_candidate(session, candidate_id)
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    
+    # Get recruitment request for position title
+    position_title = "N/A"
+    if candidate.recruitment_request_id:
+        request = await recruitment_service.get_request(session, candidate.recruitment_request_id)
+        if request:
+            position_title = request.position_title
+    
+    # Convert candidate to dict
+    candidate_data = {
+        'candidate_number': candidate.candidate_number,
+        'full_name': candidate.full_name,
+        'email': candidate.email,
+        'phone': candidate.phone,
+        'current_location': candidate.current_location,
+        'nationality': candidate.nationality,
+        'current_job_title': candidate.current_job_title,
+        'current_company': candidate.current_company,
+        'years_experience': candidate.years_experience,
+        'stage': candidate.stage,
+        'status': candidate.status,
+        'applied_at': str(candidate.created_at) if candidate.created_at else None,
+        'source': candidate.source,
+        'notice_period': candidate.notice_period,
+        'availability_date': str(candidate.availability_date) if candidate.availability_date else None,
+        'salary_expectation_min': candidate.salary_expectation_min,
+        'salary_expectation_max': candidate.salary_expectation_max,
+        'work_mode_preference': candidate.work_mode_preference
+    }
+    
+    # Generate PDF
+    pdf_buffer = await pdf_service.generate_candidate_profile_pdf(
+        candidate_data=candidate_data,
+        position_title=position_title
+    )
+    
+    # Return as downloadable file
+    filename = f"candidate_{candidate.candidate_number}_{candidate.full_name.replace(' ', '_')}.pdf"
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@router.get(
+    "/requests/{request_id}/pdf",
+    summary="Download job requisition PDF"
+)
+async def download_requisition_pdf(
+    request_id: int,
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Generate and download job requisition as PDF.
+    
+    **Admin and HR only.**
+    **No approval required - instant generation.**
+    """
+    # Get requisition data
+    request = await recruitment_service.get_request(session, request_id)
+    if not request:
+        raise HTTPException(status_code=404, detail="Recruitment request not found")
+    
+    # Convert to dict
+    requisition_data = {
+        'request_number': request.request_number,
+        'position_title': request.position_title,
+        'department': request.department,
+        'employment_type': request.employment_type,
+        'headcount': request.headcount,
+        'location': request.location,
+        'status': request.status,
+        'salary_range_min': request.salary_range_min,
+        'salary_range_max': request.salary_range_max,
+        'job_description': request.job_description,
+        'requirements': request.requirements,
+        'required_skills': request.required_skills,
+        'request_date': str(request.request_date) if request.request_date else None,
+        'target_hire_date': str(request.target_hire_date) if request.target_hire_date else None
+    }
+    
+    # Generate PDF
+    pdf_buffer = await pdf_service.generate_job_requisition_pdf(requisition_data)
+    
+    # Return as downloadable file
+    filename = f"job_requisition_{request.request_number}.pdf"
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@router.get(
+    "/report/pipeline-pdf",
+    summary="Download recruitment pipeline report PDF"
+)
+async def download_pipeline_report_pdf(
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Generate and download recruitment pipeline report as PDF.
+    
+    Includes:
+    - Summary statistics
+    - Open positions
+    - Candidate pipeline by stage
+    
+    **Admin and HR only.**
+    **No approval required - instant generation.**
+    """
+    # Get statistics
+    stats = await recruitment_service.get_stats(session)
+    
+    # Get open positions
+    requests = await recruitment_service.list_requests(session, status="open", limit=100)
+    positions = [
+        {
+            'position_title': req.position_title,
+            'department': req.department,
+            'employment_type': req.employment_type,
+            'headcount': req.headcount,
+            'status': req.status
+        }
+        for req in requests
+    ]
+    
+    # Get pipeline counts
+    pipeline_counts = await recruitment_service.get_pipeline_counts(session)
+    candidates_summary = [
+        {'stage': stage, 'count': count}
+        for stage, count in pipeline_counts.items()
+    ]
+    
+    # Convert stats to dict
+    stats_dict = {
+        'active_positions': stats.active_positions,
+        'total_candidates': stats.total_candidates,
+        'in_interview': stats.candidates_by_stage.get('interview', 0),
+        'hired_30_days': stats.hired_30_days
+    }
+    
+    # Generate PDF
+    pdf_buffer = await pdf_service.generate_recruitment_report_pdf(
+        stats=stats_dict,
+        positions=positions,
+        candidates_summary=candidates_summary
+    )
+    
+    # Return as downloadable file
+    from datetime import datetime
+    filename = f"recruitment_report_{datetime.now().strftime('%Y%m%d')}.pdf"
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )

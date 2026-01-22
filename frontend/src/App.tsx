@@ -2649,7 +2649,89 @@ function App() {
           {/* Recruitment Tab Content */}
           {adminTab === 'recruitment' && (
             <div className="space-y-6">
-              {/* Recruitment Dashboard Header */}
+              {/* Quick Actions Bar - New Professional Section */}
+              <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl shadow-lg p-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Recruitment Dashboard</h2>
+                    <p className="text-slate-300 text-sm mt-1">Manage positions, candidates, and generate reports</p>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const response = await fetchWithAuth(`${API_BASE}/recruitment/report/pipeline-pdf`)
+                          if (response.ok) {
+                            const blob = await response.blob()
+                            const url = window.URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = `recruitment_report_${new Date().toISOString().split('T')[0]}.pdf`
+                            document.body.appendChild(a)
+                            a.click()
+                            window.URL.revokeObjectURL(url)
+                            document.body.removeChild(a)
+                          }
+                        } catch (err) {
+                          console.error('Failed to download PDF:', err)
+                        }
+                      }}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shadow-lg"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Download Pipeline Report (PDF)
+                    </button>
+                    <button
+                      onClick={() => {
+                        const data = candidatesList.map((c: any) => ({
+                          Name: c.full_name,
+                          Email: c.email,
+                          Stage: c.stage,
+                          Status: c.status,
+                          Source: c.source,
+                          'CV Score': c.cv_scoring || c.ai_ranking || 'N/A',
+                          'Applied Date': c.created_at?.split('T')[0]
+                        }))
+                        const csv = [
+                          Object.keys(data[0]).join(','),
+                          ...data.map((row: any) => Object.values(row).map((v: any) => `"${v}"`).join(','))
+                        ].join('\n')
+                        const blob = new Blob([csv], { type: 'text/csv' })
+                        const url = window.URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `candidates_export_${new Date().toISOString().split('T')[0]}.csv`
+                        document.body.appendChild(a)
+                        a.click()
+                        window.URL.revokeObjectURL(url)
+                        document.body.removeChild(a)
+                      }}
+                      disabled={candidatesList.length === 0}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg transition-colors shadow-lg"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Export Candidates (CSV)
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveSection('recruitment-request')
+                      }}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-lg"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      New Job Position
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recruitment Dashboard Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-white rounded-xl shadow p-6">
                   <div className="flex items-center justify-between">
@@ -2739,18 +2821,47 @@ function App() {
                                 <p className="text-xs text-gray-400">AED {req.salary_range_min.toLocaleString()} - {req.salary_range_max.toLocaleString()}</p>
                               )}
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setViewingManagerPassPositionId(req.id)
-                                setViewingManagerId(req.hiring_manager_id || user?.employee_id || '')
-                                setActiveSection('manager-pass')
-                              }}
-                              className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 flex items-center gap-1"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                              Manager Pass
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation()
+                                  try {
+                                    const response = await fetchWithAuth(`${API_BASE}/recruitment/requests/${req.id}/pdf`)
+                                    if (response.ok) {
+                                      const blob = await response.blob()
+                                      const url = window.URL.createObjectURL(blob)
+                                      const a = document.createElement('a')
+                                      a.href = url
+                                      a.download = `job_requisition_${req.request_number}.pdf`
+                                      document.body.appendChild(a)
+                                      a.click()
+                                      window.URL.revokeObjectURL(url)
+                                      document.body.removeChild(a)
+                                    }
+                                  } catch (err) {
+                                    console.error('Failed to download PDF:', err)
+                                  }
+                                }}
+                                className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 flex items-center gap-1"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                PDF
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setViewingManagerPassPositionId(req.id)
+                                  setViewingManagerId(req.hiring_manager_id || user?.employee_id || '')
+                                  setActiveSection('manager-pass')
+                                }}
+                                className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 flex items-center gap-1"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                                Manager Pass
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2863,6 +2974,7 @@ function App() {
                           <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-28 border-b border-slate-700">Education</th>
                           <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-24 border-b border-slate-700">Experience</th>
                           <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-28 border-b border-slate-700">Stage</th>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-32 border-b border-slate-700">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2957,40 +3069,57 @@ function App() {
                                   {candidate.stage?.charAt(0).toUpperCase() + candidate.stage?.slice(1)}
                                 </span>
                               </td>
-                              <td className="py-5 px-4">
-                                {candidate.linkedin_url ? (
-                                  <a 
-                                    href={candidate.linkedin_url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-medium rounded-lg transition-colors"
+                              <td className="py-5 px-4" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        const response = await fetchWithAuth(`${API_BASE}/recruitment/candidates/${candidate.id}/pdf`)
+                                        if (response.ok) {
+                                          const blob = await response.blob()
+                                          const url = window.URL.createObjectURL(blob)
+                                          const a = document.createElement('a')
+                                          a.href = url
+                                          a.download = `candidate_${candidate.candidate_number}.pdf`
+                                          document.body.appendChild(a)
+                                          a.click()
+                                          window.URL.revokeObjectURL(url)
+                                          document.body.removeChild(a)
+                                        }
+                                      } catch (err) {
+                                        console.error('Failed to download PDF:', err)
+                                      }
+                                    }}
+                                    className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                                    title="Download PDF"
                                   >
-                                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                                    View
-                                  </a>
-                                ) : (
-                                  <span className="text-sm text-gray-400">-</span>
-                                )}
-                              </td>
-                              <td className="py-5 px-4">
-                                {candidate.resume_url ? (
-                                  <a 
-                                    href={candidate.resume_url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-medium rounded-lg transition-colors"
-                                  >
-                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                    View
-                                  </a>
-                                ) : (
-                                  <span className="text-sm text-gray-400">-</span>
-                                )}
-                              </td>
-                              <td className="py-5 px-4">
-                                <span className="text-sm text-gray-600">{candidate.source || '-'}</span>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                  </button>
+                                  {candidate.linkedin_url && (
+                                    <a 
+                                      href={candidate.linkedin_url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                                      title="View LinkedIn"
+                                    >
+                                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                                    </a>
+                                  )}
+                                  {candidate.resume_url && (
+                                    <a 
+                                      href={candidate.resume_url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="p-2 hover:bg-emerald-50 text-emerald-600 rounded-lg transition-colors"
+                                      title="View Resume"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    </a>
+                                  )}
+                                </div>
                               </td>
                             </tr>
                           )
